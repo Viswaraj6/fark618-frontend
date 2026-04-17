@@ -78,8 +78,10 @@ function loadOrders() {
 
       let html = "";
 
-      // ✅ filter by user
-      let myOrders = data.filter(o => o.user === user);
+      // ✅ safer filter (undefined avoid + trim match)
+      let myOrders = data.filter(o => 
+        o.user && o.user.trim() === user.trim()
+      );
 
       if (myOrders.length === 0) {
         html = "<p>No orders yet</p>";
