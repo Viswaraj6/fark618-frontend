@@ -13,31 +13,60 @@
 
     h1 { text-align: center; }
 
+    #cart {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: black;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #authBtn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: red;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #account {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      background: green;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
     #welcome {
       text-align: center;
       margin-bottom: 10px;
       font-weight: bold;
     }
 
-    /* 🎥 VIDEO (REEL STYLE) */
+    /* 🎥 VIDEO SECTION */
     .video-box {
       margin: 20px 0;
       border-radius: 12px;
       overflow: hidden;
       position: relative;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 260px;
     }
 
     .video-box iframe {
-      width: 150px;   /* 🔥 portrait */
-      height: 100%;
-      border-radius: 10px;
+      width: 100%;
+      height: 220px;
+      border-radius: 12px;
     }
 
+    /* ❌ CLOSE BUTTON */
     .close-btn {
       position: absolute;
       top: 8px;
@@ -51,7 +80,6 @@
       z-index: 10;
     }
 
-    /* 🛍 products */
     .products {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -79,6 +107,8 @@
       margin-top: 10px;
       cursor: pointer;
     }
+
+    button:disabled { background: grey; }
 
     .fav-btn { background: orange; }
 
@@ -126,12 +156,16 @@
 
 <body>
 
+<div id="authBtn" onclick="handleAuth()">...</div>
+<div id="account" onclick="goToAccount()">My Account 👤</div>
 <h3 id="welcome"></h3>
+<div id="cart" onclick="goToCart()">Cart: 0</div>
 
 <h1>FARK 618 🛍️</h1>
 
-<!-- 🎥 VIDEO -->
+<!-- 🎥 VIDEO SECTION -->
 <div class="video-box" id="videoBox">
+
   <div class="close-btn" onclick="closeVideo()">✖</div>
 
   <iframe 
@@ -139,6 +173,7 @@
     allow="autoplay"
     allowfullscreen>
   </iframe>
+
 </div>
 
 <div id="products" class="products"></div>
@@ -166,14 +201,29 @@ const user = localStorage.getItem("user");
 document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
 
+// auth button
+const authBtn = document.getElementById("authBtn");
+authBtn.innerText = user ? "Logout" : "Login";
+
 // hide login bar
 if (user) {
   document.getElementById("loginBar").style.display = "none";
 }
 
-// hide video permanently
+// 🔥 hide video if already closed
 if (localStorage.getItem("videoClosed") === "yes") {
   document.getElementById("videoBox").style.display = "none";
+}
+
+// login/logout
+function handleAuth() {
+  if (user) {
+    localStorage.removeItem("user");
+    alert("Logged out 👋");
+    location.reload();
+  } else {
+    window.location.href = "login.html";
+  }
 }
 
 // ❌ close video
@@ -181,6 +231,12 @@ function closeVideo() {
   localStorage.setItem("videoClosed", "yes");
   document.getElementById("videoBox").style.display = "none";
 }
+
+// cart UI
+function updateCartUI() {
+  document.getElementById("cart").innerText = "Cart: " + cart.length;
+}
+updateCartUI();
 
 // load products
 function loadProducts() {
@@ -200,8 +256,9 @@ function loadProducts() {
           <p>₹${p.price}</p>
           <p>Stock: ${p.stock}</p>
 
-          <button onclick="addToCart('${p._id}')">
-            Add to Cart
+          <button onclick="addToCart('${p._id}')"
+            ${p.stock == 0 ? "disabled" : ""}>
+            ${p.stock == 0 ? "Out of Stock" : "Add to Cart"}
           </button>
 
           <button class="fav-btn" onclick="addToFav('${p._id}')">
@@ -217,6 +274,7 @@ function loadProducts() {
 
 // add to cart
 function addToCart(id) {
+
   if (!user) {
     alert("Login first ❌");
     window.location.href = "login.html";
@@ -224,6 +282,7 @@ function addToCart(id) {
   }
 
   const product = productsData.find(p => p._id == id);
+  if (!product || product.stock <= 0) return;
 
   cart.push({
     id: product._id,
@@ -232,10 +291,24 @@ function addToCart(id) {
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
+  updateCartUI();
+
+  fetch("https://fark618-1.onrender.com/products/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: product.name,
+      price: product.price,
+      stock: product.stock - 1,
+      image: product.image
+    })
+  })
+  .then(() => loadProducts());
 }
 
 // favorite
 function addToFav(id) {
+
   if (!user) {
     alert("Login first ❌");
     return;
@@ -252,16 +325,24 @@ function addToFav(id) {
   });
 
   localStorage.setItem("fav", JSON.stringify(fav));
+
+  alert("Added to Favorites ❤️");
 }
 
 // navigation
 function goToCart() {
-  if (!user) return alert("Login first ❌");
+  if (!user) {
+    alert("Login first ❌");
+    return;
+  }
   window.location.href = "cart.html";
 }
 
 function goToAccount() {
-  if (!user) return alert("Login first ❌");
+  if (!user) {
+    alert("Login first ❌");
+    return;
+  }
   window.location.href = "account.html";
 }
 
