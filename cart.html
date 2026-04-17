@@ -59,7 +59,14 @@ function loadCart() {
   let html = "";
   let total = 0;
 
+  if (cart.length === 0) {
+    document.getElementById("cartItems").innerHTML = "<p>Cart is empty</p>";
+    document.getElementById("total").innerText = "";
+    return;
+  }
+
   cart.forEach((item, index) => {
+
     total += Number(item.price || 0);
 
     html += `
@@ -81,8 +88,7 @@ function removeItem(index) {
   loadCart();
 }
 
-// 🔥 FINAL ORDER FUNCTION (BACKEND)
-<script>
+// 🔥 FIXED ORDER FUNCTION
 function placeOrder() {
 
   if (cart.length === 0) {
@@ -90,38 +96,38 @@ function placeOrder() {
     return;
   }
 
+  const user = localStorage.getItem("user") || "guest";
+
   let total = 0;
   cart.forEach(item => total += Number(item.price || 0));
 
-  fetch("https://fark618-1.onrender.com/order", {
+  fetch(BASE_URL + "/order", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      user: localStorage.getItem("user") || "guest",
+      user: user,
       products: cart,
       total: total,
       status: "Pending"
     })
   })
-  .then(res => res.json()) // 🔥 ONLY THIS
-  .then(data => {
-
-    console.log("SUCCESS:", data);
-
-    alert("Order placed successfully ✅");
-
-    localStorage.removeItem("cart");
-
-    window.location.href = "account.html";
+  .then(res => {
+    if (res.ok) {
+      alert("Order placed successfully ✅");
+      localStorage.removeItem("cart");
+      window.location.href = "account.html";
+    } else {
+      alert("Order failed ❌");
+    }
   })
-  .catch(err => {
-    console.log("ERROR:", err);
-    alert("Order failed ❌");
+  .catch(() => {
+    alert("Server error ❌");
   });
 }
-</script>
+
+loadCart();
 
 </script>
 
