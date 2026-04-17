@@ -50,30 +50,28 @@
   <button onclick="login()">Login</button>
 </div>
 
-<!-- 🔧 ADMIN -->
+<!-- 🔧 ADMIN PANEL -->
 <div id="adminPanel" style="display:none;">
 
   <h1>Admin Panel 🔧</h1>
 
-  <!-- 🔥 ADD PRODUCT -->
+  <!-- ADD PRODUCT -->
   <h2>Add Product</h2>
 
   <input id="name" placeholder="Product name">
   <input id="price" placeholder="Price">
   <input id="stock" placeholder="Stock">
 
-  <!-- 🔥 TYPE -->
   <select id="type">
     <option value="shirt">Shirt</option>
     <option value="pant">Pant</option>
   </select>
 
-  <!-- 🔥 IMAGE UPLOAD -->
   <input type="file" id="imageFile">
 
   <button onclick="addProduct()">Add Product</button>
 
-  <!-- 📥 EXCEL IMPORT -->
+  <!-- EXCEL -->
   <h3>Import Excel 📥</h3>
   <input type="file" id="excelFile">
   <button onclick="importExcel()">Upload Excel</button>
@@ -94,12 +92,13 @@ const BASE_URL = "https://fark618-1.onrender.com";
 
 // 🔐 LOGIN
 function login() {
-  const u = user.value;
-  const p = pass.value;
+  const u = document.getElementById("user").value;
+  const p = document.getElementById("pass").value;
 
   if (u === "admin" && p === "1234") {
-    loginBox.style.display = "none";
-    adminPanel.style.display = "block";
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+
     loadProducts();
     loadOrders();
   } else {
@@ -108,10 +107,10 @@ function login() {
 }
 
 
-// 🔥 ADD PRODUCT WITH IMAGE + SIZE
+// 🔥 ADD PRODUCT
 async function addProduct() {
 
-  const name = nameInput = document.getElementById("name").value;
+  const name = document.getElementById("name").value;
   const price = document.getElementById("price").value;
   const stock = document.getElementById("stock").value;
   const type = document.getElementById("type").value;
@@ -126,7 +125,10 @@ async function addProduct() {
 
   fetch(BASE_URL + "/add-product", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "admin": "fark618"
+    },
     body: JSON.stringify({
       name,
       price,
@@ -136,13 +138,13 @@ async function addProduct() {
     })
   })
   .then(() => {
-    alert("Added ✅");
+    alert("Product Added ✅");
     loadProducts();
   });
 }
 
 
-// 🔥 BASE64 CONVERT
+// 🔥 BASE64
 function toBase64(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -162,13 +164,9 @@ function loadProducts() {
 
     data.forEach(p => {
 
-      let sizeText = "";
-
-      if (p.type === "shirt") {
-        sizeText = "S, M, L, XL, XXL";
-      } else {
-        sizeText = "30, 32, 34, 36, 38, 40";
-      }
+      let sizeText = p.type === "shirt"
+        ? "S, M, L, XL, XXL"
+        : "30, 32, 34, 36, 38, 40";
 
       html += `
         <div class="card">
@@ -183,19 +181,24 @@ function loadProducts() {
       `;
     });
 
-    products.innerHTML = html;
+    document.getElementById("products").innerHTML = html;
   });
 }
 
 
-// ❌ DELETE
+// ❌ DELETE PRODUCT
 function deleteProduct(id) {
-  fetch(BASE_URL + "/products/" + id, { method: "DELETE" })
+  fetch(BASE_URL + "/products/" + id, {
+    method: "DELETE",
+    headers: {
+      "admin": "fark618"
+    }
+  })
   .then(() => loadProducts());
 }
 
 
-// 📦 ORDERS
+// 📦 LOAD ORDERS
 function loadOrders() {
   fetch(BASE_URL + "/orders")
   .then(res => res.json())
@@ -205,15 +208,15 @@ function loadOrders() {
 
     data.forEach(o => {
 
-      let items = "";
+      let itemsHtml = "";
 
-      o.products.forEach(i => {
-        items += `<li>${i.name} (${i.size || "-"})</li>`;
+      o.products.forEach(item => {
+        itemsHtml += `<li>${item.name} - ${item.size || "-"}</li>`;
       });
 
       html += `
         <div class="card">
-          <p>Order: ${o._id}</p>
+          <h3>Order ID: ${o._id}</h3>
           <p>Total: ₹${o.total}</p>
           <p>Status: ${o.status}</p>
 
@@ -223,24 +226,30 @@ function loadOrders() {
             <option ${o.status=="Delivered"?"selected":""}>Delivered</option>
           </select>
 
-          <ul>${items}</ul>
+          <ul>${itemsHtml}</ul>
         </div>
       `;
     });
 
-    orders.innerHTML = html;
+    document.getElementById("orders").innerHTML = html;
   });
 }
 
 
-// 🔄 STATUS
+// 🔄 UPDATE STATUS
 function updateStatus(id, status) {
   fetch(BASE_URL + "/orders/" + id, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "admin": "fark618"
+    },
     body: JSON.stringify({ status })
   })
-  .then(() => loadOrders());
+  .then(() => {
+    alert("Status updated ✅");
+    loadOrders();
+  });
 }
 
 
@@ -263,7 +272,10 @@ function importExcel() {
 
       fetch(BASE_URL + "/add-product", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "admin": "fark618"
+        },
         body: JSON.stringify({
           name: item.name,
           price: item.price,
