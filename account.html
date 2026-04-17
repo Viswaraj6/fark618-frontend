@@ -79,7 +79,7 @@ function loadOrders() {
       let html = "";
 
       // ✅ filter by user
-      let myOrders = data.filter(o => o.user === user);
+      let myOrders = data.filter(o => (o.user || "guest") === user);
 
       if (myOrders.length === 0) {
         html = "<p>No orders yet</p>";
