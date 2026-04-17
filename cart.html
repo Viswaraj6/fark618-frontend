@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
-  <title>Cart</title>
-
-  <style>
+  <title>Cart</title>  <style>
     body {
       font-family: Arial;
       padding: 20px;
@@ -36,17 +33,8 @@
       margin: 20px auto;
       padding: 10px 20px;
     }
-  </style>
-</head>
-
-<body>
-
-<h1>🛒 Your Cart</h1>
-
-<div id="cartItems"></div>
-<h2 id="total"></h2>
-
-<button class="order-btn" onclick="placeOrder()">Place Order</button>
+  </style></head><body><h1>🛒 Your Cart</h1><div id="cartItems"></div>
+<h2 id="total"></h2><button class="order-btn" onclick="placeOrder()">Place Order</button>
 
 <script>
 
@@ -79,7 +67,7 @@ function removeItem(index) {
   loadCart();
 }
 
-// ✅ FIXED ORDER FUNCTION
+// ✅ FINAL WORKING ORDER FUNCTION
 function placeOrder() {
 
   if (cart.length === 0) {
@@ -90,29 +78,29 @@ function placeOrder() {
   let total = 0;
   cart.forEach(item => total += Number(item.price || 0));
 
-  fetch("https://fark618-1.onrender.com/order", {   // ✅ correct URL
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-body: JSON.stringify({
-  products: cart,
-  total: total,
-  user: localStorage.getItem("user") || "guest",
-  status: "Pending"
-})
-  })
-  .then(() => {
-    alert("Order placed successfully ✅");
-    localStorage.removeItem("cart");
-    window.location.href = "/";
-  })
-  .catch(err => console.log(err));
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+  let newOrder = {
+    id: Date.now(),
+    items: cart,
+    total: total,
+    status: "Order Placed",
+    date: new Date().toLocaleString()
+  };
+
+  orders.push(newOrder);
+
+  localStorage.setItem("orders", JSON.stringify(orders));
+
+  // clear cart
+  localStorage.removeItem("cart");
+
+  alert("Order placed successfully ✅");
+
+  window.location.href = "account.html";
 }
 
 loadCart();
 
-</script>
-
-</body>
+</script></body>
 </html>
