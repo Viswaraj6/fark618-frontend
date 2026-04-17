@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    input {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 250px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+
+    img {
+      width: 150px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 🔐 LOGIN -->
+<div id="loginBox">
+  <h2>Admin Login 🔐</h2>
+  <input id="user" placeholder="Username">
+  <input id="pass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- 🔧 ADMIN PANEL -->
+<div id="adminPanel" style="display:none;">
+  <h1>Admin Panel 🔧</h1>
+
+  <h2>Add Product</h2>
+  <input id="name" placeholder="Product name">
+  <input id="price" placeholder="Price">
+  <input id="stock" placeholder="Stock">
+  <input id="image" placeholder="Image URL">
+
+  <button onclick="addProduct()">Add Product</button>
+
+  <h2>All Products</h2>
+  <div id="products"></div>
+
+  <h2>Orders</h2>
+  <div id="orders"></div>
+
+</div>
+
+<script>
+
+// ✅ CORRECT BACKEND URL
+const BASE_URL = "https://fark618-1.onrender.com";
+
+// 🔐 LOGIN
+function login() {
+  const u = document.getElementById("user").value;
+  const p = document.getElementById("pass").value;
+
+  if (u === "admin" && p === "1234") {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+
+    loadProducts();
+    loadOrders();
+  } else {
+    alert("Wrong login!");
+  }
+}
+
+// ➕ ADD PRODUCT (FIXED + DEBUG)
+function addProduct() {
+  const name = document.getElementById("name").value;
+  const price = document.getElementById("price").value;
+  const stock = document.getElementById("stock").value;
+  const image = document.getElementById("image").value;
+
+  fetch(BASE_URL + "/add-product", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name, price, stock, image })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Added:", data); // 🔥 debug
+    alert("Product Added ✅");
+    loadProducts();
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Error adding product ❌");
+  });
+}
+
+// 📦 LOAD PRODUCTS
+function loadProducts() {
+  fetch(BASE_URL + "/products")
+    .then(res => res.json())
+    .then(data => {
+
+      console.log("Products:", data); // 🔥 debug
+
+      let html = "";
+
+      if (data.length === 0) {
+        html = "<p>No products found</p>";
+      }
+
+      data.forEach(p => {
+        html += `
+          <div class="card">
+           <img src="${p.image || 'https://via.placeholder.com/150'}" /> 
+            <h3>${p.name}</h3>
+            <p>₹${p.price}</p>
+            <p>Stock: ${p.stock}</p>
+
+            <button onclick="deleteProduct('${p._id}')">Delete</button>
+            <button onclick="editProduct('${p._id}')">Edit</button>
+          </div>
+        `;
+      });
+
+      document.getElementById("products").innerHTML = html;
+    })
+    .catch(err => console.log(err));
+}
+
+// 📦 LOAD ORDERS
+function loadOrders() {
+  fetch(BASE_URL + "/orders")
+    .then(res => res.json())
+    .then(data => {
+
+      let html = "";
+
+      data.forEach(o => {
+
+        let itemsHtml = "";
+
+        o.products.forEach(item => {
+          itemsHtml += `
+            <li>${item.name} - ₹${item.price}</li>
+          `;
+        });
+
+        html += `
+          <div class="card">
+            <h3>Order ID: ${o._id}</h3>
+            <p><b>Total:</b> ₹${o.total}</p>
+            <p><b>Status:</b> ${o.status}</p>
+
+            <select onchange="updateStatus('${o._id}', this.value)">
+              <option ${o.status=="Pending"?"selected":""}>Pending</option>
+              <option ${o.status=="Shipped"?"selected":""}>Shipped</option>
+              <option ${o.status=="Delivered"?"selected":""}>Delivered</option>
+            </select>
+
+            <ul>${itemsHtml}</ul>
+          </div>
+        `;
+      });
+
+      document.getElementById("orders").innerHTML = html;
+    });
+}
+
+// ✏️ EDIT
+function editProduct(id) {
+  const name = prompt("New name:");
+  const price = prompt("New price:");
+  const stock = prompt("New stock:");
+  const image = prompt("New image URL:");
+
+  fetch(BASE_URL + "/products/" + id, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name, price, stock, image })
+  })
+  .then(() => loadProducts());
+}
+
+// ❌ DELETE
+function deleteProduct(id) {
+  fetch(BASE_URL + "/products/" + id, {
+    method: "DELETE"
+  })
+  .then(() => loadProducts());
+}
+function updateStatus(id, status) {
+  fetch(BASE_URL + "/orders/" + id, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ status })
+  })
+  .then(() => {
+    alert("Status updated ✅");
+    loadOrders();
+  });
+}
+</script>
+
+</body>
+</html>
