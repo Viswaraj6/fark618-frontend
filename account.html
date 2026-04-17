@@ -61,14 +61,17 @@
 
 const BASE_URL = "https://fark618-1.onrender.com";
 
-const user = localStorage.getItem("user");
+// 🔑 GET USER
+let user = localStorage.getItem("user");
 
-// 🚫 login check
+// 🚫 LOGIN CHECK
 if (!user) {
   window.location.href = "login.html";
 }
 
-// 👋 welcome
+// 👋 NORMALIZE USER (IMPORTANT FIX)
+user = user.toLowerCase().trim();
+
 document.getElementById("welcome").innerText = "Welcome, " + user;
 
 
@@ -79,18 +82,20 @@ function loadOrders() {
     .then(res => res.json())
     .then(data => {
 
-      console.log("ALL ORDERS:", data); // 🔍 debug
+      console.log("ALL ORDERS:", data);
+      console.log("CURRENT USER:", user);
 
       let html = "";
 
-      // ✅ FIXED FILTER
-      let myOrders = data.filter(o => (o.user || "guest") === user);
+      // ✅ STRONG FILTER FIX
+      let myOrders = data.filter(o => 
+        o.user && o.user.toLowerCase().trim() === user
+      );
 
       if (myOrders.length === 0) {
         html = "<p>No orders yet</p>";
       } else {
 
-        // latest first
         myOrders.reverse().forEach(o => {
 
           html += `
@@ -117,7 +122,7 @@ function loadOrders() {
 }
 
 
-// 🔍 TRACK ORDER
+// 🔍 TRACK
 function track(id) {
   window.location.href = "track.html?id=" + id;
 }
