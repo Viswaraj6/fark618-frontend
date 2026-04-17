@@ -82,6 +82,7 @@ function removeItem(index) {
 }
 
 // 🔥 FINAL ORDER FUNCTION (BACKEND)
+<script>
 function placeOrder() {
 
   if (cart.length === 0) {
@@ -92,20 +93,23 @@ function placeOrder() {
   let total = 0;
   cart.forEach(item => total += Number(item.price || 0));
 
-  fetch(BASE_URL + "/order", {
+  fetch("https://fark618-1.onrender.com/order", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
+      user: localStorage.getItem("user") || "guest",
       products: cart,
       total: total,
-      user: localStorage.getItem("user"), // ✅ IMPORTANT
       status: "Pending"
     })
   })
-  .then(res => res.json())
-  .then(() => {
+  .then(res => res.json()) // 🔥 ONLY THIS
+  .then(data => {
+
+    console.log("SUCCESS:", data);
+
     alert("Order placed successfully ✅");
 
     localStorage.removeItem("cart");
@@ -113,12 +117,11 @@ function placeOrder() {
     window.location.href = "account.html";
   })
   .catch(err => {
-    console.log(err);
+    console.log("ERROR:", err);
     alert("Order failed ❌");
   });
 }
-
-loadCart();
+</script>
 
 </script>
 
