@@ -25,7 +25,7 @@
       cursor: pointer;
     }
 
-    #logout {
+    #authBtn {
       position: fixed;
       top: 20px;
       left: 20px;
@@ -36,7 +36,6 @@
       cursor: pointer;
     }
 
-    /* ✅ My Account */
     #account {
       position: fixed;
       top: 70px;
@@ -94,15 +93,8 @@
 
 <body>
 
-<!-- 🔐 LOGIN CHECK -->
-<script>
-if (!localStorage.getItem("user")) {
-  window.location.href = "login.html";
-}
-</script>
-
-<!-- 🔴 Logout -->
-<div id="logout" onclick="logout()">Logout</div>
+<!-- 🔁 LOGIN / LOGOUT BUTTON -->
+<div id="authBtn" onclick="handleAuth()">Loading...</div>
 
 <!-- 🟢 My Account -->
 <div id="account" onclick="goToAccount()">My Account 👤</div>
@@ -121,18 +113,28 @@ if (!localStorage.getItem("user")) {
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let productsData = [];
+const user = localStorage.getItem("user");
 
-// 👤 username
+// 👋 welcome
 document.getElementById("welcome").innerText =
-  "Welcome, " + localStorage.getItem("user");
+  user ? "Welcome, " + user : "Welcome, Guest";
 
-// 🔴 logout
-function logout() {
-  localStorage.removeItem("user");
-  window.location.href = "login.html";
+// 🔁 auth button
+const authBtn = document.getElementById("authBtn");
+authBtn.innerText = user ? "Logout" : "Login";
+
+// 🔐 login / logout
+function handleAuth() {
+  if (user) {
+    localStorage.removeItem("user");
+    alert("Logged out 👋");
+    location.reload();
+  } else {
+    window.location.href = "login.html";
+  }
 }
 
-// 🛒 cart update
+// 🛒 cart UI
 function updateCartUI() {
   document.getElementById("cart").innerText = "Cart: " + cart.length;
 }
@@ -170,8 +172,7 @@ function loadProducts() {
 
     document.getElementById("products").innerHTML = html;
   })
-  .catch(err => {
-    console.log(err);
+  .catch(() => {
     document.getElementById("products").innerHTML =
       "<p>Failed to load products ❌</p>";
   });
@@ -180,24 +181,23 @@ function loadProducts() {
 // ➕ add to cart
 function addToCart(id) {
 
-  const product = productsData.find(p => p._id == id);
-
-  if (!product) return;
-
-  if (product.stock <= 0) {
-    alert("Out of stock ❌");
+  if (!user) {
+    alert("Login first ❌");
+    window.location.href = "login.html";
     return;
   }
+
+  const product = productsData.find(p => p._id == id);
+
+  if (!product || product.stock <= 0) return;
 
   cart.push({
     id: product._id,
     name: product.name,
-    price: product.price,
-    image: product.image
+    price: product.price
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
-
   updateCartUI();
 
   fetch("https://fark618-1.onrender.com/products/" + id, {
@@ -213,8 +213,13 @@ function addToCart(id) {
   .then(() => loadProducts());
 }
 
-// ❤️ add to favorite
+// ❤️ favorite
 function addToFav(id) {
+
+  if (!user) {
+    alert("Login first ❌");
+    return;
+  }
 
   const product = productsData.find(p => p._id == id);
 
@@ -231,13 +236,23 @@ function addToFav(id) {
   alert("Added to Favorites ❤️");
 }
 
-// 🛒 cart page
+// 🛒 go cart
 function goToCart() {
+  if (!user) {
+    alert("Login first ❌");
+    window.location.href = "login.html";
+    return;
+  }
   window.location.href = "cart.html";
 }
 
-// 👤 account page
+// 👤 go account
 function goToAccount() {
+  if (!user) {
+    alert("Login first ❌");
+    window.location.href = "login.html";
+    return;
+  }
   window.location.href = "account.html";
 }
 
