@@ -8,12 +8,10 @@
       font-family: Arial;
       background: #f5f5f5;
       padding: 20px;
-      padding-bottom: 120px; /* bottom space */
+      padding-bottom: 120px;
     }
 
-    h1 {
-      text-align: center;
-    }
+    h1 { text-align: center; }
 
     #cart {
       position: fixed;
@@ -54,6 +52,34 @@
       font-weight: bold;
     }
 
+    /* 🎥 VIDEO SECTION */
+    .video-box {
+      margin: 20px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .video-box iframe {
+      width: 100%;
+      height: 220px;
+      border-radius: 12px;
+    }
+
+    /* ❌ CLOSE BUTTON */
+    .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: black;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      z-index: 10;
+    }
+
     .products {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -82,19 +108,14 @@
       cursor: pointer;
     }
 
-    button:disabled {
-      background: grey;
-    }
+    button:disabled { background: grey; }
 
-    .fav-btn {
-      background: orange;
-    }
+    .fav-btn { background: orange; }
 
     /* 🔻 Bottom Nav */
     #bottomNav {
       position: fixed;
       bottom: 0;
-      left: 0;
       width: 100%;
       background: white;
       display: flex;
@@ -113,7 +134,6 @@
     #loginBar {
       position: fixed;
       bottom: 60px;
-      left: 0;
       width: 100%;
       background: black;
       color: white;
@@ -136,19 +156,25 @@
 
 <body>
 
-<!-- 🔁 LOGIN / LOGOUT -->
 <div id="authBtn" onclick="handleAuth()">...</div>
-
-<!-- 🟢 My Account -->
 <div id="account" onclick="goToAccount()">My Account 👤</div>
-
-<!-- 👤 Welcome -->
 <h3 id="welcome"></h3>
-
-<!-- 🛒 Cart -->
 <div id="cart" onclick="goToCart()">Cart: 0</div>
 
 <h1>FARK 618 🛍️</h1>
+
+<!-- 🎥 VIDEO SECTION -->
+<div class="video-box" id="videoBox">
+
+  <div class="close-btn" onclick="closeVideo()">✖</div>
+
+  <iframe 
+    src="https://www.youtube.com/embed/y1zCKcv2AiY?autoplay=1&mute=1&loop=1&playlist=y1zCKcv2AiY"
+    allow="autoplay"
+    allowfullscreen>
+  </iframe>
+
+</div>
 
 <div id="products" class="products"></div>
 
@@ -171,20 +197,25 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let productsData = [];
 const user = localStorage.getItem("user");
 
-// 👋 welcome
+// welcome
 document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
 
-// 🔁 auth button
+// auth button
 const authBtn = document.getElementById("authBtn");
 authBtn.innerText = user ? "Logout" : "Login";
 
-// 🔻 hide login bar if logged in
+// hide login bar
 if (user) {
   document.getElementById("loginBar").style.display = "none";
 }
 
-// 🔐 login/logout
+// 🔥 hide video if already closed
+if (localStorage.getItem("videoClosed") === "yes") {
+  document.getElementById("videoBox").style.display = "none";
+}
+
+// login/logout
 function handleAuth() {
   if (user) {
     localStorage.removeItem("user");
@@ -195,13 +226,19 @@ function handleAuth() {
   }
 }
 
-// 🛒 cart UI
+// ❌ close video
+function closeVideo() {
+  localStorage.setItem("videoClosed", "yes");
+  document.getElementById("videoBox").style.display = "none";
+}
+
+// cart UI
 function updateCartUI() {
   document.getElementById("cart").innerText = "Cart: " + cart.length;
 }
 updateCartUI();
 
-// 📦 load products
+// load products
 function loadProducts() {
   fetch("https://fark618-1.onrender.com/products")
   .then(res => res.json())
@@ -232,14 +269,10 @@ function loadProducts() {
     });
 
     document.getElementById("products").innerHTML = html;
-  })
-  .catch(() => {
-    document.getElementById("products").innerHTML =
-      "<p>Failed to load products ❌</p>";
   });
 }
 
-// ➕ add to cart
+// add to cart
 function addToCart(id) {
 
   if (!user) {
@@ -273,7 +306,7 @@ function addToCart(id) {
   .then(() => loadProducts());
 }
 
-// ❤️ favorite
+// favorite
 function addToFav(id) {
 
   if (!user) {
@@ -296,7 +329,7 @@ function addToFav(id) {
   alert("Added to Favorites ❤️");
 }
 
-// 🛒 navigation
+// navigation
 function goToCart() {
   if (!user) {
     alert("Login first ❌");
@@ -321,7 +354,7 @@ function goLogin() {
   window.location.href = "login.html";
 }
 
-// 🚀 start
+// start
 loadProducts();
 
 </script>
