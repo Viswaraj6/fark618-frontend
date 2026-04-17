@@ -63,28 +63,34 @@ const BASE_URL = "https://fark618-1.onrender.com";
 
 const user = localStorage.getItem("user");
 
+// 🚫 login check
 if (!user) {
   window.location.href = "login.html";
 }
 
+// 👋 welcome
 document.getElementById("welcome").innerText = "Welcome, " + user;
 
-// 🔥 LOAD ORDERS FROM BACKEND
+
+// 🔥 LOAD ORDERS
 function loadOrders() {
 
   fetch(BASE_URL + "/orders")
     .then(res => res.json())
     .then(data => {
 
+      console.log("ALL ORDERS:", data); // 🔍 debug
+
       let html = "";
 
-      // ✅ filter by user
+      // ✅ FIXED FILTER
       let myOrders = data.filter(o => (o.user || "guest") === user);
 
       if (myOrders.length === 0) {
         html = "<p>No orders yet</p>";
       } else {
 
+        // latest first
         myOrders.reverse().forEach(o => {
 
           html += `
@@ -104,13 +110,18 @@ function loadOrders() {
       document.getElementById("orders").innerHTML = html;
 
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      console.log("ORDER ERROR:", err);
+      document.getElementById("orders").innerHTML = "<p>Error loading orders</p>";
+    });
 }
 
-// 🔍 TRACK
+
+// 🔍 TRACK ORDER
 function track(id) {
   window.location.href = "track.html?id=" + id;
 }
+
 
 // ❤️ FAVORITES
 let favorites = JSON.parse(localStorage.getItem("fav")) || [];
@@ -138,13 +149,16 @@ function loadFavorites() {
   document.getElementById("favorites").innerHTML = html;
 }
 
+
+// ❌ REMOVE FAVORITE
 function removeFav(i) {
   favorites.splice(i, 1);
   localStorage.setItem("fav", JSON.stringify(favorites));
   loadFavorites();
 }
 
-// INIT
+
+// 🚀 INIT
 loadOrders();
 loadFavorites();
 
