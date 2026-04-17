@@ -52,17 +52,9 @@
       font-weight: bold;
     }
 
-    /* 🎥 VIDEO SECTION */
-    .video-box {
-      margin: 20px 0;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
     .video-box iframe {
       width: 100%;
       height: 220px;
-      border-radius: 12px;
     }
 
     .products {
@@ -78,12 +70,6 @@
       text-align: center;
     }
 
-    .card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-    }
-
     button {
       background: black;
       color: white;
@@ -93,11 +79,8 @@
       cursor: pointer;
     }
 
-    button:disabled { background: grey; }
-
     .fav-btn { background: orange; }
 
-    /* 🔻 Bottom Nav */
     #bottomNav {
       position: fixed;
       bottom: 0;
@@ -106,34 +89,6 @@
       display: flex;
       justify-content: space-around;
       padding: 10px 0;
-      border-top: 1px solid #ccc;
-    }
-
-    #bottomNav div {
-      text-align: center;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    /* 🔻 Login Bar */
-    #loginBar {
-      position: fixed;
-      bottom: 60px;
-      width: 100%;
-      background: black;
-      color: white;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #loginBar button {
-      background: orange;
-      border: none;
-      padding: 8px 12px;
-      color: black;
-      font-weight: bold;
     }
 
   </style>
@@ -148,28 +103,16 @@
 
 <h1>FARK 618 🛍️</h1>
 
-<!-- 🎥 VIDEO SECTION -->
 <div class="video-box">
-  <iframe 
-    src="https://www.youtube.com/embed/y1zCKcv2AiY?autoplay=1&mute=1&loop=1&playlist=y1zCKcv2AiY"
-    allow="autoplay"
-    allowfullscreen>
-  </iframe>
+  <iframe src="https://www.youtube.com/embed/y1zCKcv2AiY?autoplay=1&mute=1"></iframe>
 </div>
 
 <div id="products" class="products"></div>
 
-<!-- 🔻 Bottom Nav -->
 <div id="bottomNav">
   <div onclick="goHome()">🏠<br>Home</div>
   <div onclick="goToAccount()">👤<br>Account</div>
   <div onclick="goToCart()">🛒<br>Cart</div>
-</div>
-
-<!-- 🔻 Login Bar -->
-<div id="loginBar" onclick="goLogin()">
-  <span>Get full access 🔓</span>
-  <button>LOGIN</button>
 </div>
 
 <script>
@@ -178,88 +121,117 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let productsData = [];
 const user = localStorage.getItem("user");
 
-// welcome
 document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
 
-// auth button
-const authBtn = document.getElementById("authBtn");
-authBtn.innerText = user ? "Logout" : "Login";
+document.getElementById("authBtn").innerText =
+  user ? "Logout" : "Login";
 
-// hide login bar
-if (user) {
-  document.getElementById("loginBar").style.display = "none";
-}
-
-// login/logout
 function handleAuth() {
   if (user) {
     localStorage.removeItem("user");
-    alert("Logged out 👋");
     location.reload();
   } else {
     window.location.href = "login.html";
   }
 }
 
-// cart UI
 function updateCartUI() {
   document.getElementById("cart").innerText = "Cart: " + cart.length;
 }
 updateCartUI();
 
-// load products
-data.forEach(p => {
 
-  let sizeOptions = "";
+// 🔥 FIXED loadProducts
+function loadProducts() {
 
-  // 👕 Shirt sizes
-  if (p.name.toLowerCase().includes("shirt")) {
-    sizeOptions = `
-      <option value="">Select Size</option>
-      <option>S</option>
-      <option>M</option>
-      <option>L</option>
-      <option>XL</option>
-      <option>XXL</option>
-    `;
+  fetch("https://fark618-1.onrender.com/products")
+  .then(res => res.json())
+  .then(data => {
+
+    productsData = data;
+
+    let html = "";
+
+    data.forEach(p => {
+
+      let sizeOptions = "";
+
+      if (p.name.toLowerCase().includes("shirt")) {
+        sizeOptions = `
+          <option value="">Select Size</option>
+          <option>S</option>
+          <option>M</option>
+          <option>L</option>
+          <option>XL</option>
+          <option>XXL</option>
+        `;
+      } else {
+        sizeOptions = `
+          <option value="">Select Size</option>
+          <option>30</option>
+          <option>32</option>
+          <option>34</option>
+          <option>36</option>
+          <option>38</option>
+          <option>40</option>
+        `;
+      }
+
+      html += `
+        <div class="card">
+          <img src="${p.image || 'https://via.placeholder.com/200'}">
+          <h3>${p.name}</h3>
+          <p>₹${p.price}</p>
+          <p>Stock: ${p.stock}</p>
+
+          <select id="size-${p._id}">
+            ${sizeOptions}
+          </select>
+
+          <button onclick="addToCart('${p._id}')">Add to Cart</button>
+
+          <button class="fav-btn" onclick="addToFav('${p._id}')">
+            ❤️ Favorite
+          </button>
+        </div>
+      `;
+    });
+
+    document.getElementById("products").innerHTML = html;
+  });
+}
+
+
+// 🔥 addToCart
+function addToCart(id) {
+
+  if (!user) {
+    alert("Login first ❌");
+    return;
   }
 
-  // 👖 Pant sizes
-  else if (p.name.toLowerCase().includes("pant")) {
-    sizeOptions = `
-      <option value="">Select Size</option>
-      <option>30</option>
-      <option>32</option>
-      <option>34</option>
-      <option>36</option>
-      <option>38</option>
-      <option>40</option>
-    `;
+  const product = productsData.find(p => p._id == id);
+  const size = document.getElementById("size-" + id).value;
+
+  if (!size) {
+    alert("Select size ❗");
+    return;
   }
 
-  html += `
-    <div class="card">
-      <img src="${p.image || 'https://via.placeholder.com/200'}">
-      <h3>${p.name}</h3>
-      <p>₹${p.price}</p>
-      <p>Stock: ${p.stock}</p>
+  cart.push({
+    id: product._id,
+    name: product.name,
+    price: product.price,
+    size: size
+  });
 
-      <!-- 🔥 SIZE -->
-      <select id="size-${p._id}">
-        ${sizeOptions}
-      </select>
+  localStorage.setItem("cart", JSON.stringify(cart));
+  updateCartUI();
 
-      <button onclick="addToCart('${p._id}')">
-        Add to Cart
-      </button>
+  alert("Added to cart ✅");
+}
 
-      <button class="fav-btn" onclick="addToFav('${p._id}')">
-        ❤️ Favorite
-      </button>
-    </div>
-  `;
-});
 
 // favorite
 function addToFav(id) {
@@ -273,31 +245,22 @@ function addToFav(id) {
 
   let fav = JSON.parse(localStorage.getItem("fav")) || [];
 
-  fav.push({
-    id: product._id,
-    name: product.name,
-    price: product.price
-  });
+  fav.push(product);
 
   localStorage.setItem("fav", JSON.stringify(fav));
 
-  alert("Added to Favorites ❤️");
+  alert("Added ❤️");
 }
+
 
 // navigation
 function goToCart() {
-  if (!user) {
-    alert("Login first ❌");
-    return;
-  }
+  if (!user) return alert("Login first ❌");
   window.location.href = "cart.html";
 }
 
 function goToAccount() {
-  if (!user) {
-    alert("Login first ❌");
-    return;
-  }
+  if (!user) return alert("Login first ❌");
   window.location.href = "account.html";
 }
 
@@ -305,9 +268,6 @@ function goHome() {
   window.location.href = "index.html";
 }
 
-function goLogin() {
-  window.location.href = "login.html";
-}
 
 // start
 loadProducts();
