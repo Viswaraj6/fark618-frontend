@@ -1,6 +1,9 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
-  <title>Cart</title>  <style>
+  <title>Cart</title>
+
+  <style>
     body {
       font-family: Arial;
       padding: 20px;
@@ -33,10 +36,21 @@
       margin: 20px auto;
       padding: 10px 20px;
     }
-  </style></head><body><h1>🛒 Your Cart</h1><div id="cartItems"></div>
-<h2 id="total"></h2><button class="order-btn" onclick="placeOrder()">Place Order</button>
+  </style>
+</head>
+
+<body>
+
+<h1>🛒 Your Cart</h1>
+
+<div id="cartItems"></div>
+<h2 id="total"></h2>
+
+<button class="order-btn" onclick="placeOrder()">Place Order</button>
 
 <script>
+
+const BASE_URL = "https://fark618-1.onrender.com";
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
@@ -67,7 +81,7 @@ function removeItem(index) {
   loadCart();
 }
 
-// ✅ FINAL WORKING ORDER FUNCTION
+// 🔥 FINAL ORDER FUNCTION (BACKEND)
 function placeOrder() {
 
   if (cart.length === 0) {
@@ -78,29 +92,35 @@ function placeOrder() {
   let total = 0;
   cart.forEach(item => total += Number(item.price || 0));
 
-  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  fetch(BASE_URL + "/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      products: cart,
+      total: total,
+      user: localStorage.getItem("user"), // ✅ IMPORTANT
+      status: "Pending"
+    })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Order placed successfully ✅");
 
-  let newOrder = {
-    id: Date.now(),
-    items: cart,
-    total: total,
-    status: "Order Placed",
-    date: new Date().toLocaleString()
-  };
+    localStorage.removeItem("cart");
 
-  orders.push(newOrder);
-
-  localStorage.setItem("orders", JSON.stringify(orders));
-
-  // clear cart
-  localStorage.removeItem("cart");
-
-  alert("Order placed successfully ✅");
-
-  window.location.href = "account.html";
+    window.location.href = "account.html";
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Order failed ❌");
+  });
 }
 
 loadCart();
 
-</script></body>
+</script>
+
+</body>
 </html>
