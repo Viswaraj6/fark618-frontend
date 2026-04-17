@@ -209,72 +209,57 @@ function updateCartUI() {
 updateCartUI();
 
 // load products
-function loadProducts() {
-  fetch("https://fark618-1.onrender.com/products")
-  .then(res => res.json())
-  .then(data => {
+data.forEach(p => {
 
-    productsData = data;
+  let sizeOptions = "";
 
-    let html = "";
-
-    data.forEach(p => {
-      html += `
-        <div class="card">
-          <img src="${p.image || 'https://via.placeholder.com/200'}">
-          <h3>${p.name}</h3>
-          <p>₹${p.price}</p>
-          <p>Stock: ${p.stock}</p>
-
-          <button onclick="addToCart('${p._id}')"
-            ${p.stock == 0 ? "disabled" : ""}>
-            ${p.stock == 0 ? "Out of Stock" : "Add to Cart"}
-          </button>
-
-          <button class="fav-btn" onclick="addToFav('${p._id}')">
-            ❤️ Favorite
-          </button>
-        </div>
-      `;
-    });
-
-    document.getElementById("products").innerHTML = html;
-  });
-}
-
-// add to cart
-function addToCart(id) {
-
-  if (!user) {
-    alert("Login first ❌");
-    window.location.href = "login.html";
-    return;
+  // 👕 Shirt sizes
+  if (p.name.toLowerCase().includes("shirt")) {
+    sizeOptions = `
+      <option value="">Select Size</option>
+      <option>S</option>
+      <option>M</option>
+      <option>L</option>
+      <option>XL</option>
+      <option>XXL</option>
+    `;
   }
 
-  const product = productsData.find(p => p._id == id);
-  if (!product || product.stock <= 0) return;
+  // 👖 Pant sizes
+  else if (p.name.toLowerCase().includes("pant")) {
+    sizeOptions = `
+      <option value="">Select Size</option>
+      <option>30</option>
+      <option>32</option>
+      <option>34</option>
+      <option>36</option>
+      <option>38</option>
+      <option>40</option>
+    `;
+  }
 
-  cart.push({
-    id: product._id,
-    name: product.name,
-    price: product.price
-  });
+  html += `
+    <div class="card">
+      <img src="${p.image || 'https://via.placeholder.com/200'}">
+      <h3>${p.name}</h3>
+      <p>₹${p.price}</p>
+      <p>Stock: ${p.stock}</p>
 
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartUI();
+      <!-- 🔥 SIZE -->
+      <select id="size-${p._id}">
+        ${sizeOptions}
+      </select>
 
-  fetch("https://fark618-1.onrender.com/products/" + id, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: product.name,
-      price: product.price,
-      stock: product.stock - 1,
-      image: product.image
-    })
-  })
-  .then(() => loadProducts());
-}
+      <button onclick="addToCart('${p._id}')">
+        Add to Cart
+      </button>
+
+      <button class="fav-btn" onclick="addToFav('${p._id}')">
+        ❤️ Favorite
+      </button>
+    </div>
+  `;
+});
 
 // favorite
 function addToFav(id) {
