@@ -43,7 +43,6 @@
 <body>
 
 <h1>👤 My Account</h1>
-
 <h3 id="welcome"></h3>
 
 <!-- 🛒 ORDERS -->
@@ -70,32 +69,42 @@ if (!user) {
 
 document.getElementById("welcome").innerText = "Welcome, " + user;
 
-// 🔥 LOAD ORDERS
+// 🔥 LOAD ORDERS FROM BACKEND
 function loadOrders() {
+
   fetch(BASE_URL + "/orders")
     .then(res => res.json())
     .then(data => {
 
       let html = "";
 
-      data
-        .filter(o => o.user === user)
-        .forEach(o => {
+      // ✅ filter by user
+      let myOrders = data.filter(o => o.user === user);
+
+      if (myOrders.length === 0) {
+        html = "<p>No orders yet</p>";
+      } else {
+
+        myOrders.reverse().forEach(o => {
 
           html += `
             <div class="card">
               <p><b>Order ID:</b> ${o._id}</p>
               <p><b>Total:</b> ₹${o.total}</p>
               <p><b>Status:</b> ${o.status}</p>
+              <p><b>Date:</b> ${new Date(o.date).toLocaleString()}</p>
 
               <button onclick="track('${o._id}')">Track Order</button>
             </div>
           `;
         });
 
-      document.getElementById("orders").innerHTML =
-        html || "<p>No orders yet</p>";
-    });
+      }
+
+      document.getElementById("orders").innerHTML = html;
+
+    })
+    .catch(err => console.log(err));
 }
 
 // 🔍 TRACK
@@ -112,17 +121,19 @@ function loadFavorites() {
 
   if (favorites.length === 0) {
     html = "<p>No favorite items</p>";
-  }
+  } else {
 
-  favorites.forEach((item, index) => {
-    html += `
-      <div class="card">
-        <h3>${item.name}</h3>
-        <p>₹${item.price}</p>
-        <button onclick="removeFav(${index})">Remove</button>
-      </div>
-    `;
-  });
+    favorites.forEach((item, index) => {
+      html += `
+        <div class="card">
+          <h3>${item.name}</h3>
+          <p>₹${item.price}</p>
+          <button onclick="removeFav(${index})">Remove</button>
+        </div>
+      `;
+    });
+
+  }
 
   document.getElementById("favorites").innerHTML = html;
 }
