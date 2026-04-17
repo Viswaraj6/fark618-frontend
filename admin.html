@@ -10,7 +10,7 @@
       background: #f5f5f5;
     }
 
-    input {
+    input, select {
       display: block;
       margin: 10px 0;
       padding: 10px;
@@ -34,7 +34,7 @@
     }
 
     img {
-      width: 150px;
+      width: 120px;
       border-radius: 10px;
     }
   </style>
@@ -50,17 +50,33 @@
   <button onclick="login()">Login</button>
 </div>
 
-<!-- 🔧 ADMIN PANEL -->
+<!-- 🔧 ADMIN -->
 <div id="adminPanel" style="display:none;">
+
   <h1>Admin Panel 🔧</h1>
 
+  <!-- 🔥 ADD PRODUCT -->
   <h2>Add Product</h2>
+
   <input id="name" placeholder="Product name">
   <input id="price" placeholder="Price">
   <input id="stock" placeholder="Stock">
-  <input id="image" placeholder="Image URL">
+
+  <!-- 🔥 TYPE -->
+  <select id="type">
+    <option value="shirt">Shirt</option>
+    <option value="pant">Pant</option>
+  </select>
+
+  <!-- 🔥 IMAGE UPLOAD -->
+  <input type="file" id="imageFile">
 
   <button onclick="addProduct()">Add Product</button>
+
+  <!-- 📥 EXCEL IMPORT -->
+  <h3>Import Excel 📥</h3>
+  <input type="file" id="excelFile">
+  <button onclick="importExcel()">Upload Excel</button>
 
   <h2>All Products</h2>
   <div id="products"></div>
@@ -70,162 +86,202 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <script>
 
-// ✅ CORRECT BACKEND URL
 const BASE_URL = "https://fark618-1.onrender.com";
 
 // 🔐 LOGIN
 function login() {
-  const u = document.getElementById("user").value;
-  const p = document.getElementById("pass").value;
+  const u = user.value;
+  const p = pass.value;
 
   if (u === "admin" && p === "1234") {
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-
+    loginBox.style.display = "none";
+    adminPanel.style.display = "block";
     loadProducts();
     loadOrders();
   } else {
-    alert("Wrong login!");
+    alert("Wrong login ❌");
   }
 }
 
-// ➕ ADD PRODUCT (FIXED + DEBUG)
-function addProduct() {
-  const name = document.getElementById("name").value;
+
+// 🔥 ADD PRODUCT WITH IMAGE + SIZE
+async function addProduct() {
+
+  const name = nameInput = document.getElementById("name").value;
   const price = document.getElementById("price").value;
   const stock = document.getElementById("stock").value;
-  const image = document.getElementById("image").value;
+  const type = document.getElementById("type").value;
+
+  const file = document.getElementById("imageFile").files[0];
+
+  let imageBase64 = "";
+
+  if (file) {
+    imageBase64 = await toBase64(file);
+  }
 
   fetch(BASE_URL + "/add-product", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name, price, stock, image })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name,
+      price,
+      stock,
+      type,
+      image: imageBase64
+    })
   })
-  .then(res => res.json())
-  .then(data => {
-    console.log("Added:", data); // 🔥 debug
-    alert("Product Added ✅");
+  .then(() => {
+    alert("Added ✅");
     loadProducts();
-  })
-  .catch(err => {
-    console.log(err);
-    alert("Error adding product ❌");
   });
 }
+
+
+// 🔥 BASE64 CONVERT
+function toBase64(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+  });
+}
+
 
 // 📦 LOAD PRODUCTS
 function loadProducts() {
   fetch(BASE_URL + "/products")
-    .then(res => res.json())
-    .then(data => {
+  .then(res => res.json())
+  .then(data => {
 
-      console.log("Products:", data); // 🔥 debug
+    let html = "";
 
-      let html = "";
+    data.forEach(p => {
 
-      if (data.length === 0) {
-        html = "<p>No products found</p>";
+      let sizeText = "";
+
+      if (p.type === "shirt") {
+        sizeText = "S, M, L, XL, XXL";
+      } else {
+        sizeText = "30, 32, 34, 36, 38, 40";
       }
 
-      data.forEach(p => {
-        html += `
-          <div class="card">
-           <img src="${p.image || 'https://via.placeholder.com/150'}" /> 
-            <h3>${p.name}</h3>
-            <p>₹${p.price}</p>
-            <p>Stock: ${p.stock}</p>
+      html += `
+        <div class="card">
+          <img src="${p.image}">
+          <h3>${p.name}</h3>
+          <p>₹${p.price}</p>
+          <p>Stock: ${p.stock}</p>
+          <p>Sizes: ${sizeText}</p>
 
-            <button onclick="deleteProduct('${p._id}')">Delete</button>
-            <button onclick="editProduct('${p._id}')">Edit</button>
-          </div>
-        `;
-      });
-
-      document.getElementById("products").innerHTML = html;
-    })
-    .catch(err => console.log(err));
-}
-
-// 📦 LOAD ORDERS
-function loadOrders() {
-  fetch(BASE_URL + "/orders")
-    .then(res => res.json())
-    .then(data => {
-
-      let html = "";
-
-      data.forEach(o => {
-
-        let itemsHtml = "";
-
-        o.products.forEach(item => {
-          itemsHtml += `
-            <li>${item.name} - ₹${item.price}</li>
-          `;
-        });
-
-        html += `
-          <div class="card">
-            <h3>Order ID: ${o._id}</h3>
-            <p><b>Total:</b> ₹${o.total}</p>
-            <p><b>Status:</b> ${o.status}</p>
-
-            <select onchange="updateStatus('${o._id}', this.value)">
-              <option ${o.status=="Pending"?"selected":""}>Pending</option>
-              <option ${o.status=="Shipped"?"selected":""}>Shipped</option>
-              <option ${o.status=="Delivered"?"selected":""}>Delivered</option>
-            </select>
-
-            <ul>${itemsHtml}</ul>
-          </div>
-        `;
-      });
-
-      document.getElementById("orders").innerHTML = html;
+          <button onclick="deleteProduct('${p._id}')">Delete</button>
+        </div>
+      `;
     });
+
+    products.innerHTML = html;
+  });
 }
 
-// ✏️ EDIT
-function editProduct(id) {
-  const name = prompt("New name:");
-  const price = prompt("New price:");
-  const stock = prompt("New stock:");
-  const image = prompt("New image URL:");
-
-  fetch(BASE_URL + "/products/" + id, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name, price, stock, image })
-  })
-  .then(() => loadProducts());
-}
 
 // ❌ DELETE
 function deleteProduct(id) {
-  fetch(BASE_URL + "/products/" + id, {
-    method: "DELETE"
-  })
+  fetch(BASE_URL + "/products/" + id, { method: "DELETE" })
   .then(() => loadProducts());
 }
+
+
+// 📦 ORDERS
+function loadOrders() {
+  fetch(BASE_URL + "/orders")
+  .then(res => res.json())
+  .then(data => {
+
+    let html = "";
+
+    data.forEach(o => {
+
+      let items = "";
+
+      o.products.forEach(i => {
+        items += `<li>${i.name} (${i.size || "-"})</li>`;
+      });
+
+      html += `
+        <div class="card">
+          <p>Order: ${o._id}</p>
+          <p>Total: ₹${o.total}</p>
+          <p>Status: ${o.status}</p>
+
+          <select onchange="updateStatus('${o._id}', this.value)">
+            <option ${o.status=="Pending"?"selected":""}>Pending</option>
+            <option ${o.status=="Shipped"?"selected":""}>Shipped</option>
+            <option ${o.status=="Delivered"?"selected":""}>Delivered</option>
+          </select>
+
+          <ul>${items}</ul>
+        </div>
+      `;
+    });
+
+    orders.innerHTML = html;
+  });
+}
+
+
+// 🔄 STATUS
 function updateStatus(id, status) {
   fetch(BASE_URL + "/orders/" + id, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
   })
-  .then(() => {
-    alert("Status updated ✅");
-    loadOrders();
-  });
+  .then(() => loadOrders());
 }
+
+
+// 📥 EXCEL IMPORT
+function importExcel() {
+
+  const file = document.getElementById("excelFile").files[0];
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet);
+
+    json.forEach(item => {
+
+      fetch(BASE_URL + "/add-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: item.name,
+          price: item.price,
+          stock: item.stock,
+          type: item.type,
+          image: ""
+        })
+      });
+
+    });
+
+    alert("Excel Imported ✅");
+    loadProducts();
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
 </script>
 
 </body>
