@@ -143,6 +143,14 @@ document.getElementById("welcome").innerText =
 
 // 🔥 LOAD PRODUCTS
 async function loadProducts() {
+
+  // 🔥 Loading UI
+  document.getElementById("products").innerHTML = `
+    <div class="card">Loading...</div>
+    <div class="card">Loading...</div>
+    <div class="card">Loading...</div>
+  `;
+
   try {
     const res = await fetch("https://fark618-backend.onrender.com/products");
     const data = await res.json();
@@ -164,8 +172,8 @@ async function loadProducts() {
         <div class="card">
 
           <img loading="lazy"
-     src="${p.image || 'https://via.placeholder.com/200'}"
-     onclick="openProduct(${index})">
+               src="${p.image || 'https://via.placeholder.com/200'}"
+               onclick="openProduct(${index})">
 
           <div class="name">${p.name}</div>
           <div class="price">₹${p.price}</div>
@@ -188,12 +196,11 @@ async function loadProducts() {
     });
 
     document.getElementById("products").innerHTML = html;
-document.getElementById("loader").style.display = "none";
+
   } catch (err) {
     alert("Server loading slow ⚠️ Try again");
   }
 }
-
 
 // 🔥 OPEN PRODUCT
 function openProduct(index){
