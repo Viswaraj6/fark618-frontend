@@ -3,19 +3,36 @@
 <head>
   <title>My Account</title>
 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
-      font-family: Arial;
-      padding: 20px;
-      background: #f5f5f5;
-      padding-bottom: 80px;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 15px;
+      background: #f1f3f6;
+      padding-bottom: 90px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 20px;
     }
 
     .card {
       background: white;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
-      border-radius: 8px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .empty {
+      color: gray;
+      text-align: center;
+      margin-top: 10px;
     }
 
     #bottomNav {
@@ -26,7 +43,12 @@
       display: flex;
       justify-content: space-around;
       padding: 10px;
-      border-top: 1px solid #ccc;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+
+    #bottomNav div {
+      text-align: center;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -35,18 +57,29 @@
 
 <h1>👤 My Account</h1>
 
+<!-- 🛒 CART -->
 <h2>🛒 Cart Items</h2>
 <div id="cartItems"></div>
 
+<!-- 📦 ORDERS -->
+<h2>📦 My Orders</h2>
+<div id="orders"></div>
+
+
+<!-- 🔻 NAV -->
 <div id="bottomNav">
   <div onclick="goHome()">🏠<br>Home</div>
   <div onclick="goAccount()">👤<br>Account</div>
   <div onclick="goCart()">🛒<br>Cart</div>
 </div>
 
+
 <script>
 
-// LOAD CART (FIXED)
+const API = "https://fark618-backend.onrender.com";
+
+
+// 🛒 LOAD CART
 function loadCart() {
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -54,7 +87,7 @@ function loadCart() {
   let html = "";
 
   if (cart.length === 0) {
-    html = "<p>No cart items</p>";
+    html = "<p class='empty'>No cart items</p>";
   } else {
 
     cart.forEach(c => {
@@ -62,7 +95,7 @@ function loadCart() {
         <div class="card">
           <h3>${c.name}</h3>
           <p>₹${c.price}</p>
-          <p>${c.size}</p>
+          <p>Size: ${c.size || "-"}</p>
         </div>
       `;
     });
@@ -73,9 +106,49 @@ function loadCart() {
 }
 
 
-// NAVIGATION FIX
+
+// 📦 LOAD ORDERS
+function loadOrders(){
+
+  fetch(API + "/orders")
+    .then(res => res.json())
+    .then(data => {
+
+      let html = "";
+
+      if(data.length === 0){
+        html = "<p class='empty'>No orders yet</p>";
+      } else {
+
+        data.forEach(order => {
+
+          html += `
+            <div class="card">
+              <b>Name:</b> ${order.name}<br>
+              <b>Total:</b> ₹${order.total}<br>
+              <b>Status:</b> ${order.status}<br>
+              <b>Date:</b> ${new Date(order.date).toLocaleDateString()}
+            </div>
+          `;
+        });
+
+      }
+
+      document.getElementById("orders").innerHTML = html;
+
+    })
+    .catch(err => {
+      console.log(err);
+      document.getElementById("orders").innerHTML = "Failed to load orders ❌";
+    });
+
+}
+
+
+
+// 🔻 NAV
 function goHome() {
-  window.location.href = "/";
+  window.location.href = "index.html";
 }
 
 function goAccount() {
@@ -86,7 +159,10 @@ function goCart() {
   window.location.href = "cart.html";
 }
 
+
+// 🚀 INIT
 loadCart();
+loadOrders();
 
 </script>
 
