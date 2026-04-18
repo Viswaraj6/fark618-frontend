@@ -124,40 +124,40 @@ async function addProduct(){
   const file = document.getElementById("imageFile").files[0];
 
   if(file){
+
+    // 🔥 IMAGE COMPRESS START
+    const img = new Image();
     const reader = new FileReader();
 
-    reader.onloadend = async function(){
-      await sendProduct(name,price,stock,type,sizes,reader.result);
+    reader.onload = function(e){
+      img.src = e.target.result;
+    };
+
+    img.onload = function(){
+
+      const canvas = document.createElement("canvas");
+
+      const maxWidth = 600; // size reduce
+      const scale = maxWidth / img.width;
+
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // 🔥 convert to small JPEG
+      const compressed = canvas.toDataURL("image/jpeg", 0.7);
+
+      sendProduct(name,price,stock,type,sizes,compressed);
     };
 
     reader.readAsDataURL(file);
+
   } else {
-    await sendProduct(name,price,stock,type,sizes,"");
+    sendProduct(name,price,stock,type,sizes,"");
   }
 }
-
-async function sendProduct(name,price,stock,type,sizes,image){
-
-  const res = await fetch(BASE_URL+"/add-product",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "admin":"fark618"
-    },
-    body:JSON.stringify({
-      name, price, stock, type, sizes, image
-    })
-  });
-
-  if(!res.ok){
-    alert("Admin auth failed ❌");
-    return;
-  }
-
-  alert("Product Added ✅");
-  loadProducts();
-}
-
 /* ================= EXCEL ================= */
 function importExcel(){
 
