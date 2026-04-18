@@ -52,7 +52,7 @@ img {
   <option value="pant">Pant</option>
 </select>
 
-<!-- 🔥 AUTO SIZE -->
+<!-- SIZE -->
 <div id="sizeBox"></div>
 
 <!-- IMAGE -->
@@ -60,12 +60,10 @@ img {
 
 <button onclick="addProduct()">Add Product</button>
 
-
-<!-- 📥 EXCEL -->
+<!-- EXCEL -->
 <h3>Import Excel 📥</h3>
 <input type="file" id="excelFile">
 <button onclick="importExcel()">Upload Excel</button>
-
 
 <h2>Products</h2>
 <div id="products"></div>
@@ -73,28 +71,22 @@ img {
 <h2>Orders</h2>
 <div id="orders"></div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <script>
 
 const BASE_URL = "https://fark618-1.onrender.com";
 
-
-// 🔥 AUTO SIZE GENERATE
+/* ================= SIZE ================= */
 document.getElementById("type").addEventListener("change", loadSizeOptions);
 
 function loadSizeOptions() {
 
   const type = document.getElementById("type").value;
 
-  let sizes = [];
-
-  if(type === "shirt"){
-    sizes = ["S","M","L","XL","XXL"];
-  } else {
-    sizes = ["30","32","34","36","38","40"];
-  }
+  let sizes = type === "shirt"
+    ? ["S","M","L","XL","XXL"]
+    : ["30","32","34","36","38","40"];
 
   let html = "<p>Select Sizes:</p>";
 
@@ -109,11 +101,9 @@ function loadSizeOptions() {
   document.getElementById("sizeBox").innerHTML = html;
 }
 
-// INIT
 loadSizeOptions();
 
-
-// 🔥 ADD PRODUCT
+/* ================= ADD PRODUCT ================= */
 async function addProduct(){
 
   const name = document.getElementById("name").value;
@@ -121,13 +111,10 @@ async function addProduct(){
   const stock = document.getElementById("stock").value;
   const type = document.getElementById("type").value;
 
-  // 🔥 GET SELECTED SIZES
   const checkboxes = document.querySelectorAll("#sizeBox input:checked");
   const sizes = [];
 
-  checkboxes.forEach(cb => {
-    sizes.push(cb.value);
-  });
+  checkboxes.forEach(cb => sizes.push(cb.value));
 
   if(sizes.length === 0){
     alert("Select size ❗");
@@ -136,59 +123,48 @@ async function addProduct(){
 
   const file = document.getElementById("imageFile").files[0];
 
-  let image = "";
-
   if(file){
     const reader = new FileReader();
-    reader.onload = function(){
-      image = reader.result;
-      sendProduct(name,price,stock,type,sizes,image);
-    }
+
+    reader.onloadend = async function(){
+      await sendProduct(name,price,stock,type,sizes,reader.result);
+    };
+
     reader.readAsDataURL(file);
   } else {
-    sendProduct(name,price,stock,type,sizes,"");
+    await sendProduct(name,price,stock,type,sizes,"");
   }
-
 }
 
+async function sendProduct(name,price,stock,type,sizes,image){
 
-// 🔥 SEND PRODUCT
-function sendProduct(name,price,stock,type,sizes,image){
-
-  fetch(BASE_URL+"/add-product",{
+  const res = await fetch(BASE_URL+"/add-product",{
     method:"POST",
     headers:{
       "Content-Type":"application/json",
       "admin":"fark618"
     },
     body:JSON.stringify({
-      name,
-      price,
-      stock,
-      type,
-      sizes,
-      image
+      name, price, stock, type, sizes, image
     })
-  })
-  .then(res => {
-    if(!res.ok){
-      alert("Admin auth failed ❌");
-      return;
-    }
-    alert("Product Added ✅");
-    loadProducts();
   });
 
+  if(!res.ok){
+    alert("Admin auth failed ❌");
+    return;
+  }
+
+  alert("Product Added ✅");
+  loadProducts();
 }
 
-
-// 📥 EXCEL IMPORT
+/* ================= EXCEL ================= */
 function importExcel(){
 
   const file = document.getElementById("excelFile").files[0];
 
   if(!file){
-    alert("Select Excel file ❗");
+    alert("Select Excel ❗");
     return;
   }
 
@@ -204,10 +180,9 @@ function importExcel(){
 
     json.forEach(item => {
 
-      let sizes = [];
-      if(item.sizes){
-        sizes = item.sizes.split(",").map(s => s.trim());
-      }
+      let sizes = item.sizes
+        ? item.sizes.split(",").map(s => s.trim())
+        : [];
 
       fetch(BASE_URL+"/add-product",{
         method:"POST",
@@ -220,7 +195,7 @@ function importExcel(){
           price: item.price,
           stock: item.stock,
           type: item.type,
-          sizes: sizes,
+          sizes,
           image: ""
         })
       });
@@ -229,14 +204,12 @@ function importExcel(){
 
     alert("Excel Imported ✅");
     loadProducts();
-
   };
 
   reader.readAsArrayBuffer(file);
 }
 
-
-// 📦 LOAD PRODUCTS
+/* ================= PRODUCTS ================= */
 function loadProducts(){
 
   fetch(BASE_URL+"/products")
@@ -253,7 +226,7 @@ function loadProducts(){
         <h3>${p.name}</h3>
         <p>₹${p.price}</p>
         <p>Stock: ${p.stock}</p>
-        <p><b>Sizes:</b> ${p.sizes ? p.sizes.join(", ") : "-"}</p>
+        <p>Sizes: ${p.sizes?.join(", ") || "-"}</p>
 
         <button onclick="deleteProduct('${p._id}')">Delete</button>
       </div>
@@ -261,27 +234,19 @@ function loadProducts(){
     });
 
     document.getElementById("products").innerHTML = html;
-
   });
-
 }
 
-
-// ❌ DELETE
 function deleteProduct(id){
 
   fetch(BASE_URL+"/products/"+id,{
     method:"DELETE",
-    headers:{
-      "admin":"fark618"
-    }
+    headers:{ "admin":"fark618" }
   })
   .then(() => loadProducts());
-
 }
 
-
-// 📦 LOAD ORDERS
+/* ================= ORDERS ================= */
 function loadOrders(){
 
   fetch(BASE_URL+"/orders")
@@ -306,20 +271,42 @@ function loadOrders(){
       html += `
       <div class="card">
         <p><b>Total:</b> ₹${o.total}</p>
-        <p><b>Status:</b> ${o.status}</p>
+
+        <p>
+          <b>Status:</b>
+          <select onchange="updateStatus('${o._id}', this.value)">
+            <option ${o.status==="Pending"?"selected":""}>Pending</option>
+            <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
+            <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+          </select>
+        </p>
+
         <ul>${items}</ul>
       </div>
       `;
     });
 
     document.getElementById("orders").innerHTML = html;
-
   });
-
 }
 
+function updateStatus(id, status){
 
-// INIT
+  fetch(BASE_URL+"/orders/"+id,{
+    method:"PUT",
+    headers:{
+      "Content-Type":"application/json",
+      "admin":"fark618"
+    },
+    body: JSON.stringify({ status })
+  })
+  .then(() => {
+    alert("Updated ✅");
+    loadOrders();
+  });
+}
+
+/* ================= INIT ================= */
 loadProducts();
 loadOrders();
 
