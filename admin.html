@@ -42,26 +42,26 @@ img {
 
 <h2>Admin Panel 🔧</h2>
 
-<!-- 🔥 ADD PRODUCT -->
+<!-- PRODUCT FORM -->
 <input id="name" placeholder="Product Name">
 <input id="price" placeholder="Price">
 <input id="stock" placeholder="Stock">
 
 <select id="type">
-<option value="shirt">Shirt</option>
-<option value="pant">Pant</option>
+  <option value="shirt">Shirt</option>
+  <option value="pant">Pant</option>
 </select>
 
-<!-- 🔥 SIZE -->
-<input id="sizes" placeholder="Sizes (S,M,L or 30,32,34)">
+<!-- 🔥 AUTO SIZE -->
+<div id="sizeBox"></div>
 
-<!-- 🔥 IMAGE -->
+<!-- IMAGE -->
 <input type="file" id="imageFile">
 
 <button onclick="addProduct()">Add Product</button>
 
 
-<!-- 📥 EXCEL IMPORT -->
+<!-- 📥 EXCEL -->
 <h3>Import Excel 📥</h3>
 <input type="file" id="excelFile">
 <button onclick="importExcel()">Upload Excel</button>
@@ -74,12 +74,43 @@ img {
 <div id="orders"></div>
 
 
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <script>
 
 const BASE_URL = "https://fark618-1.onrender.com";
+
+
+// 🔥 AUTO SIZE GENERATE
+document.getElementById("type").addEventListener("change", loadSizeOptions);
+
+function loadSizeOptions() {
+
+  const type = document.getElementById("type").value;
+
+  let sizes = [];
+
+  if(type === "shirt"){
+    sizes = ["S","M","L","XL","XXL"];
+  } else {
+    sizes = ["30","32","34","36","38","40"];
+  }
+
+  let html = "<p>Select Sizes:</p>";
+
+  sizes.forEach(s => {
+    html += `
+      <label>
+        <input type="checkbox" value="${s}"> ${s}
+      </label><br>
+    `;
+  });
+
+  document.getElementById("sizeBox").innerHTML = html;
+}
+
+// INIT
+loadSizeOptions();
 
 
 // 🔥 ADD PRODUCT
@@ -90,12 +121,18 @@ async function addProduct(){
   const stock = document.getElementById("stock").value;
   const type = document.getElementById("type").value;
 
-  // 🔥 SIZE CLEAN
-  const sizes = document
-    .getElementById("sizes")
-    .value
-    .split(",")
-    .map(s => s.trim());
+  // 🔥 GET SELECTED SIZES
+  const checkboxes = document.querySelectorAll("#sizeBox input:checked");
+  const sizes = [];
+
+  checkboxes.forEach(cb => {
+    sizes.push(cb.value);
+  });
+
+  if(sizes.length === 0){
+    alert("Select size ❗");
+    return;
+  }
 
   const file = document.getElementById("imageFile").files[0];
 
@@ -115,7 +152,7 @@ async function addProduct(){
 }
 
 
-// 🔥 SEND PRODUCT (ADMIN HEADER FIX)
+// 🔥 SEND PRODUCT
 function sendProduct(name,price,stock,type,sizes,image){
 
   fetch(BASE_URL+"/add-product",{
@@ -196,7 +233,6 @@ function importExcel(){
   };
 
   reader.readAsArrayBuffer(file);
-
 }
 
 
@@ -245,7 +281,7 @@ function deleteProduct(id){
 }
 
 
-// 📦 LOAD ORDERS (SIZE SHOW)
+// 📦 LOAD ORDERS
 function loadOrders(){
 
   fetch(BASE_URL+"/orders")
@@ -283,7 +319,7 @@ function loadOrders(){
 }
 
 
-// 🚀 INIT
+// INIT
 loadProducts();
 loadOrders();
 
