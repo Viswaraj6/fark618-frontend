@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Login</title>
+</head>
+<body>
+
+<h2>Admin Login 🔐</h2>
+
+<input id="user" placeholder="Username"><br>
+<input id="pass" type="password" placeholder="Password"><br>
+
+<button onclick="login()">Login</button>
+
+<script>
+const BASE_URL = "https://fark618-1.onrender.com";
+
+async function login(){
+
+  const username = document.getElementById("user").value;
+  const password = document.getElementById("pass").value;
+
+  const res = await fetch(BASE_URL+"/admin-login",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await res.json();
+
+  if(res.ok){
+    localStorage.setItem("adminToken", data.token);
+    alert("Login success ✅");
+    window.location.href = "admin.html";
+  } else {
+    alert(data.error);
+  }
+}
+</script>
+
+</body>
+</html>
