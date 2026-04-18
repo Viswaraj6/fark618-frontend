@@ -25,25 +25,18 @@
       color: #444;
     }
 
-    /* 🔷 PRODUCT GRID */
     .products {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 18px;
     }
 
-    /* 🔷 CARD */
     .card {
       background: #fff;
       padding: 15px;
       border-radius: 15px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-      transition: 0.2s;
       text-align: center;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
     }
 
     .card img {
@@ -51,33 +44,12 @@
       height: 180px;
       object-fit: cover;
       border-radius: 10px;
-      margin-bottom: 10px;
+      cursor: pointer;
     }
 
-    .title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .price {
-      color: #2e7d32;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .stock {
-      font-size: 13px;
-      color: #777;
-    }
-
-    select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+    .title { font-weight: bold; }
+    .price { color: green; }
+    .stock { font-size: 13px; }
 
     button {
       width: 100%;
@@ -86,20 +58,11 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-weight: 600;
     }
 
-    .cart-btn {
-      background: #111;
-      color: white;
-    }
+    .cart-btn { background: black; color: white; }
+    .fav-btn { background: orange; }
 
-    .fav-btn {
-      background: linear-gradient(to right, orange, gold);
-      color: black;
-    }
-
-    /* 🔻 Bottom Nav */
     #bottomNav {
       position: fixed;
       bottom: 0;
@@ -107,16 +70,8 @@
       background: white;
       display: flex;
       justify-content: space-around;
-      padding: 10px 0;
-      border-top: 1px solid #ccc;
+      padding: 10px;
     }
-
-    #bottomNav div {
-      text-align: center;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
   </style>
 </head>
 
@@ -142,10 +97,9 @@ let user = localStorage.getItem("user");
 document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
 
-
 // 🔥 LOAD PRODUCTS
 function loadProducts() {
-  fetch("https://fark618-1.onrender.com/products")
+  fetch("https://fark618-backend.onrender.com/products")
   .then(res => res.json())
   .then(data => {
 
@@ -154,21 +108,18 @@ function loadProducts() {
 
     data.forEach(p => {
 
-      let sizes = p.sizes && p.sizes.length > 0
-        ? p.sizes
-        : (p.type === "shirt"
-          ? ["S","M","L","XL","XXL"]
-          : ["30","32","34","36","38","40"]);
-
+      let sizes = p.sizes || [];
       let options = `<option value="">Select Size</option>`;
+
       sizes.forEach(s => {
         options += `<option>${s}</option>`;
       });
 
       html += `
         <div class="card">
-          <img src="${p.image || 'https://via.placeholder.com/200'}" 
-     onclick='openProduct(${JSON.stringify(p)})'>
+          <img src="${p.image || 'https://via.placeholder.com/200'}"
+               onclick="openProduct('${p._id}')">
+
           <div class="title">${p.name}</div>
           <div class="price">₹${p.price}</div>
           <div class="stock">Stock: ${p.stock}</div>
@@ -192,8 +143,14 @@ function loadProducts() {
   });
 }
 
+// 🔥 OPEN PRODUCT PAGE
+function openProduct(id){
+  const product = productsData.find(p => p._id == id);
+  localStorage.setItem("selectedProduct", JSON.stringify(product));
+  window.location.href = "product.html";
+}
 
-// 🔥 ADD TO CART (NO ALERT)
+// 🔥 ADD TO CART
 function addToCart(id) {
 
   if (!user) {
@@ -217,10 +174,7 @@ function addToCart(id) {
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
-
-  // 🔥 NO POPUP (silent add)
 }
-
 
 // ❤️ FAVORITE
 function addToFav(id) {
@@ -237,27 +191,13 @@ function addToFav(id) {
   localStorage.setItem("fav", JSON.stringify(fav));
 }
 
+// NAV
+function goHome(){ location.href = "index.html"; }
+function goAccount(){ location.href = "account.html"; }
+function goCart(){ location.href = "cart.html"; }
 
-// 🔗 NAVIGATION
-function goHome() {
-  location.href = "index.html";
-}
-
-function goAccount() {
-  location.href = "account.html";
-}
-
-function goCart() {
-  location.href = "cart.html";
-}
-
-
-// 🚀 INIT
 loadProducts();
-function openProduct(product){
-  localStorage.setItem("selectedProduct", JSON.stringify(product));
-  window.location.href = "product.html";
-}
+
 </script>
 
 </body>
