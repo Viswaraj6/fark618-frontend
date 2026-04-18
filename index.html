@@ -1,104 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FARK 618</title>
+  <title>My Account</title>
 
   <style>
     body {
       font-family: Arial;
-      background: linear-gradient(to bottom, #e3f2fd, #ffffff);
-      padding: 15px;
-      padding-bottom: 120px;
+      padding: 20px;
+      background: #f5f5f5;
     }
 
     h1 {
       text-align: center;
-      color: #333;
-    }
-
-    #welcome {
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #444;
-    }
-
-    /* 🎥 VIDEO */
-    .video-box {
-      width: 100%;
-      max-width: 400px;
-      margin: 15px auto;
-      border-radius: 15px;
-      overflow: hidden;
-      background: black;
-    }
-
-    .video-box iframe {
-      width: 100%;
-      height: 500px;
-      border: none;
-    }
-
-    /* PRODUCTS */
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
     }
 
     .card {
       background: white;
       padding: 15px;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
+      margin: 10px 0;
       border-radius: 10px;
     }
 
-    select {
-      padding: 8px;
-      margin-top: 10px;
-      border-radius: 5px;
-    }
-
     button {
-      background: black;
-      color: white;
-      padding: 10px;
+      padding: 8px 12px;
       border: none;
-      margin-top: 10px;
       cursor: pointer;
+      margin-top: 5px;
       border-radius: 5px;
     }
 
-    .fav-btn {
-      background: linear-gradient(to right, orange, gold);
-      color: black;
-      font-weight: bold;
-    }
-
-    /* 🔻 Bottom Nav only */
-    #bottomNav {
-      position: fixed;
-      bottom: 0;
+    .logout {
+      background: red;
+      color: white;
       width: 100%;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      border-top: 2px solid #ddd;
     }
 
-    #bottomNav div {
-      text-align: center;
-      font-size: 14px;
-      cursor: pointer;
+    .remove {
+      background: red;
+      color: white;
+    }
+
+    .order-btn {
+      background: green;
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .section {
+      margin-top: 25px;
     }
 
   </style>
@@ -106,154 +56,221 @@
 
 <body>
 
+<h1>👤 My Account</h1>
 <h3 id="welcome"></h3>
 
-<h1>FARK 618 🛍️</h1>
+<button class="logout" onclick="logout()">Logout</button>
 
-<!-- VIDEO -->
-<div class="video-box">
-  <iframe 
-    src="https://www.youtube.com/embed/y1zCKcv2AiY?autoplay=1&mute=1&playsinline=1"
-    allow="autoplay"
-    allowfullscreen>
-  </iframe>
+<!-- 🛒 CART -->
+<div class="section">
+  <h2>🛒 My Cart</h2>
+  <div id="cartItems"></div>
+  <h3 id="total"></h3>
+  <button class="order-btn" onclick="placeOrder()">Place Order</button>
 </div>
 
-<div id="products" class="products"></div>
+<!-- 📦 ORDERS -->
+<div class="section">
+  <h2>📦 My Orders</h2>
+  <div id="orders"></div>
+</div>
 
-<!-- 🔻 Bottom Nav -->
-<div id="bottomNav">
-  <div onclick="goHome()">🏠<br>Home</div>
-  <div onclick="goToAccount()">👤<br>Account</div>
-  <div onclick="goToCart()">🛒<br>Cart</div>
+<!-- ❤️ FAVORITES -->
+<div class="section">
+  <h2>❤️ Favorites</h2>
+  <div id="favorites"></div>
 </div>
 
 <script>
 
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let productsData = [];
-const user = localStorage.getItem("user");
+const BASE_URL = "https://fark618-1.onrender.com";
 
-document.getElementById("welcome").innerText =
-  user ? "Welcome, " + user : "Welcome, Guest";
+let user = localStorage.getItem("user");
 
-function updateCartUI() {
-  // no top cart now
+if (!user) {
+  window.location.href = "login.html";
 }
-updateCartUI();
+
+user = user.toLowerCase().trim();
+
+document.getElementById("welcome").innerText = "Welcome, " + user;
 
 
-// 🔥 LOAD PRODUCTS
-function loadProducts() {
+// 🔓 LOGOUT
+function logout() {
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
+}
 
-  fetch("https://fark618-1.onrender.com/products")
+
+// 🛒 LOAD CART
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function loadCart() {
+
+  let html = "";
+  let total = 0;
+
+  if (cart.length === 0) {
+    document.getElementById("cartItems").innerHTML = "<p>Cart is empty</p>";
+    document.getElementById("total").innerText = "";
+    return;
+  }
+
+  cart.forEach((item, index) => {
+
+    total += Number(item.price);
+
+    html += `
+      <div class="card">
+        <h3>${item.name}</h3>
+        <p>₹${item.price}</p>
+        <p>Size: <b>${item.size}</b></p>
+
+        <button class="remove" onclick="removeItem(${index})">Remove</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("cartItems").innerHTML = html;
+  document.getElementById("total").innerText = "Total: ₹" + total;
+}
+
+
+// ❌ REMOVE CART ITEM
+function removeItem(index) {
+  cart.splice(index, 1);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  loadCart();
+}
+
+
+// 🛒 PLACE ORDER
+function placeOrder() {
+
+  if (cart.length === 0) {
+    alert("Cart empty ❌");
+    return;
+  }
+
+  let total = 0;
+  cart.forEach(i => total += Number(i.price));
+
+  fetch(BASE_URL + "/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user,
+      products: cart,
+      total
+    })
+  })
+  .then(res => {
+    if (res.ok) {
+      alert("Order placed ✅");
+      localStorage.removeItem("cart");
+      loadCart();
+      loadOrders();
+    }
+  });
+}
+
+
+// 📦 LOAD ORDERS
+function loadOrders() {
+
+  fetch(BASE_URL + "/orders")
   .then(res => res.json())
   .then(data => {
 
-    productsData = data;
     let html = "";
 
-    data.forEach(p => {
+    let myOrders = data.filter(o =>
+      o.user && o.user.toLowerCase().trim() === user
+    );
 
-      let sizeOptions = "";
+    if (myOrders.length === 0) {
+      html = "<p>No orders yet</p>";
+    }
 
-      if (p.sizes && p.sizes.length > 0) {
-        sizeOptions = `<option value="">Select Size</option>`;
-        p.sizes.forEach(s => {
-          sizeOptions += `<option>${s}</option>`;
-        });
-      }
+    myOrders.reverse().forEach(o => {
+
+      let items = "";
+
+      o.products.forEach(i => {
+        items += `
+          <li>
+            ${i.name} - ₹${i.price}
+            <br>Size: <b>${i.size}</b>
+          </li>
+        `;
+      });
 
       html += `
         <div class="card">
-          <img src="${p.image || 'https://via.placeholder.com/200'}">
-          <h3>${p.name}</h3>
-          <p>₹${p.price}</p>
-          <p>Stock: ${p.stock}</p>
+          <p><b>Order ID:</b> ${o._id}</p>
+          <p>Total: ₹${o.total}</p>
+          <p>Status: ${o.status}</p>
 
-          <select id="size-${p._id}">
-            ${sizeOptions}
-          </select>
+          <ul>${items}</ul>
 
-          <button onclick="addToCart('${p._id}')">Add to Cart</button>
-
-          <button class="fav-btn" onclick="addToFav('${p._id}')">
-            ❤️ Favorite
-          </button>
+          <button onclick="track('${o._id}')">Track</button>
         </div>
       `;
     });
 
-    document.getElementById("products").innerHTML = html;
+    document.getElementById("orders").innerHTML = html;
+
   });
 }
 
 
-// 🔥 ADD TO CART (NO ALERT)
-function addToCart(id) {
-
-  if (!user) {
-    alert("Login first ❌");
-    return;
-  }
-
-  const product = productsData.find(p => p._id == id);
-  const size = document.getElementById("size-" + id).value;
-
-  if (!size) {
-    alert("Select size ❗");
-    return;
-  }
-
-  cart.push({
-    id: product._id,
-    name: product.name,
-    price: product.price,
-    size: size
-  });
-
-  localStorage.setItem("cart", JSON.stringify(cart));
-
-  // 🔥 NO ALERT
+// 🔍 TRACK
+function track(id) {
+  alert("Tracking Order: " + id);
 }
 
 
-// ❤️ FAVORITE
-function addToFav(id) {
+// ❤️ FAVORITES
+let fav = JSON.parse(localStorage.getItem("fav")) || [];
 
-  if (!user) {
-    alert("Login first ❌");
-    return;
+function loadFav() {
+
+  let html = "";
+
+  if (fav.length === 0) {
+    html = "<p>No favorites</p>";
   }
 
-  const product = productsData.find(p => p._id == id);
+  fav.forEach((item, i) => {
+    html += `
+      <div class="card">
+        <h3>${item.name}</h3>
+        <p>₹${item.price}</p>
 
-  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+        <button onclick="removeFav(${i})">Remove</button>
+      </div>
+    `;
+  });
 
-  fav.push(product);
+  document.getElementById("favorites").innerHTML = html;
+}
 
+
+// ❌ REMOVE FAVORITE
+function removeFav(i) {
+  fav.splice(i, 1);
   localStorage.setItem("fav", JSON.stringify(fav));
+  loadFav();
 }
 
 
-// NAVIGATION
-function goToCart() {
-  if (!user) return alert("Login first ❌");
-  window.location.href = "cart.html";
-}
-
-function goToAccount() {
-  if (!user) return alert("Login first ❌");
-  window.location.href = "account.html";
-}
-
-function goHome() {
-  window.location.href = "index.html";
-}
-
-
-// INIT
-loadProducts();
+// 🚀 INIT
+loadCart();
+loadOrders();
+loadFav();
 
 </script>
 
