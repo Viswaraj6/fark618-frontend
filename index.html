@@ -39,7 +39,7 @@
       border: none;
     }
 
-    /* 🛍 PRODUCTS */
+    /* PRODUCTS */
     .products {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -83,7 +83,7 @@
       font-weight: bold;
     }
 
-    /* 🔻 Bottom Nav */
+    /* 🔻 Bottom Nav only */
     #bottomNav {
       position: fixed;
       bottom: 0;
@@ -110,7 +110,7 @@
 
 <h1>FARK 618 🛍️</h1>
 
-<!-- 🎥 VIDEO -->
+<!-- VIDEO -->
 <div class="video-box">
   <iframe 
     src="https://www.youtube.com/embed/y1zCKcv2AiY?autoplay=1&mute=1&playsinline=1"
@@ -137,6 +137,11 @@ const user = localStorage.getItem("user");
 document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
 
+function updateCartUI() {
+  // no top cart now
+}
+updateCartUI();
+
 
 // 🔥 LOAD PRODUCTS
 function loadProducts() {
@@ -146,39 +151,17 @@ function loadProducts() {
   .then(data => {
 
     productsData = data;
-
     let html = "";
 
     data.forEach(p => {
 
-      let sizeOptions = `<option value="">Select Size</option>`;
+      let sizeOptions = "";
 
-      // ✅ DB sizes (new products)
       if (p.sizes && p.sizes.length > 0) {
+        sizeOptions = `<option value="">Select Size</option>`;
         p.sizes.forEach(s => {
           sizeOptions += `<option>${s}</option>`;
         });
-      }
-
-      // 🔥 fallback (old products)
-      else if (p.type === "shirt") {
-        sizeOptions += `
-          <option>S</option>
-          <option>M</option>
-          <option>L</option>
-          <option>XL</option>
-          <option>XXL</option>
-        `;
-      }
-      else if (p.type === "pant") {
-        sizeOptions += `
-          <option>30</option>
-          <option>32</option>
-          <option>34</option>
-          <option>36</option>
-          <option>38</option>
-          <option>40</option>
-        `;
       }
 
       html += `
@@ -202,7 +185,6 @@ function loadProducts() {
     });
 
     document.getElementById("products").innerHTML = html;
-
   });
 }
 
@@ -231,6 +213,8 @@ function addToCart(id) {
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
+
+  // 🔥 NO ALERT
 }
 
 
@@ -268,7 +252,7 @@ function goHome() {
 }
 
 
-// 🚀 INIT
+// INIT
 loadProducts();
 
 </script>
