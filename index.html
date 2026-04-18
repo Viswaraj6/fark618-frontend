@@ -1,69 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Account</title>
+  <title>FARK 618</title>
 
   <style>
     body {
       font-family: Arial;
-      padding: 20px;
       background: #f5f5f5;
-      padding-bottom: 80px;
+      padding: 15px;
+      padding-bottom: 100px;
     }
 
-    h1 {
-      text-align: center;
-    }
+    h1 { text-align: center; }
 
-    /* 🔝 TOP RIGHT */
-    .topbar {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-
-    .topbar button {
-      margin-left: 5px;
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
     }
 
     .card {
       background: white;
       padding: 15px;
-      margin: 10px 0;
       border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    }
-
-    .section {
-      margin-top: 30px;
+      text-align: center;
     }
 
     button {
-      padding: 8px 12px;
-      border: none;
+      padding: 8px;
+      margin-top: 8px;
       background: black;
       color: white;
+      border: none;
       cursor: pointer;
-      border-radius: 5px;
     }
 
-    .fav {
-      background: orange;
-      color: black;
-      font-weight: bold;
-    }
-
-    ul {
-      padding-left: 20px;
-    }
-
-    .msg {
-      text-align: center;
-      margin-top: 30px;
-      color: #777;
-    }
-
-    /* 🔻 BOTTOM NAV */
     #bottomNav {
       position: fixed;
       bottom: 0;
@@ -72,182 +43,79 @@
       display: flex;
       justify-content: space-around;
       padding: 10px 0;
-      border-top: 2px solid #ddd;
-    }
-
-    #bottomNav div {
-      text-align: center;
-      font-size: 14px;
-      cursor: pointer;
+      border-top: 1px solid #ccc;
     }
   </style>
 </head>
 
 <body>
 
-<!-- 🔝 TOP RIGHT -->
-<div class="topbar">
-  🛒 <span id="cartCount">0</span>
-  <button onclick="goToCart()">Cart</button>
-  <button onclick="logout()">Logout</button>
-</div>
+<h1>FARK 618 🛍️</h1>
 
-<h1>👤 My Account</h1>
-<h3 id="welcome"></h3>
+<div id="products" class="products"></div>
 
-<!-- 📦 ORDERS -->
-<div class="section">
-  <h2>📦 My Orders</h2>
-  <div id="orders"></div>
-</div>
-
-<!-- ❤️ FAVORITES -->
-<div class="section">
-  <h2>❤️ Favorite Items</h2>
-  <div id="favorites"></div>
-</div>
-
-<!-- 🛒 CART -->
-<div class="section">
-  <h2>🛒 Cart Items</h2>
-  <div id="cartItems"></div>
-</div>
-
-<!-- 🔻 BOTTOM NAV -->
 <div id="bottomNav">
   <div onclick="goHome()">🏠<br>Home</div>
   <div onclick="goAccount()">👤<br>Account</div>
-  <div onclick="goToCart()">🛒<br>Cart</div>
+  <div onclick="goCart()">🛒<br>Cart</div>
 </div>
 
 <script>
 
-const BASE_URL = "https://fark618-1.onrender.com";
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let productsData = [];
 
-let user = localStorage.getItem("user");
+// LOAD PRODUCTS
+function loadProducts() {
+  fetch("https://fark618-1.onrender.com/products")
+  .then(res => res.json())
+  .then(data => {
 
-// 🔐 LOGIN CHECK
-if (!user) {
-  document.getElementById("welcome").innerText = "Please login";
-} else {
-  user = user.toLowerCase().trim();
-  document.getElementById("welcome").innerText = "Welcome, " + user;
-  loadOrders();
-  loadFavorites();
-  loadCart();
-}
+    productsData = data;
+    let html = "";
 
-// 🛒 CART COUNT
-function updateCartCount() {
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  document.getElementById("cartCount").innerText = cart.length;
-}
-updateCartCount();
-
-
-// 📦 ORDERS
-function loadOrders() {
-  fetch(BASE_URL + "/orders")
-    .then(res => res.json())
-    .then(data => {
-
-      let html = "";
-
-      let myOrders = data.filter(o =>
-        o.user && o.user.toLowerCase().trim() === user
-      );
-
-      if (myOrders.length === 0) {
-        html = "<p>No orders yet</p>";
-      } else {
-        myOrders.reverse().forEach(o => {
-
-          let itemsHtml = "";
-
-          o.products.forEach(item => {
-            itemsHtml += `
-              <li>${item.name} - ₹${item.price}</li>
-            `;
-          });
-
-          html += `
-            <div class="card">
-              <p><b>Order ID:</b> ${o._id}</p>
-              <p><b>Total:</b> ₹${o.total}</p>
-              <p><b>Status:</b> ${o.status}</p>
-              <ul>${itemsHtml}</ul>
-              <button onclick="track('${o._id}')">Track</button>
-            </div>
-          `;
-        });
-      }
-
-      document.getElementById("orders").innerHTML = html;
+    data.forEach(p => {
+      html += `
+        <div class="card">
+          <h3>${p.name}</h3>
+          <p>₹${p.price}</p>
+          <button onclick="addToCart('${p._id}')">Add to Cart</button>
+        </div>
+      `;
     });
+
+    document.getElementById("products").innerHTML = html;
+  });
 }
 
-// 🔍 TRACK
-function track(id) {
-  window.location.href = "track.html?id=" + id;
-}
+// ADD TO CART (FIXED FORMAT)
+function addToCart(id) {
+  const product = productsData.find(p => p._id == id);
 
-
-// ❤️ FAVORITES
-function loadFavorites() {
-  let fav = JSON.parse(localStorage.getItem("fav")) || [];
-  let html = fav.length === 0 ? "<p>No favorites</p>" : "";
-
-  fav.forEach((f, i) => {
-    html += `
-      <div class="card">
-        <h3>${f.name}</h3>
-        <p>₹${f.price}</p>
-      </div>
-    `;
+  cart.push({
+    name: product.name,
+    price: product.price,
+    size: "Free Size"
   });
 
-  document.getElementById("favorites").innerHTML = html;
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("Added to cart");
 }
 
-
-// 🛒 CART ITEMS
-function loadCart() {
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  let html = cart.length === 0 ? "<p>No cart items</p>" : "";
-
-  cart.forEach((c, i) => {
-    html += `
-      <div class="card">
-        <h3>${c.name}</h3>
-        <p>₹${c.price}</p>
-        <p>Size: ${c.size}</p>
-      </div>
-    `;
-  });
-
-  document.getElementById("cartItems").innerHTML = html;
-}
-
-
-// 🔐 LOGOUT
-function logout() {
-  localStorage.removeItem("user");
-  location.reload();
-}
-
-
-// 🔻 NAVIGATION
+// NAVIGATION FIX
 function goHome() {
-  window.location.href = "index.html";
+  window.location.href = "/";
 }
 
 function goAccount() {
   window.location.href = "account.html";
 }
 
-function goToCart() {
+function goCart() {
   window.location.href = "cart.html";
 }
+
+loadProducts();
 
 </script>
 
