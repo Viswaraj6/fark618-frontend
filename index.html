@@ -12,18 +12,7 @@
       padding-bottom: 90px;
     }
 
-    h1 {
-      text-align: center;
-      color: #222;
-      margin-bottom: 20px;
-    }
-
-    #welcome {
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: #444;
-    }
+    h1 { text-align: center; }
 
     .products {
       display: grid;
@@ -35,8 +24,8 @@
       background: #fff;
       padding: 15px;
       border-radius: 15px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
       text-align: center;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.1);
     }
 
     .card img {
@@ -46,10 +35,6 @@
       border-radius: 10px;
       cursor: pointer;
     }
-
-    .title { font-weight: bold; }
-    .price { color: green; }
-    .stock { font-size: 13px; }
 
     button {
       width: 100%;
@@ -97,16 +82,18 @@ let user = localStorage.getItem("user");
 document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
 
+
 // 🔥 LOAD PRODUCTS
-function loadProducts() {
-  fetch("https://fark618-backend.onrender.com/products")
-  .then(res => res.json())
-  .then(data => {
+async function loadProducts() {
+  try {
+    const res = await fetch("https://fark618-backend.onrender.com/products");
+    const data = await res.json();
 
     productsData = data;
+
     let html = "";
 
-    data.forEach(p => {
+    data.forEach((p, index) => {
 
       let sizes = p.sizes || [];
       let options = `<option value="">Select Size</option>`;
@@ -118,21 +105,21 @@ function loadProducts() {
       html += `
         <div class="card">
           <img src="${p.image || 'https://via.placeholder.com/200'}"
-               onclick="openProduct('${p._id}')">
+               onclick="openProduct(${index})">
 
-          <div class="title">${p.name}</div>
-          <div class="price">₹${p.price}</div>
-          <div class="stock">Stock: ${p.stock}</div>
+          <div><b>${p.name}</b></div>
+          <div style="color:green">₹${p.price}</div>
+          <div>Stock: ${p.stock}</div>
 
-          <select id="size-${p._id}">
+          <select id="size-${index}">
             ${options}
           </select>
 
-          <button class="cart-btn" onclick="addToCart('${p._id}')">
+          <button class="cart-btn" onclick="addToCart(${index})">
             Add to Cart
           </button>
 
-          <button class="fav-btn" onclick="addToFav('${p._id}')">
+          <button class="fav-btn" onclick="addToFav(${index})">
             ❤️ Favorite
           </button>
         </div>
@@ -140,26 +127,39 @@ function loadProducts() {
     });
 
     document.getElementById("products").innerHTML = html;
-  });
+
+  } catch (err) {
+    alert("Server loading slow ⚠️ Try again");
+  }
 }
 
-// 🔥 OPEN PRODUCT PAGE
-function openProduct(id){
-  const product = productsData.find(p => p._id == id);
+
+// 🔥 OPEN PRODUCT (SAFE VERSION)
+function openProduct(index){
+
+  const product = productsData[index];
+
+  if(!product){
+    alert("Product not loaded ❌");
+    return;
+  }
+
   localStorage.setItem("selectedProduct", JSON.stringify(product));
+
   window.location.href = "product.html";
 }
 
+
 // 🔥 ADD TO CART
-function addToCart(id) {
+function addToCart(index) {
 
   if (!user) {
     alert("Login first ❌");
     return;
   }
 
-  const product = productsData.find(p => p._id == id);
-  const size = document.getElementById("size-" + id).value;
+  const product = productsData[index];
+  const size = document.getElementById("size-" + index).value;
 
   if (!size) {
     alert("Select size ❗");
@@ -174,27 +174,29 @@ function addToCart(id) {
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
+
+  alert("Added to cart ✅");
 }
 
+
 // ❤️ FAVORITE
-function addToFav(id) {
+function addToFav(index) {
 
-  if (!user) {
-    alert("Login first ❌");
-    return;
-  }
-
-  const product = productsData.find(p => p._id == id);
+  const product = productsData[index];
   let fav = JSON.parse(localStorage.getItem("fav")) || [];
 
   fav.push(product);
   localStorage.setItem("fav", JSON.stringify(fav));
+
+  alert("Added to favorite ❤️");
 }
+
 
 // NAV
 function goHome(){ location.href = "index.html"; }
 function goAccount(){ location.href = "account.html"; }
 function goCart(){ location.href = "cart.html"; }
+
 
 loadProducts();
 
