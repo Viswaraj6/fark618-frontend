@@ -154,7 +154,7 @@ async function loadProducts() {
   try {
     const res = await fetch("https://fark618-backend.onrender.com/products");
     const data = await res.json();
-
+localStorage.setItem("products", JSON.stringify(data));
     productsData = data;
 
     let html = "";
