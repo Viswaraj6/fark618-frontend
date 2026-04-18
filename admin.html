@@ -1,14 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin</title>
+<title>Admin Panel</title>
 
 <style>
-body { font-family: Arial; background:#f5f5f5; padding:20px; }
-input,select { margin:10px; padding:10px; width:250px; }
-button { padding:10px; background:black; color:white; }
-.card { background:white; padding:15px; margin:10px; border-radius:10px; }
-img { width:120px; }
+body {
+  font-family: Arial;
+  background:#f5f5f5;
+  padding:20px;
+}
+
+input, select {
+  margin:10px 0;
+  padding:10px;
+  width:250px;
+}
+
+button {
+  padding:10px;
+  background:black;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  margin:10px 0;
+  border-radius:10px;
+}
+
+img {
+  width:120px;
+  border-radius:10px;
+}
 </style>
 
 </head>
@@ -16,7 +42,8 @@ img { width:120px; }
 
 <h2>Admin Panel 🔧</h2>
 
-<input id="name" placeholder="Name">
+<!-- 🔥 ADD PRODUCT -->
+<input id="name" placeholder="Product Name">
 <input id="price" placeholder="Price">
 <input id="stock" placeholder="Stock">
 
@@ -31,7 +58,14 @@ img { width:120px; }
 <!-- 🔥 IMAGE -->
 <input type="file" id="imageFile">
 
-<button onclick="addProduct()">Add</button>
+<button onclick="addProduct()">Add Product</button>
+
+
+<!-- 📥 EXCEL IMPORT -->
+<h3>Import Excel 📥</h3>
+<input type="file" id="excelFile">
+<button onclick="importExcel()">Upload Excel</button>
+
 
 <h2>Products</h2>
 <div id="products"></div>
@@ -39,120 +73,217 @@ img { width:120px; }
 <h2>Orders</h2>
 <div id="orders"></div>
 
+
+<!-- XLSX -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <script>
 
 const BASE_URL = "https://fark618-1.onrender.com";
 
+
+// 🔥 ADD PRODUCT
 async function addProduct(){
 
-const name = nameInput = document.getElementById("name").value;
-const price = document.getElementById("price").value;
-const stock = document.getElementById("stock").value;
-const type = document.getElementById("type").value;
+  const name = document.getElementById("name").value;
+  const price = document.getElementById("price").value;
+  const stock = document.getElementById("stock").value;
+  const type = document.getElementById("type").value;
 
-const sizes = document.getElementById("sizes").value.split(",");
+  // 🔥 SIZE CLEAN
+  const sizes = document
+    .getElementById("sizes")
+    .value
+    .split(",")
+    .map(s => s.trim());
 
-const file = document.getElementById("imageFile").files[0];
+  const file = document.getElementById("imageFile").files[0];
 
-let image = "";
+  let image = "";
 
-if(file){
-const reader = new FileReader();
-reader.onload = async function(){
-image = reader.result;
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(){
+      image = reader.result;
+      sendProduct(name,price,stock,type,sizes,image);
+    }
+    reader.readAsDataURL(file);
+  } else {
+    sendProduct(name,price,stock,type,sizes,"");
+  }
 
-await sendProduct(name,price,stock,type,sizes,image);
 }
-reader.readAsDataURL(file);
-}else{
-sendProduct(name,price,stock,type,sizes,"");
-}
 
-}
 
+// 🔥 SEND PRODUCT (ADMIN HEADER FIX)
 function sendProduct(name,price,stock,type,sizes,image){
 
-fetch(BASE_URL+"/add-product",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({name,price,stock,type,sizes,image})
-})
-.then(()=>{ alert("Added ✅"); loadProducts(); })
+  fetch(BASE_URL+"/add-product",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "admin":"fark618"
+    },
+    body:JSON.stringify({
+      name,
+      price,
+      stock,
+      type,
+      sizes,
+      image
+    })
+  })
+  .then(res => {
+    if(!res.ok){
+      alert("Admin auth failed ❌");
+      return;
+    }
+    alert("Product Added ✅");
+    loadProducts();
+  });
 
 }
 
 
-// PRODUCTS
+// 📥 EXCEL IMPORT
+function importExcel(){
+
+  const file = document.getElementById("excelFile").files[0];
+
+  if(!file){
+    alert("Select Excel file ❗");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet);
+
+    json.forEach(item => {
+
+      let sizes = [];
+      if(item.sizes){
+        sizes = item.sizes.split(",").map(s => s.trim());
+      }
+
+      fetch(BASE_URL+"/add-product",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "admin":"fark618"
+        },
+        body:JSON.stringify({
+          name: item.name,
+          price: item.price,
+          stock: item.stock,
+          type: item.type,
+          sizes: sizes,
+          image: ""
+        })
+      });
+
+    });
+
+    alert("Excel Imported ✅");
+    loadProducts();
+
+  };
+
+  reader.readAsArrayBuffer(file);
+
+}
+
+
+// 📦 LOAD PRODUCTS
 function loadProducts(){
 
-fetch(BASE_URL+"/products")
-.then(res=>res.json())
-.then(data=>{
+  fetch(BASE_URL+"/products")
+  .then(res => res.json())
+  .then(data => {
 
-let html="";
+    let html = "";
 
-data.forEach(p=>{
+    data.forEach(p => {
 
-html+=`
-<div class="card">
-<img src="${p.image}">
-<h3>${p.name}</h3>
-<p>₹${p.price}</p>
-<p>Stock:${p.stock}</p>
-<p>Sizes:${p.sizes?.join(",")}</p>
+      html += `
+      <div class="card">
+        <img src="${p.image || ''}">
+        <h3>${p.name}</h3>
+        <p>₹${p.price}</p>
+        <p>Stock: ${p.stock}</p>
+        <p><b>Sizes:</b> ${p.sizes ? p.sizes.join(", ") : "-"}</p>
 
-<button onclick="del('${p._id}')">Delete</button>
-</div>
-`;
+        <button onclick="deleteProduct('${p._id}')">Delete</button>
+      </div>
+      `;
+    });
 
-});
+    document.getElementById("products").innerHTML = html;
 
-products.innerHTML=html;
-
-});
+  });
 
 }
 
 
-// DELETE
-function del(id){
-fetch(BASE_URL+"/products/"+id,{method:"DELETE"})
-.then(()=>loadProducts());
+// ❌ DELETE
+function deleteProduct(id){
+
+  fetch(BASE_URL+"/products/"+id,{
+    method:"DELETE",
+    headers:{
+      "admin":"fark618"
+    }
+  })
+  .then(() => loadProducts());
+
 }
 
 
-// ORDERS
+// 📦 LOAD ORDERS (SIZE SHOW)
 function loadOrders(){
 
-fetch(BASE_URL+"/orders")
-.then(res=>res.json())
-.then(data=>{
+  fetch(BASE_URL+"/orders")
+  .then(res => res.json())
+  .then(data => {
 
-let html="";
+    let html = "";
 
-data.forEach(o=>{
+    data.forEach(o => {
 
-let items="";
+      let items = "";
 
-o.products.forEach(i=>{
-items+=`<li>${i.name} - ${i.size}</li>`;
-});
+      o.products.forEach(i => {
+        items += `
+          <li>
+            ${i.name} - ₹${i.price}
+            <br>Size: <b>${i.size || "-"}</b>
+          </li>
+        `;
+      });
 
-html+=`
-<div class="card">
-<p>Total: ₹${o.total}</p>
-<ul>${items}</ul>
-</div>
-`;
+      html += `
+      <div class="card">
+        <p><b>Total:</b> ₹${o.total}</p>
+        <p><b>Status:</b> ${o.status}</p>
+        <ul>${items}</ul>
+      </div>
+      `;
+    });
 
-});
+    document.getElementById("orders").innerHTML = html;
 
-orders.innerHTML=html;
-
-});
+  });
 
 }
 
+
+// 🚀 INIT
 loadProducts();
 loadOrders();
 
