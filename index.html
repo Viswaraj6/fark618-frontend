@@ -187,7 +187,7 @@ async function loadProducts() {
     });
 
     document.getElementById("products").innerHTML = html;
-
+document.getElementById("loader").style.display = "none";
   } catch (err) {
     alert("Server loading slow ⚠️ Try again");
   }
