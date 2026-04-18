@@ -1,212 +1,160 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Panel</title>
+<title>Admin</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
-      background: #f5f5f5;
-    }
+<style>
+body { font-family: Arial; background:#f5f5f5; padding:20px; }
+input,select { margin:10px; padding:10px; width:250px; }
+button { padding:10px; background:black; color:white; }
+.card { background:white; padding:15px; margin:10px; border-radius:10px; }
+img { width:120px; }
+</style>
 
-    input, select {
-      display: block;
-      margin: 10px 0;
-      padding: 10px;
-      width: 250px;
-    }
-
-    button {
-      padding: 10px 15px;
-      background: black;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-
-    .card {
-      background: white;
-      padding: 15px;
-      margin: 10px;
-      border-radius: 10px;
-    }
-
-    img {
-      width: 120px;
-      border-radius: 10px;
-    }
-  </style>
 </head>
-
 <body>
 
-<div id="loginBox">
-  <h2>Admin Login 🔐</h2>
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
+<h2>Admin Panel 🔧</h2>
 
-<div id="adminPanel" style="display:none;">
+<input id="name" placeholder="Name">
+<input id="price" placeholder="Price">
+<input id="stock" placeholder="Stock">
 
-  <h1>Admin Panel 🔧</h1>
+<select id="type">
+<option value="shirt">Shirt</option>
+<option value="pant">Pant</option>
+</select>
 
-  <h2>Add Product</h2>
+<!-- 🔥 SIZE -->
+<input id="sizes" placeholder="Sizes (S,M,L or 30,32,34)">
 
-  <input id="name" placeholder="Product name">
-  <input id="price" placeholder="Price">
-  <input id="stock" placeholder="Stock">
+<!-- 🔥 IMAGE -->
+<input type="file" id="imageFile">
 
-  <select id="type">
-    <option value="shirt">Shirt</option>
-    <option value="pant">Pant</option>
-  </select>
+<button onclick="addProduct()">Add</button>
 
-  <input type="file" id="imageFile">
+<h2>Products</h2>
+<div id="products"></div>
 
-  <button onclick="addProduct()">Add Product</button>
-
-  <h2>All Products</h2>
-  <div id="products"></div>
-
-  <h2>Orders</h2>
-  <div id="orders"></div>
-
-</div>
+<h2>Orders</h2>
+<div id="orders"></div>
 
 <script>
 
 const BASE_URL = "https://fark618-1.onrender.com";
 
-function login() {
-  const u = user.value;
-  const p = pass.value;
+async function addProduct(){
 
-  if (u === "admin" && p === "1234") {
-    loginBox.style.display = "none";
-    adminPanel.style.display = "block";
-    loadProducts();
-    loadOrders();
-  } else {
-    alert("Wrong login ❌");
-  }
+const name = nameInput = document.getElementById("name").value;
+const price = document.getElementById("price").value;
+const stock = document.getElementById("stock").value;
+const type = document.getElementById("type").value;
+
+const sizes = document.getElementById("sizes").value.split(",");
+
+const file = document.getElementById("imageFile").files[0];
+
+let image = "";
+
+if(file){
+const reader = new FileReader();
+reader.onload = async function(){
+image = reader.result;
+
+await sendProduct(name,price,stock,type,sizes,image);
+}
+reader.readAsDataURL(file);
+}else{
+sendProduct(name,price,stock,type,sizes,"");
 }
 
-
-// ADD PRODUCT
-async function addProduct() {
-
-  const name = document.getElementById("name").value;
-  const price = document.getElementById("price").value;
-  const stock = document.getElementById("stock").value;
-  const type = document.getElementById("type").value;
-
-  const file = document.getElementById("imageFile").files[0];
-
-  let imageBase64 = "";
-
-  if (file) {
-    imageBase64 = await toBase64(file);
-  }
-
-  fetch(BASE_URL + "/add-product", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "admin": "fark618"
-    },
-    body: JSON.stringify({
-      name,
-      price,
-      stock,
-      type,
-      image: imageBase64
-    })
-  })
-  .then(() => {
-    alert("Added ✅");
-    loadProducts();
-  });
 }
 
+function sendProduct(name,price,stock,type,sizes,image){
 
-// BASE64
-function toBase64(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-  });
+fetch(BASE_URL+"/add-product",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({name,price,stock,type,sizes,image})
+})
+.then(()=>{ alert("Added ✅"); loadProducts(); })
+
 }
 
 
 // PRODUCTS
-function loadProducts() {
-  fetch(BASE_URL + "/products")
-  .then(res => res.json())
-  .then(data => {
+function loadProducts(){
 
-    let html = "";
+fetch(BASE_URL+"/products")
+.then(res=>res.json())
+.then(data=>{
 
-    data.forEach(p => {
+let html="";
 
-      let sizeText = p.type === "shirt"
-        ? "S, M, L, XL, XXL"
-        : "30, 32, 34, 36, 38, 40";
+data.forEach(p=>{
 
-      html += `
-        <div class="card">
-          <img src="${p.image}">
-          <h3>${p.name}</h3>
-          <p>₹${p.price}</p>
-          <p>Stock: ${p.stock}</p>
-          <p><b>Sizes:</b> ${sizeText}</p>
-        </div>
-      `;
-    });
+html+=`
+<div class="card">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<p>₹${p.price}</p>
+<p>Stock:${p.stock}</p>
+<p>Sizes:${p.sizes?.join(",")}</p>
 
-    products.innerHTML = html;
-  });
+<button onclick="del('${p._id}')">Delete</button>
+</div>
+`;
+
+});
+
+products.innerHTML=html;
+
+});
+
 }
 
 
-// 🔥 ORDERS WITH SIZE
-function loadOrders() {
-  fetch(BASE_URL + "/orders")
-  .then(res => res.json())
-  .then(data => {
-
-    let html = "";
-
-    data.forEach(o => {
-
-      let itemsHtml = "";
-
-      o.products.forEach(item => {
-        itemsHtml += `
-          <li>
-            ${item.name} - ₹${item.price}
-            <br>Size: <b>${item.size || "-"}</b>
-          </li>
-        `;
-      });
-
-      html += `
-        <div class="card">
-          <p><b>Order:</b> ${o._id}</p>
-          <p><b>Total:</b> ₹${o.total}</p>
-          <p><b>Status:</b> ${o.status}</p>
-
-          <ul>${itemsHtml}</ul>
-        </div>
-      `;
-    });
-
-    orders.innerHTML = html;
-  });
+// DELETE
+function del(id){
+fetch(BASE_URL+"/products/"+id,{method:"DELETE"})
+.then(()=>loadProducts());
 }
+
+
+// ORDERS
+function loadOrders(){
+
+fetch(BASE_URL+"/orders")
+.then(res=>res.json())
+.then(data=>{
+
+let html="";
+
+data.forEach(o=>{
+
+let items="";
+
+o.products.forEach(i=>{
+items+=`<li>${i.name} - ${i.size}</li>`;
+});
+
+html+=`
+<div class="card">
+<p>Total: ₹${o.total}</p>
+<ul>${items}</ul>
+</div>
+`;
+
+});
+
+orders.innerHTML=html;
+
+});
+
+}
+
+loadProducts();
+loadOrders();
 
 </script>
 
