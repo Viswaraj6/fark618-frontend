@@ -73,6 +73,7 @@ function loadCart() {
       <div class="item">
         <h3>${item.name}</h3>
         <p>₹${item.price}</p>
+        <p><b>Size:</b> ${item.size || "-"}</p> <!-- ✅ FIX -->
         <button onclick="removeItem(${index})">Remove</button>
       </div>
     `;
@@ -88,7 +89,8 @@ function removeItem(index) {
   loadCart();
 }
 
-// 🔥 FIXED ORDER FUNCTION
+
+// 🛒 PLACE ORDER (SIZE INCLUDED)
 function placeOrder() {
 
   if (cart.length === 0) {
@@ -108,7 +110,7 @@ function placeOrder() {
     },
     body: JSON.stringify({
       user: user,
-      products: cart,
+      products: cart, // 🔥 size also included
       total: total,
       status: "Pending"
     })
