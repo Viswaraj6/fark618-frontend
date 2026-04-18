@@ -8,236 +8,61 @@
       font-family: Arial;
       padding: 20px;
       background: #f5f5f5;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    .topbar {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+      padding-bottom: 80px;
     }
 
     .card {
       background: white;
-      padding: 15px;
+      padding: 10px;
       margin: 10px 0;
-      border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
     }
 
-    .section {
-      margin-top: 30px;
-    }
-
-    button {
-      padding: 8px 12px;
-      border: none;
-      background: black;
-      color: white;
-      cursor: pointer;
-      margin-top: 5px;
-      border-radius: 5px;
-    }
-
-    .fav {
-      background: orange;
-      color: black;
-      font-weight: bold;
-    }
-
-    ul {
-      padding-left: 20px;
-    }
-
-    .msg {
-      text-align: center;
-      margin-top: 30px;
-      color: #777;
+    #bottomNav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      border-top: 1px solid #ccc;
     }
   </style>
 </head>
 
 <body>
 
-<!-- 🔝 LOGIN / LOGOUT -->
-<div class="topbar">
-  <button id="loginBtn" onclick="goLogin()">Login</button>
-  <button id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
-</div>
-
 <h1>👤 My Account</h1>
-<h3 id="welcome"></h3>
 
-<!-- 📦 ORDERS -->
-<div class="section">
-  <h2>📦 My Orders</h2>
-  <div id="orders"></div>
-</div>
+<h2>🛒 Cart Items</h2>
+<div id="cartItems"></div>
 
-<!-- ❤️ FAVORITES -->
-<div class="section">
-  <h2>❤️ Favorite Items</h2>
-  <div id="favorites"></div>
-</div>
-
-<!-- 🛒 CART -->
-<div class="section">
-  <h2>🛒 Cart Items</h2>
-  <div id="cartItems"></div>
+<div id="bottomNav">
+  <div onclick="goHome()">🏠<br>Home</div>
+  <div onclick="goAccount()">👤<br>Account</div>
+  <div onclick="goCart()">🛒<br>Cart</div>
 </div>
 
 <script>
 
-const BASE_URL = "https://fark618-1.onrender.com";
-
-// 🔑 USER
-let user = localStorage.getItem("user");
-
-// ❌ NOT LOGIN
-if (!user) {
-
-  document.getElementById("welcome").innerText = "Please login to view your account";
-
-  document.getElementById("orders").innerHTML = "<p class='msg'>Login pannina aprm orders kanum</p>";
-  document.getElementById("favorites").innerHTML = "<p class='msg'>Login pannina aprm favorites kanum</p>";
-  document.getElementById("cartItems").innerHTML = "<p class='msg'>Login pannina aprm cart kanum</p>";
-
-  document.getElementById("loginBtn").style.display = "inline-block";
-  document.getElementById("logoutBtn").style.display = "none";
-
-} else {
-
-  user = user.toLowerCase().trim();
-
-  document.getElementById("welcome").innerText = "Welcome, " + user;
-
-  document.getElementById("loginBtn").style.display = "none";
-  document.getElementById("logoutBtn").style.display = "inline-block";
-
-  loadOrders();
-  loadFavorites();
-  loadCart();
-}
-
-
-// 📦 LOAD ORDERS
-function loadOrders() {
-
-  fetch(BASE_URL + "/orders")
-    .then(res => res.json())
-    .then(data => {
-
-      let html = "";
-
-      let myOrders = data.filter(o => 
-        o.user && o.user.toLowerCase().trim() === user
-      );
-
-      if (myOrders.length === 0) {
-        html = "<p>No orders yet</p>";
-      } else {
-
-        myOrders.reverse().forEach(o => {
-
-          let itemsHtml = "";
-
-          o.products.forEach(item => {
-            itemsHtml += `
-              <li>
-                ${item.name} - ₹${item.price}
-                <br>Size: <b>${item.size || "-"}</b>
-              </li>
-            `;
-          });
-
-          html += `
-            <div class="card">
-              <p><b>Order ID:</b> ${o._id}</p>
-              <p><b>Total:</b> ₹${o.total}</p>
-              <p><b>Status:</b> ${o.status}</p>
-              <p><b>Date:</b> ${new Date(o.date).toLocaleString()}</p>
-
-              <ul>${itemsHtml}</ul>
-
-              <button onclick="track('${o._id}')">Track Order</button>
-            </div>
-          `;
-        });
-
-      }
-
-      document.getElementById("orders").innerHTML = html;
-
-    })
-    .catch(() => {
-      document.getElementById("orders").innerHTML = "<p>Error loading orders</p>";
-    });
-}
-
-
-// 🔍 TRACK
-function track(id) {
-  window.location.href = "track.html?id=" + id;
-}
-
-
-// ❤️ FAVORITES
-let favorites = JSON.parse(localStorage.getItem("fav")) || [];
-
-function loadFavorites() {
-
-  let html = "";
-
-  if (favorites.length === 0) {
-    html = "<p>No favorite items</p>";
-  } else {
-
-    favorites.forEach((item, index) => {
-      html += `
-        <div class="card">
-          <h3>${item.name}</h3>
-          <p>₹${item.price}</p>
-          <button class="fav" onclick="removeFav(${index})">Remove</button>
-        </div>
-      `;
-    });
-
-  }
-
-  document.getElementById("favorites").innerHTML = html;
-}
-
-
-// ❌ REMOVE FAVORITE
-function removeFav(i) {
-  favorites.splice(i, 1);
-  localStorage.setItem("fav", JSON.stringify(favorites));
-  loadFavorites();
-}
-
-
-// 🛒 CART
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
+// LOAD CART (FIXED)
 function loadCart() {
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
   let html = "";
 
   if (cart.length === 0) {
-    html = "<p>No items in cart</p>";
+    html = "<p>No cart items</p>";
   } else {
 
-    cart.forEach((item, index) => {
+    cart.forEach(c => {
       html += `
         <div class="card">
-          <h3>${item.name}</h3>
-          <p>₹${item.price}</p>
-          <p>Qty: ${item.qty || 1}</p>
-
-          <button onclick="removeCart(${index})">Remove</button>
+          <h3>${c.name}</h3>
+          <p>₹${c.price}</p>
+          <p>${c.size}</p>
         </div>
       `;
     });
@@ -248,23 +73,20 @@ function loadCart() {
 }
 
 
-// ❌ REMOVE CART
-function removeCart(i) {
-  cart.splice(i, 1);
-  localStorage.setItem("cart", JSON.stringify(cart));
-  loadCart();
+// NAVIGATION FIX
+function goHome() {
+  window.location.href = "/";
 }
 
-
-// 🔐 LOGIN / LOGOUT
-function goLogin() {
-  window.location.href = "login.html";
+function goAccount() {
+  window.location.href = "account.html";
 }
 
-function logout() {
-  localStorage.removeItem("user");
-  location.reload();
+function goCart() {
+  window.location.href = "cart.html";
 }
+
+loadCart();
 
 </script>
 
