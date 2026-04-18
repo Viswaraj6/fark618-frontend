@@ -18,8 +18,7 @@
 
 <script>
 
-const API = "https://fark618-1.onrender.com";
-
+const API = "https://fark618-backend.onrender.com";
 function payNow() {
 
   let name = document.getElementById("name").value;
@@ -45,14 +44,14 @@ function payNow() {
   .then(order => {
 
     var options = {
-      key: "rzp_test_xxxxx", // 👈 your key id
+      key: "rzp_test_SerYxhYWMF3IMm" // 👈 your key id
       amount: order.amount,
       currency: "INR",
       name: "FARK 618",
       order_id: order.id,
 
       handler: function (response) {
-
+console.log("Pay clicked");
         // 🔒 VERIFY PAYMENT
         fetch(API + "/verify-payment", {
           method: "POST",
