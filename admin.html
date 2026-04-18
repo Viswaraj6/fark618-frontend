@@ -35,12 +35,19 @@ img {
   width:120px;
   border-radius:10px;
 }
+
+.logout {
+  float:right;
+  background:red;
+}
 </style>
 
 </head>
 <body>
 
-<h2>Admin Panel 🔧</h2>
+<h2>Admin Panel 🔧 
+  <button class="logout" onclick="logout()">Logout</button>
+</h2>
 
 <!-- PRODUCT FORM -->
 <input id="name" placeholder="Product Name">
@@ -76,6 +83,17 @@ img {
 <script>
 
 const BASE_URL = "https://fark618-1.onrender.com";
+
+/* 🔐 CHECK LOGIN */
+if(!localStorage.getItem("adminToken")){
+  window.location.href = "admin-login.html";
+}
+
+/* 🔓 LOGOUT */
+function logout(){
+  localStorage.removeItem("adminToken");
+  window.location.href = "admin-login.html";
+}
 
 /* ================= SIZE ================= */
 document.getElementById("type").addEventListener("change", loadSizeOptions);
@@ -125,7 +143,6 @@ async function addProduct(){
 
   if(file){
 
-    // 🔥 IMAGE COMPRESS START
     const img = new Image();
     const reader = new FileReader();
 
@@ -137,7 +154,7 @@ async function addProduct(){
 
       const canvas = document.createElement("canvas");
 
-      const maxWidth = 600; // size reduce
+      const maxWidth = 600;
       const scale = maxWidth / img.width;
 
       canvas.width = maxWidth;
@@ -146,7 +163,6 @@ async function addProduct(){
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // 🔥 convert to small JPEG
       const compressed = canvas.toDataURL("image/jpeg", 0.7);
 
       sendProduct(name,price,stock,type,sizes,compressed);
@@ -158,6 +174,29 @@ async function addProduct(){
     sendProduct(name,price,stock,type,sizes,"");
   }
 }
+
+async function sendProduct(name,price,stock,type,sizes,image){
+
+  const res = await fetch(BASE_URL+"/add-product",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization": localStorage.getItem("adminToken")
+    },
+    body:JSON.stringify({
+      name, price, stock, type, sizes, image
+    })
+  });
+
+  if(!res.ok){
+    alert("Unauthorized ❌");
+    return;
+  }
+
+  alert("Product Added ✅");
+  loadProducts();
+}
+
 /* ================= EXCEL ================= */
 function importExcel(){
 
@@ -188,7 +227,7 @@ function importExcel(){
         method:"POST",
         headers:{
           "Content-Type":"application/json",
-          "admin":"fark618"
+          "Authorization": localStorage.getItem("adminToken")
         },
         body:JSON.stringify({
           name: item.name,
@@ -241,7 +280,9 @@ function deleteProduct(id){
 
   fetch(BASE_URL+"/products/"+id,{
     method:"DELETE",
-    headers:{ "admin":"fark618" }
+    headers:{
+      "Authorization": localStorage.getItem("adminToken")
+    }
   })
   .then(() => loadProducts());
 }
@@ -296,7 +337,7 @@ function updateStatus(id, status){
     method:"PUT",
     headers:{
       "Content-Type":"application/json",
-      "admin":"fark618"
+      "Authorization": localStorage.getItem("adminToken")
     },
     body: JSON.stringify({ status })
   })
