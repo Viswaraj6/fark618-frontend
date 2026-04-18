@@ -1,39 +1,127 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Checkout</title>
+  <title>Checkout - FARK 618</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- 💳 Razorpay -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #eef2f7, #dfe9f3);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      animation: fadeIn 0.5s ease;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    .total {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+      color: green;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(45deg, #ff9800, #ffcc00);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
 </head>
 
 <body>
 
-<h1>Checkout</h1>
+<div class="container">
 
-<input id="name" placeholder="Name"><br><br>
-<input id="phone" placeholder="Phone"><br><br>
-<textarea id="address" placeholder="Address"></textarea><br><br>
+  <h1>🛍 Checkout</h1>
 
-<button onclick="payNow()">Pay Now</button>
+  <input id="name" placeholder="Full Name">
+  <input id="phone" placeholder="Phone Number">
+  <textarea id="address" placeholder="Delivery Address"></textarea>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <div class="total" id="totalAmount">Total: ₹0</div>
+
+  <button onclick="payNow()">Pay Now 💳</button>
+
+</div>
 
 <script>
 
 const API = "https://fark618-backend.onrender.com";
+
+// 🧮 Calculate total on load
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let total = 0;
+
+cart.forEach(i => total += i.price * (i.qty || 1));
+document.getElementById("totalAmount").innerText = "Total: ₹" + total;
+
+
+// 💳 PAYMENT
 function payNow() {
+
+  console.log("Pay clicked");
 
   let name = document.getElementById("name").value;
   let phone = document.getElementById("phone").value;
   let address = document.getElementById("address").value;
-
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
   if (!name || !phone || !address) {
     alert("Fill all fields ❗");
     return;
   }
 
-  let total = 0;
-  cart.forEach(i => total += i.price * (i.qty || 1));
+  if (total === 0) {
+    alert("Cart empty ❌");
+    return;
+  }
 
   fetch(API + "/create-order", {
     method: "POST",
@@ -43,16 +131,22 @@ function payNow() {
   .then(res => res.json())
   .then(order => {
 
+    if(!order.id){
+      alert("Order create failed ❌");
+      return;
+    }
+
     var options = {
-      key: "rzp_test_SerYxhYWMF3IMm" // 👈 your key id
+      key: "rzp_test_SerYxhYWMF3IMm",
       amount: order.amount,
       currency: "INR",
       name: "FARK 618",
+      description: "Order Payment",
       order_id: order.id,
 
       handler: function (response) {
-console.log("Pay clicked");
-        // 🔒 VERIFY PAYMENT
+
+        // ✅ VERIFY
         fetch(API + "/verify-payment", {
           method: "POST",
           headers: {"Content-Type":"application/json"},
@@ -63,7 +157,7 @@ console.log("Pay clicked");
 
           if (data.success) {
 
-            // SAVE ORDER
+            // ✅ SAVE ORDER
             fetch(API + "/order", {
               method: "POST",
               headers: {"Content-Type":"application/json"},
@@ -92,10 +186,15 @@ console.log("Pay clicked");
       }
     };
 
-    var rzp = new Razorpay(options);
+    const rzp = new Razorpay(options);
     rzp.open();
 
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Server error ❌");
   });
+
 }
 
 </script>
