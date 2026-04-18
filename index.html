@@ -254,7 +254,10 @@ function goCart() {
 
 // 🚀 INIT
 loadProducts();
-
+function openProduct(product){
+  localStorage.setItem("selectedProduct", JSON.stringify(product));
+  window.location.href = "product.html";
+}
 </script>
 
 </body>
