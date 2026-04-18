@@ -5,36 +5,101 @@
 
   <style>
     body {
-      font-family: Arial;
-      background: #f5f5f5;
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef2f7;
+      margin: 0;
       padding: 15px;
-      padding-bottom: 100px;
+      padding-bottom: 90px;
     }
 
-    h1 { text-align: center; }
+    h1 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 20px;
+    }
 
+    #welcome {
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    /* 🔷 PRODUCT GRID */
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
     }
 
+    /* 🔷 CARD */
     .card {
-      background: white;
+      background: #fff;
       padding: 15px;
-      border-radius: 10px;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      transition: 0.2s;
       text-align: center;
     }
 
-    button {
-      padding: 8px;
-      margin-top: 8px;
-      background: black;
-      color: white;
-      border: none;
-      cursor: pointer;
+    .card:hover {
+      transform: translateY(-5px);
     }
 
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .price {
+      color: #2e7d32;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .stock {
+      font-size: 13px;
+      color: #777;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .cart-btn {
+      background: #111;
+      color: white;
+    }
+
+    .fav-btn {
+      background: linear-gradient(to right, orange, gold);
+      color: black;
+    }
+
+    /* 🔻 Bottom Nav */
     #bottomNav {
       position: fixed;
       bottom: 0;
@@ -45,12 +110,20 @@
       padding: 10px 0;
       border-top: 1px solid #ccc;
     }
+
+    #bottomNav div {
+      text-align: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 
 <body>
 
 <h1>FARK 618 🛍️</h1>
+<h3 id="welcome"></h3>
 
 <div id="products" class="products"></div>
 
@@ -64,8 +137,13 @@
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let productsData = [];
+let user = localStorage.getItem("user");
 
-// LOAD PRODUCTS
+document.getElementById("welcome").innerText =
+  user ? "Welcome, " + user : "Welcome, Guest";
+
+
+// 🔥 LOAD PRODUCTS
 function loadProducts() {
   fetch("https://fark618-1.onrender.com/products")
   .then(res => res.json())
@@ -75,11 +153,36 @@ function loadProducts() {
     let html = "";
 
     data.forEach(p => {
+
+      let sizes = p.sizes && p.sizes.length > 0
+        ? p.sizes
+        : (p.type === "shirt"
+          ? ["S","M","L","XL","XXL"]
+          : ["30","32","34","36","38","40"]);
+
+      let options = `<option value="">Select Size</option>`;
+      sizes.forEach(s => {
+        options += `<option>${s}</option>`;
+      });
+
       html += `
         <div class="card">
-          <h3>${p.name}</h3>
-          <p>₹${p.price}</p>
-          <button onclick="addToCart('${p._id}')">Add to Cart</button>
+          <img src="${p.image || 'https://via.placeholder.com/200'}">
+          <div class="title">${p.name}</div>
+          <div class="price">₹${p.price}</div>
+          <div class="stock">Stock: ${p.stock}</div>
+
+          <select id="size-${p._id}">
+            ${options}
+          </select>
+
+          <button class="cart-btn" onclick="addToCart('${p._id}')">
+            Add to Cart
+          </button>
+
+          <button class="fav-btn" onclick="addToFav('${p._id}')">
+            ❤️ Favorite
+          </button>
         </div>
       `;
     });
@@ -88,33 +191,67 @@ function loadProducts() {
   });
 }
 
-// ADD TO CART (FIXED FORMAT)
+
+// 🔥 ADD TO CART (NO ALERT)
 function addToCart(id) {
+
+  if (!user) {
+    alert("Login first ❌");
+    return;
+  }
+
   const product = productsData.find(p => p._id == id);
+  const size = document.getElementById("size-" + id).value;
+
+  if (!size) {
+    alert("Select size ❗");
+    return;
+  }
 
   cart.push({
+    id: product._id,
     name: product.name,
     price: product.price,
-    size: "Free Size"
+    size: size
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
-  alert("Added to cart");
+
+  // 🔥 NO POPUP (silent add)
 }
 
-// NAVIGATION FIX
+
+// ❤️ FAVORITE
+function addToFav(id) {
+
+  if (!user) {
+    alert("Login first ❌");
+    return;
+  }
+
+  const product = productsData.find(p => p._id == id);
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+
+  fav.push(product);
+  localStorage.setItem("fav", JSON.stringify(fav));
+}
+
+
+// 🔗 NAVIGATION
 function goHome() {
-  window.location.href = "/";
+  location.href = "index.html";
 }
 
 function goAccount() {
-  window.location.href = "account.html";
+  location.href = "account.html";
 }
 
 function goCart() {
-  window.location.href = "cart.html";
+  location.href = "cart.html";
 }
 
+
+// 🚀 INIT
 loadProducts();
 
 </script>
