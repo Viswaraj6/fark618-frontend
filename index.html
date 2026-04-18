@@ -167,7 +167,8 @@ function loadProducts() {
 
       html += `
         <div class="card">
-          <img src="${p.image || 'https://via.placeholder.com/200'}">
+          <img src="${p.image || 'https://via.placeholder.com/200'}" 
+     onclick='openProduct(${JSON.stringify(p)})'>
           <div class="title">${p.name}</div>
           <div class="price">₹${p.price}</div>
           <div class="stock">Stock: ${p.stock}</div>
