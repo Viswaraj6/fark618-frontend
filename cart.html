@@ -6,35 +6,76 @@
   <style>
     body {
       font-family: Arial;
-      padding: 20px;
       background: #f5f5f5;
+      padding: 20px;
+      padding-bottom: 100px;
     }
 
     h1 {
       text-align: center;
     }
 
-    .item {
+    .card {
       background: white;
       padding: 15px;
       margin: 10px 0;
       border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info {
+      flex: 1;
+    }
+
+    .actions {
+      text-align: right;
     }
 
     button {
-      background: red;
-      color: white;
-      padding: 8px;
+      padding: 6px 10px;
+      margin: 5px;
       border: none;
-      margin-top: 10px;
       cursor: pointer;
+      border-radius: 5px;
     }
 
-    .order-btn {
+    .remove {
+      background: red;
+      color: white;
+    }
+
+    .qty {
+      width: 50px;
+      text-align: center;
+    }
+
+    .total-box {
+      background: white;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .checkout {
       background: green;
-      display: block;
-      margin: 20px auto;
+      color: white;
       padding: 10px 20px;
+      margin-top: 10px;
+    }
+
+    /* Bottom Nav */
+    #bottomNav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      border-top: 1px solid #ccc;
     }
   </style>
 </head>
@@ -43,46 +84,75 @@
 
 <h1>🛒 Your Cart</h1>
 
-<div id="cartItems"></div>
-<h2 id="total"></h2>
+<div id="cartList"></div>
 
-<button class="order-btn" onclick="placeOrder()">Place Order</button>
+<div class="total-box">
+  <h2>Total: ₹<span id="total">0</span></h2>
+  <button class="checkout" onclick="checkout()">Checkout</button>
+</div>
+
+<!-- Bottom Nav -->
+<div id="bottomNav">
+  <div onclick="goHome()">🏠<br>Home</div>
+  <div onclick="goAccount()">👤<br>Account</div>
+  <div onclick="goCart()">🛒<br>Cart</div>
+</div>
 
 <script>
 
-const BASE_URL = "https://fark618-1.onrender.com";
-
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
+// LOAD CART
 function loadCart() {
 
   let html = "";
   let total = 0;
 
   if (cart.length === 0) {
-    document.getElementById("cartItems").innerHTML = "<p>Cart is empty</p>";
-    document.getElementById("total").innerText = "";
-    return;
+    html = "<p>No items in cart</p>";
+  } else {
+
+    cart.forEach((item, index) => {
+
+      let qty = item.qty || 1;
+      let itemTotal = item.price * qty;
+      total += itemTotal;
+
+      html += `
+        <div class="card">
+          <div class="info">
+            <h3>${item.name}</h3>
+            <p>₹${item.price}</p>
+            <p>Size: ${item.size}</p>
+          </div>
+
+          <div class="actions">
+            <input type="number" min="1" value="${qty}" 
+              onchange="updateQty(${index}, this.value)" class="qty">
+
+            <br>
+
+            <button class="remove" onclick="removeItem(${index})">Remove</button>
+          </div>
+        </div>
+      `;
+    });
   }
 
-  cart.forEach((item, index) => {
-
-    total += Number(item.price || 0);
-
-    html += `
-      <div class="item">
-        <h3>${item.name}</h3>
-        <p>₹${item.price}</p>
-        <p><b>Size:</b> ${item.size || "-"}</p> <!-- ✅ FIX -->
-        <button onclick="removeItem(${index})">Remove</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("cartItems").innerHTML = html;
-  document.getElementById("total").innerText = "Total: ₹" + total;
+  document.getElementById("cartList").innerHTML = html;
+  document.getElementById("total").innerText = total;
 }
 
+
+// UPDATE QTY
+function updateQty(index, value) {
+  cart[index].qty = parseInt(value) || 1;
+  localStorage.setItem("cart", JSON.stringify(cart));
+  loadCart();
+}
+
+
+// REMOVE ITEM
 function removeItem(index) {
   cart.splice(index, 1);
   localStorage.setItem("cart", JSON.stringify(cart));
@@ -90,45 +160,34 @@ function removeItem(index) {
 }
 
 
-// 🛒 PLACE ORDER (SIZE INCLUDED)
-function placeOrder() {
+// CHECKOUT
+function checkout() {
 
   if (cart.length === 0) {
     alert("Cart is empty ❌");
     return;
   }
 
-  const user = localStorage.getItem("user") || "guest";
-
-  let total = 0;
-  cart.forEach(item => total += Number(item.price || 0));
-
-  fetch(BASE_URL + "/order", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user: user,
-      products: cart, // 🔥 size also included
-      total: total,
-      status: "Pending"
-    })
-  })
-  .then(res => {
-    if (res.ok) {
-      alert("Order placed successfully ✅");
-      localStorage.removeItem("cart");
-      window.location.href = "account.html";
-    } else {
-      alert("Order failed ❌");
-    }
-  })
-  .catch(() => {
-    alert("Server error ❌");
-  });
+  // next step page
+  window.location.href = "checkout.html";
 }
 
+
+// NAVIGATION
+function goHome() {
+  window.location.href = "/";
+}
+
+function goAccount() {
+  window.location.href = "account.html";
+}
+
+function goCart() {
+  window.location.href = "cart.html";
+}
+
+
+// INIT
 loadCart();
 
 </script>
