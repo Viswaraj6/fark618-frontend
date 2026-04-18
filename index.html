@@ -163,8 +163,9 @@ async function loadProducts() {
       html += `
         <div class="card">
 
-          <img src="${p.image || 'https://via.placeholder.com/200'}"
-               onclick="openProduct(${index})">
+          <img loading="lazy"
+     src="${p.image || 'https://via.placeholder.com/200'}"
+     onclick="openProduct(${index})">
 
           <div class="name">${p.name}</div>
           <div class="price">₹${p.price}</div>
