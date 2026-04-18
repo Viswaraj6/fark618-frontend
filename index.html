@@ -83,7 +83,7 @@
       font-weight: bold;
     }
 
-    /* 🔻 Bottom Nav only */
+    /* 🔻 Bottom Nav */
     #bottomNav {
       position: fixed;
       bottom: 0;
@@ -110,7 +110,7 @@
 
 <h1>FARK 618 🛍️</h1>
 
-<!-- VIDEO -->
+<!-- 🎥 VIDEO -->
 <div class="video-box">
   <iframe 
     src="https://www.youtube.com/embed/y1zCKcv2AiY?autoplay=1&mute=1&playsinline=1"
@@ -134,13 +134,9 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let productsData = [];
 const user = localStorage.getItem("user");
 
+// 👤 Welcome text
 document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
-
-function updateCartUI() {
-  // no top cart now
-}
-updateCartUI();
 
 
 // 🔥 LOAD PRODUCTS
@@ -155,10 +151,9 @@ function loadProducts() {
 
     data.forEach(p => {
 
-      let sizeOptions = "";
+      let sizeOptions = `<option value="">Size (Optional)</option>`;
 
       if (p.sizes && p.sizes.length > 0) {
-        sizeOptions = `<option value="">Select Size</option>`;
         p.sizes.forEach(s => {
           sizeOptions += `<option>${s}</option>`;
         });
@@ -189,42 +184,30 @@ function loadProducts() {
 }
 
 
-// 🔥 ADD TO CART (NO ALERT)
+// 🛒 ADD TO CART (NO LOGIN BLOCK)
 function addToCart(id) {
 
-  if (!user) {
-    alert("Login first ❌");
-    return;
-  }
-
   const product = productsData.find(p => p._id == id);
-  const size = document.getElementById("size-" + id).value;
+  let size = document.getElementById("size-" + id).value;
 
-  if (!size) {
-    alert("Select size ❗");
-    return;
-  }
+  if (!size) size = "Free Size";
 
   cart.push({
     id: product._id,
     name: product.name,
     price: product.price,
-    size: size
+    size: size,
+    qty: 1
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
 
-  // 🔥 NO ALERT
+  alert("Added to Cart ✅");
 }
 
 
-// ❤️ FAVORITE
+// ❤️ FAVORITE (NO LOGIN BLOCK)
 function addToFav(id) {
-
-  if (!user) {
-    alert("Login first ❌");
-    return;
-  }
 
   const product = productsData.find(p => p._id == id);
 
@@ -233,17 +216,17 @@ function addToFav(id) {
   fav.push(product);
 
   localStorage.setItem("fav", JSON.stringify(fav));
+
+  alert("Added to Favorite ❤️");
 }
 
 
-// NAVIGATION
+// 🔻 NAVIGATION (NO BLOCK)
 function goToCart() {
-  if (!user) return alert("Login first ❌");
   window.location.href = "cart.html";
 }
 
 function goToAccount() {
-  if (!user) return alert("Login first ❌");
   window.location.href = "account.html";
 }
 
@@ -252,7 +235,7 @@ function goHome() {
 }
 
 
-// INIT
+// 🚀 INIT
 loadProducts();
 
 </script>
