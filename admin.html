@@ -144,13 +144,11 @@ async function addProduct(){
   let image = "";
   let video = "";
 
-  // IMAGE
+  // 🔥 IMAGE (optional)
   if(imageFile){
     const reader = new FileReader();
     reader.onload = function(e){
       image = e.target.result;
-
-      // VIDEO AFTER IMAGE
       handleVideo();
     };
     reader.readAsDataURL(imageFile);
@@ -158,6 +156,7 @@ async function addProduct(){
     handleVideo();
   }
 
+  // 🔥 VIDEO (optional)
   function handleVideo(){
     if(videoFile){
       const reader2 = new FileReader();
@@ -171,7 +170,6 @@ async function addProduct(){
     }
   }
 }
-
 /* ================= SEND PRODUCT ================= */
 async function sendProduct(name,price,stock,type,sizes,image,video){
 
