@@ -20,6 +20,15 @@
     #welcome {
       text-align: center;
       color: gray;
+      margin-bottom: 10px;
+    }
+
+    /* 🔥 VIDEO BANNER */
+    .video-banner video {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
       margin-bottom: 15px;
     }
 
@@ -29,29 +38,26 @@
       gap: 15px;
     }
 
-   .card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  text-align: center;
-}
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
 
-.card img {
-  width: 100%;
-  height: 200px;
-  object-fit: contain;
-}
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
     .name {
       font-weight: 600;
       margin-top: 8px;
     }
-.card video {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 8px;
-}
+
     .price {
       color: green;
       font-weight: bold;
@@ -97,12 +103,6 @@
       padding: 10px;
       border-top: 1px solid #ccc;
     }
-
-    #loader {
-      text-align: center;
-      padding: 20px;
-    }
-
   </style>
 </head>
 
@@ -111,8 +111,14 @@
 <h1>FARK 618 🛍️</h1>
 <h3 id="welcome"></h3>
 
+<!-- 🔥 VIDEO BANNER -->
+<div class="video-banner">
+  <video autoplay muted loop playsinline>
+    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+  </video>
+</div>
+
 <div id="products" class="products"></div>
-<div id="loader">Loading products... ⏳</div>
 
 <div id="bottomNav">
   <div onclick="goHome()">🏠<br>Home</div>
@@ -130,151 +136,85 @@ document.getElementById("welcome").innerText =
   user ? "Welcome, " + user : "Welcome, Guest";
 
 
-// 🔥 LOAD PRODUCTS
 async function loadProducts() {
 
-  document.getElementById("products").innerHTML = `
-    <div class="card">Loading...</div>
-    <div class="card">Loading...</div>
-  `;
+  const res = await fetch("https://fark618-backend.onrender.com/products");
+  const data = await res.json();
 
-  try {
-    const res = await fetch("https://fark618-backend.onrender.com/products");
-    const data = await res.json();
+  productsData = data;
 
-    productsData = data;
+  let html = "";
 
-    let html = "";
+  data.forEach((p, index) => {
 
-    data.forEach((p, index) => {
+    let sizes = Array.isArray(p.sizes) ? p.sizes : (p.sizes || "").split(",");
 
-      // ✅ FIX SIZE FORMAT
-      let sizes = [];
-
-      if (Array.isArray(p.sizes)) {
-        sizes = p.sizes;
-      } else if (typeof p.sizes === "string") {
-        sizes = p.sizes.split(",");
-      }
-
-      let options = `<option value="">Select Size</option>`;
-
-      sizes.forEach(s => {
-        options += `<option value="${s.trim()}">${s.trim()}</option>`;
-      });
-
-      html += `
-        <div class="card">
-
-         ${p.video ? `
-  <video 
-    src="${p.video}" 
-    autoplay 
-    muted 
-    loop 
-    playsinline
-    onclick="openProduct(${index})"
-    style="width:100%; height:200px; object-fit:cover; border-radius:8px;">
-  </video>
-` : `
-  <img
-    src="${p.image ? p.image : 'https://via.placeholder.com/200'}"
-    onclick="openProduct(${index})"
-  >
-`}
-
-          <div class="name">${p.name}</div>
-          <div class="price">₹${p.price}</div>
-          <div class="stock">Stock: ${p.stock}</div>
-
-          <select id="size-${index}">
-            ${options}
-          </select>
-
-          <button class="cart-btn" onclick="addToCart(${index})">
-            Add to Cart
-          </button>
-
-          <button class="fav-btn" onclick="addToFav(${index})">
-            ❤️ Favorite
-          </button>
-
-        </div>
-      `;
+    let options = `<option value="">Select Size</option>`;
+    sizes.forEach(s => {
+      options += `<option value="${s.trim()}">${s.trim()}</option>`;
     });
 
-    document.getElementById("products").innerHTML = html;
-    document.getElementById("loader").style.display = "none";
+    html += `
+      <div class="card">
 
-  } catch (err) {
-    alert("Server slow ⚠️ Try again");
-  }
-}
+        <img
+          src="${p.image || 'https://via.placeholder.com/200'}"
+          onclick="openProduct(${index})"
+        >
 
+        <div class="name">${p.name}</div>
+        <div class="price">₹${p.price}</div>
+        <div class="stock">Stock: ${p.stock}</div>
 
-// 🔥 OPEN PRODUCT
-function openProduct(index){
-  const product = productsData[index];
+        <select id="size-${index}">
+          ${options}
+        </select>
 
-  if(!product){
-    alert("Product not loaded ❌");
-    return;
-  }
+        <button class="cart-btn" onclick="addToCart(${index})">
+          Add to Cart
+        </button>
 
-  localStorage.setItem("selectedProduct", JSON.stringify(product));
-  window.location.href = "product.html";
-}
+        <button class="fav-btn" onclick="addToFav(${index})">
+          ❤️ Favorite
+        </button>
 
-
-// 🔥 ADD TO CART
-function addToCart(index) {
-
-  if (!user) {
-    alert("Login first ❌");
-    return;
-  }
-
-  const product = productsData[index];
-  const size = document.getElementById("size-" + index).value;
-
-  if (!size) {
-    alert("Select size ❗");
-    return;
-  }
-
-  cart.push({
-    id: product._id,
-    name: product.name,
-    price: product.price,
-    size: size
+      </div>
+    `;
   });
 
+  document.getElementById("products").innerHTML = html;
+}
+
+function openProduct(index){
+  localStorage.setItem("selectedProduct", JSON.stringify(productsData[index]));
+  location.href = "product.html";
+}
+
+function addToCart(index) {
+  if (!user) return alert("Login first ❌");
+
+  const size = document.getElementById("size-" + index).value;
+  if (!size) return alert("Select size ❗");
+
+  const p = productsData[index];
+
+  cart.push({ id:p._id, name:p.name, price:p.price, size });
   localStorage.setItem("cart", JSON.stringify(cart));
 
   alert("Added to cart ✅");
 }
 
-
-// ❤️ FAVORITE
-function addToFav(index) {
-
-  const product = productsData[index];
+function addToFav(index){
   let fav = JSON.parse(localStorage.getItem("fav")) || [];
-
-  fav.push(product);
+  fav.push(productsData[index]);
   localStorage.setItem("fav", JSON.stringify(fav));
-
-  alert("Added to favorite ❤️");
+  alert("Added ❤️");
 }
 
+function goHome(){ location.href="index.html"; }
+function goAccount(){ location.href="account.html"; }
+function goCart(){ location.href="cart.html"; }
 
-// NAV
-function goHome(){ location.href = "index.html"; }
-function goAccount(){ location.href = "account.html"; }
-function goCart(){ location.href = "cart.html"; }
-
-
-// START
 loadProducts();
 
 </script>
