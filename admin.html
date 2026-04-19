@@ -219,10 +219,11 @@ if(files.length > 0){
 
   }
 
+  send(); // ✅ IMPORTANT
 }
-  } else {
-    send();
-  }
+else{
+  send();
+}
 
   async function send(){
     await fetch(BASE_URL + "/add-product",{
@@ -232,22 +233,22 @@ if(files.length > 0){
         "Authorization":"Bearer " + localStorage.getItem("adminToken")
       },
       body: JSON.stringify({
-        name,
-        price,
-        stock,
-        type,
-        sizes,
-        sizeStock,
-        image,
-      brand,
+  name,
+  price,
+  stock,
+  type,
+  sizes,
+  sizeStock,
+  images,   // ✅ correct
+  brand,
   fabric,
   typeDetail,
   fit,
   pattern,
   color,
   occasion,
-  description  
-      })
+  description
+})
     });
 
     alert("Product Added ✅");
