@@ -4,64 +4,104 @@
 <title>Product</title>
 
 <style>
-  body {
-    font-family: 'Segoe UI';
-    margin: 0;
-    background: #f5f5f5;
-  }
+body {
+  font-family: 'Segoe UI';
+  margin: 0;
+  background: #f1f3f6;
+  padding-bottom: 90px;
+}
 
-  .container {
-    padding: 15px;
-  }
+.container {
+  padding: 10px;
+}
 
-  .main-img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 10px;
-  }
+.main-img {
+  width: 100%;
+  height: 280px;
+  object-fit: contain;
+  background: white;
+  border-radius: 10px;
+}
 
-  .thumbs {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-  }
+.thumbs {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
 
-  .thumbs img {
-    width: 70px;
-    height: 70px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
+.thumbs img {
+  width: 70px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-  .price {
-    color: green;
-    font-size: 22px;
-    font-weight: bold;
-  }
+h2 { margin: 10px 0 5px; }
 
-  .bottom-bar {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-  }
+.price {
+  color: green;
+  font-size: 22px;
+  font-weight: bold;
+}
 
-  .cart-btn {
-    flex: 1;
-    padding: 15px;
-    background: black;
-    color: white;
-    border: none;
-  }
+.sizes {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
 
-  .buy-btn {
-    flex: 1;
-    padding: 15px;
-    background: orange;
-    border: none;
-    font-weight: bold;
-  }
+.size {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.size.active {
+  border: 2px solid black;
+}
+
+/* bottom bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 15px;
+  background: black;
+  color: white;
+  border: none;
+}
+
+.buy-btn {
+  flex: 1;
+  padding: 15px;
+  background: orange;
+  border: none;
+  font-weight: bold;
+}
+
+/* similar */
+.similar {
+  margin-top: 20px;
+}
+
+.similar-grid {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.similar-card {
+  min-width: 140px;
+  background: white;
+  padding: 8px;
+  border-radius: 10px;
+  text-align: center;
+}
 </style>
 
 </head>
@@ -77,32 +117,44 @@
   <h2 id="name"></h2>
   <div class="price" id="price"></div>
 
-  <p><b>Fabric:</b> Rayon</p>
-  <p><b>Type:</b> Kurta Set</p>
-  <p><b>Occasion:</b> Festive</p>
+  <!-- SIZE -->
+  <h3>Select Size</h3>
+  <div id="sizes" class="sizes"></div>
+
+  <!-- DETAILS -->
+  <p><b>Brand:</b> <span id="brand"></span></p>
+  <p><b>Description:</b> <span id="desc"></span></p>
+
+  <!-- SIMILAR -->
+  <div class="similar">
+    <h3>Similar Products</h3>
+    <div id="similar" class="similar-grid"></div>
+  </div>
 
 </div>
 
 <div class="bottom-bar">
   <button class="cart-btn" onclick="addToCart()">Add to Cart</button>
-  <button class="buy-btn" onclick="buyNow()">Buy at ₹999</button>
+  <button class="buy-btn" onclick="buyNow()">Buy Now</button>
 </div>
 
 <script>
+
+const API = "https://fark618-backend.onrender.com";
 
 const product = JSON.parse(localStorage.getItem("selectedProduct"));
 
 document.getElementById("name").innerText = product.name;
 document.getElementById("price").innerText = "₹" + product.price;
+document.getElementById("brand").innerText = product.brand || "FARK";
+document.getElementById("desc").innerText = product.description || "-";
 
+// IMAGE
 let images = product.images || [product.image];
-
-// main image
 document.getElementById("mainImage").src = images[0];
 
-// thumbnails
 let thumbsHTML = "";
-images.forEach(img => {
+images.forEach(img=>{
   thumbsHTML += `<img src="${img}" onclick="changeImage('${img}')">`;
 });
 document.getElementById("thumbs").innerHTML = thumbsHTML;
@@ -111,19 +163,91 @@ function changeImage(src){
   document.getElementById("mainImage").src = src;
 }
 
+// SIZE
+let selectedSize = "";
+
+let sizeHTML = "";
+(product.sizes || []).forEach(s=>{
+  sizeHTML += `<div class="size" onclick="selectSize(this,'${s}')">${s}</div>`;
+});
+document.getElementById("sizes").innerHTML = sizeHTML;
+
+function selectSize(el,size){
+  document.querySelectorAll(".size").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+  selectedSize = size;
+}
+
+// CART
 function addToCart(){
+  if(!selectedSize){
+    alert("Select size ❗");
+    return;
+  }
+
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  cart.push(product);
+  cart.push({
+    name: product.name,
+    price: product.price,
+    size: selectedSize,
+    image: product.image
+  });
 
   localStorage.setItem("cart", JSON.stringify(cart));
 
   alert("Added to cart ✅");
 }
 
+// BUY
 function buyNow(){
-  alert("Proceed to payment 💳");
+  if(!selectedSize){
+    alert("Select size ❗");
+    return;
+  }
+
+  localStorage.setItem("checkout", JSON.stringify({
+    ...product,
+    size: selectedSize
+  }));
+
+  location.href = "checkout.html";
 }
+
+// SIMILAR PRODUCTS
+async function loadSimilar(){
+  const res = await fetch(API + "/products");
+  const data = await res.json();
+
+  let html = "";
+
+  data
+  .filter(p => p.category === product.category && p._id !== product._id)
+  .slice(0,5)
+  .forEach(p=>{
+    html += `
+      <div class="similar-card" onclick="openProduct('${p._id}')">
+        <img src="${p.image}" width="100%">
+        <p>${p.name}</p>
+        <b>₹${p.price}</b>
+      </div>
+    `;
+  });
+
+  document.getElementById("similar").innerHTML = html;
+}
+
+function openProduct(id){
+  fetch(API + "/products")
+  .then(r=>r.json())
+  .then(data=>{
+    const p = data.find(x=>x._id===id);
+    localStorage.setItem("selectedProduct", JSON.stringify(p));
+    location.reload();
+  });
+}
+
+loadSimilar();
 
 </script>
 
