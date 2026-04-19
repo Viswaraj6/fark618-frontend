@@ -66,7 +66,7 @@ img {
 <!-- IMAGE -->
 <input type="file" id="imageFile">
 <input type="file" id="videoFile">
-<button onclick="uploadBannerVideo()">Upload Banner Video</button>
+
   <button onclick="addProduct()">Add Product</button>
 <button onclick="saveBanner()">Save Banner</button>
 <h2>Products</h2>
@@ -356,39 +356,7 @@ checkboxes.forEach(cb => {
     stock: Number(stockVal || 0)
   });
 });
-  async function uploadBannerVideo(){
-
-  const file = document.getElementById("videoFile").files[0];
-
-  if(!file){
-    alert("Choose video ❗");
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = async function(e){
-
-    const res = await fetch(BASE_URL + "/video", {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization": "Bearer " + localStorage.getItem("adminToken")
-      },
-      body: JSON.stringify({ url: e.target.result })
-    });
-
-    const data = await res.json();
-
-    if(data.success){
-      alert("Banner Video Updated ✅");
-    } else {
-      alert("Upload failed ❌");
-    }
-  };
-
-  reader.readAsDataURL(file);
-}
+ 
 /* ================= INIT ================= */
 loadProducts();
 loadOrders();
