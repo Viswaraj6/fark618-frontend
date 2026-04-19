@@ -67,7 +67,7 @@ img {
 
 <div id="sizeBox"></div>
 
-<input type="file" id="imageFile">
+<input type="file" id="imageFiles" multiple>
 
 <button onclick="addProduct()">Add Product</button>
 
@@ -182,37 +182,44 @@ const description = document.getElementById("description").value;
     alert("Fill all fields ❗");
     return;
   }
+const files = document.getElementById("imageFiles").files;
 
-  const file = document.getElementById("imageFile").files[0];
+let images = [];
 
-  let image = "";
+if(files.length > 0){
 
-  if(file){
+  for(let i=0;i<files.length;i++){
+
     const reader = new FileReader();
 
-reader.onload = function(e){
+    await new Promise(resolve=>{
+      reader.onload = function(e){
 
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
 
-  const img = new Image();
+        img.onload = function(){
+          canvas.width = 300;
+          canvas.height = 300;
 
-  img.onload = function () {
-    canvas.width = 300;
-    canvas.height = 300;
+          ctx.drawImage(img,0,0,300,300);
 
-    ctx.drawImage(img, 0, 0, 300, 300);
+          const small = canvas.toDataURL("image/jpeg",0.5);
 
-    const smallImage = canvas.toDataURL("image/jpeg", 0.3);
+          images.push(small);
+          resolve();
+        };
 
-    image = smallImage;  // ✅ small image save
-    send();
-  };
+        img.src = e.target.result;
+      };
 
-  img.src = e.target.result;
-};
+      reader.readAsDataURL(files[i]);
+    });
 
-reader.readAsDataURL(file);
+  }
+
+}
   } else {
     send();
   }
@@ -329,7 +336,7 @@ function loadProducts(){
     data.forEach(p => {
       html += `
         <div class="card">
-          <img src="${p.image || ''}">
+          <img src="${(p.images && p.images[0]) || p.image || ''}">
           <h3>${p.name}</h3>
           <p>₹${p.price}</p>
           <p>Stock: ${p.stock}</p>
