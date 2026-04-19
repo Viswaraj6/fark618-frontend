@@ -48,14 +48,23 @@
     button {
       width: 100%;
       padding: 14px;
-      margin-top: 20px;
+      margin-top: 15px;
       border: none;
       border-radius: 10px;
-      background: linear-gradient(45deg, #ff9800, #ffcc00);
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
     }
+
+    .payBtn {
+      background: linear-gradient(45deg, #ff9800, #ffcc00);
+    }
+
+    .codBtn {
+      background: #4caf50;
+      color: white;
+    }
+
   </style>
 </head>
 
@@ -71,58 +80,56 @@
 
   <div class="total" id="totalAmount">Total: ₹0</div>
 
-  <!-- 🔥 onclick remove -->
-  <button id="payBtn">Pay Now 💳</button>
+  <button id="payBtn" class="payBtn">Pay Now 💳</button>
+  <button id="codBtn" class="codBtn">Cash on Delivery 🚚</button>
 
 </div>
 
-<!-- 💳 Razorpay script -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
 
-console.log("JS Loaded ✅");
-
 const API = "https://fark618-backend.onrender.com";
 
-// 🧮 LOAD CART
+// 🧮 CART
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-if(cart.length === 0){
-  alert("Cart empty ❌");
-}
-
-// 🧮 CALCULATE TOTAL
 let total = 0;
 cart.forEach(i => total += i.price * (i.qty || 1));
 
 document.getElementById("totalAmount").innerText = "Total: ₹" + total;
 
-
-// 🔥 BUTTON CLICK (SAFE)
+// EVENTS
 document.getElementById("payBtn").addEventListener("click", payNow);
+document.getElementById("codBtn").addEventListener("click", cashOnDelivery);
 
 
-// 💳 PAYMENT FUNCTION
-function payNow() {
-
-  alert("Button working ✅");
-
+// COMMON VALIDATION
+function getUserData() {
   let name = document.getElementById("name").value;
   let phone = document.getElementById("phone").value;
   let address = document.getElementById("address").value;
 
   if (!name || !phone || !address) {
     alert("Fill all fields ❗");
-    return;
+    return null;
   }
 
   if (total === 0) {
     alert("Cart empty ❌");
-    return;
+    return null;
   }
 
-  // 🟢 CREATE ORDER
+  return { name, phone, address };
+}
+
+
+// 💳 ONLINE PAYMENT
+function payNow() {
+
+  let data = getUserData();
+  if (!data) return;
+
   fetch(API + "/create-order", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
@@ -131,14 +138,11 @@ function payNow() {
   .then(res => res.json())
   .then(order => {
 
-    console.log("ORDER:", order);
-
     if(!order.id){
       alert("Order create failed ❌");
       return;
     }
 
-    // 💳 RAZORPAY
     var options = {
       key: "rzp_test_SfD9BzINtp65Kb",
       amount: order.amount,
@@ -149,36 +153,17 @@ function payNow() {
 
       handler: function (response) {
 
-        // 🔐 VERIFY PAYMENT
         fetch(API + "/verify-payment", {
           method: "POST",
           headers: {"Content-Type":"application/json"},
           body: JSON.stringify(response)
         })
         .then(res => res.json())
-        .then(data => {
+        .then(result => {
 
-          if (data.success) {
+          if (result.success) {
 
-            // 💾 SAVE ORDER
-            fetch(API + "/order", {
-              method: "POST",
-              headers: {"Content-Type":"application/json"},
-              body: JSON.stringify({
-                user: localStorage.getItem("user") || "guest",
-                name,
-                phone,
-                address,
-                products: cart,
-                total,
-                paymentId: response.razorpay_payment_id,
-                status: "Paid"
-              })
-            });
-
-            alert("Payment Success ✅");
-            localStorage.removeItem("cart");
-            window.location.href = "account.html";
+            saveOrder(data, "Paid", response.razorpay_payment_id);
 
           } else {
             alert("Payment verification failed ❌");
@@ -193,9 +178,42 @@ function payNow() {
     rzp.open();
 
   })
-  .catch(err => {
-    console.log("ERROR:", err);
-    alert("Server error ❌");
+  .catch(() => alert("Server error ❌"));
+}
+
+
+// 🚚 CASH ON DELIVERY
+function cashOnDelivery() {
+
+  let data = getUserData();
+  if (!data) return;
+
+  saveOrder(data, "Pending", "COD");
+
+}
+
+
+// 💾 SAVE ORDER FUNCTION
+function saveOrder(userData, status, paymentId) {
+
+  fetch(API + "/order", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      user: localStorage.getItem("user") || "guest",
+      name: userData.name,
+      phone: userData.phone,
+      address: userData.address,
+      products: cart,
+      total,
+      paymentId,
+      status
+    })
+  })
+  .then(() => {
+    alert("Order placed ✅");
+    localStorage.removeItem("cart");
+    window.location.href = "account.html";
   });
 
 }
