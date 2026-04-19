@@ -4,11 +4,7 @@
 <title>Admin Panel</title>
 
 <style>
-body {
-  font-family: Arial;
-  background:#f5f5f5;
-  padding:20px;
-}
+body { font-family: Arial; background:#f5f5f5; padding:20px; }
 
 input, select {
   margin:10px 0;
@@ -21,7 +17,6 @@ button {
   background:black;
   color:white;
   border:none;
-  cursor:pointer;
 }
 
 .card {
@@ -31,15 +26,9 @@ button {
   border-radius:10px;
 }
 
-img {
-  width:120px;
-  border-radius:10px;
-}
+img { width:120px; border-radius:10px; }
 
-.logout {
-  float:right;
-  background:red;
-}
+.logout { float:right; background:red; }
 </style>
 
 </head>
@@ -49,7 +38,6 @@ img {
   <button class="logout" onclick="logout()">Logout</button>
 </h2>
 
-<!-- PRODUCT FORM -->
 <input id="name" placeholder="Product Name">
 <input id="price" placeholder="Price">
 <input id="stock" placeholder="Stock">
@@ -59,55 +47,38 @@ img {
   <option value="pant">Pant</option>
 </select>
 
-<!-- SIZE -->
 <div id="sizeBox"></div>
 
-<!-- IMAGE -->
 <input type="file" id="imageFile">
-<input type="file" id="videoFile">
+
 <button onclick="addProduct()">Add Product</button>
 
 <h2>Products</h2>
 <div id="products"></div>
 
-<h2>Orders</h2>
-<div id="orders"></div>
-
 <script>
 
 const BASE_URL = "https://fark618-backend.onrender.com";
 
-/* 🔐 CHECK LOGIN */
 if(!localStorage.getItem("adminToken")){
   alert("Login first ❌");
-  window.location.href = "admin-login.html";
+  location.href="admin-login.html";
 }
 
-/* 🔓 LOGOUT */
 function logout(){
   localStorage.removeItem("adminToken");
-  window.location.href = "admin-login.html";
+  location.href="admin-login.html";
 }
 
-/* ================= SIZE ================= */
 document.getElementById("type").addEventListener("change", loadSizeOptions);
 
-function loadSizeOptions() {
+function loadSizeOptions(){
+  let type = document.getElementById("type").value;
+  let sizes = type==="shirt" ? ["S","M","L","XL","XXL"] : ["30","32","34","36","38","40"];
 
-  const type = document.getElementById("type").value;
-
-  let sizes = type === "shirt"
-    ? ["S","M","L","XL","XXL"]
-    : ["30","32","34","36","38","40"];
-
-  let html = "<p>Select Sizes:</p>";
-
-  sizes.forEach(s => {
-    html += `
-      <label>
-        <input type="checkbox" value="${s}"> ${s}
-      </label><br>
-    `;
+  let html="";
+  sizes.forEach(s=>{
+    html+=`<label><input type="checkbox" value="${s}"> ${s}</label><br>`;
   });
 
   document.getElementById("sizeBox").innerHTML = html;
@@ -115,209 +86,75 @@ function loadSizeOptions() {
 
 loadSizeOptions();
 
-/* ================= ADD PRODUCT ================= */
 async function addProduct(){
 
-  const name = document.getElementById("name").value;
-  const price = Number(document.getElementById("price").value);
-  const stock = Number(document.getElementById("stock").value);
-  const type = document.getElementById("type").value;
+  const name = document.getElementById("name").value.trim();
+  const price = document.getElementById("price").value;
+  const stock = document.getElementById("stock").value;
 
-  const checkboxes = document.querySelectorAll("#sizeBox input:checked");
-  const sizes = [];
-
-  checkboxes.forEach(cb => sizes.push(cb.value));
+  const sizes = [...document.querySelectorAll("#sizeBox input:checked")].map(cb=>cb.value);
 
   if(!name || !price || !stock){
-    alert("Fill all fields ❗");
-    return;
+    return alert("Fill all fields ❗");
   }
 
-  if(
-  name.trim() === "" ||
-  document.getElementById("price").value === "" ||
-  document.getElementById("stock").value === ""
-){
-  alert("Fill all fields ❗");
-  return;
-}
+  let image="";
 
-  const imageFile = document.getElementById("imageFile").files[0];
-  const videoFile = document.getElementById("videoFile").files[0];
+  const file = document.getElementById("imageFile").files[0];
 
-  let image = "";
-  let video = "";
-
-  // 🔥 IMAGE (optional)
-  if(imageFile){
+  if(file){
     const reader = new FileReader();
-    reader.onload = function(e){
+    reader.onload = async function(e){
       image = e.target.result;
-      handleVideo();
+      sendProduct(name,price,stock,sizes,image);
     };
-    reader.readAsDataURL(imageFile);
+    reader.readAsDataURL(file);
   } else {
-    handleVideo();
-  }
-
-  // 🔥 VIDEO (optional)
-  function handleVideo(){
-    if(videoFile){
-      const reader2 = new FileReader();
-      reader2.onload = function(e){
-        video = e.target.result;
-        sendProduct(name,price,stock,type,sizes,image,video);
-      };
-      reader2.readAsDataURL(videoFile);
-    } else {
-      sendProduct(name,price,stock,type,sizes,image,"");
-    }
+    sendProduct(name,price,stock,sizes,"");
   }
 }
-/* ================= SEND PRODUCT ================= */
-async function sendProduct(name,price,stock,type,sizes,image,video){
+
+async function sendProduct(name,price,stock,sizes,image){
 
   const res = await fetch(BASE_URL+"/add-product",{
     method:"POST",
     headers:{
       "Content-Type":"application/json",
-      "Authorization": "Bearer " + localStorage.getItem("adminToken")
+      "Authorization":"Bearer "+localStorage.getItem("adminToken")
     },
-    body:JSON.stringify({
-      name,
-      price,
-      stock,
-      type,
-      sizes,
-      image,
-      video   // 🔥 IMPORTANT
-    })
+    body:JSON.stringify({ name,price,stock,sizes,image })
   });
-
-  const data = await res.json();
-
-  if(!res.ok){
-    alert("Failed ❌");
-    return;
-  }
 
   alert("Product Added ✅");
   loadProducts();
 }
-/* ================= PRODUCTS ================= */
+
 function loadProducts(){
-
   fetch(BASE_URL+"/products")
-  .then(res => res.json())
-  .then(data => {
-
-    let html = "";
-
-    data.forEach(p => {
-
-      html += `
+  .then(r=>r.json())
+  .then(data=>{
+    let html="";
+    data.forEach(p=>{
+      html+=`
       <div class="card">
-        <img src="${p.image || ''}">
+        <img src="${p.image}">
         <h3>${p.name}</h3>
         <p>₹${p.price}</p>
-        <p>Stock: ${p.stock}</p>
-        <p>Sizes: ${p.sizes?.join(", ") || "-"}</p>
-
         <button onclick="deleteProduct('${p._id}')">Delete</button>
-      </div>
-      `;
+      </div>`;
     });
-
-    document.getElementById("products").innerHTML = html;
+    document.getElementById("products").innerHTML=html;
   });
 }
 
 function deleteProduct(id){
-
-  if(!confirm("Delete product? ❗")) return;
-
   fetch(BASE_URL+"/products/"+id,{
     method:"DELETE",
-    headers:{
-      "Authorization": "Bearer " + localStorage.getItem("adminToken")
-    }
-  })
-  .then(res => res.json())
-  .then(data => {
-
-    console.log("DELETE:", data);
-
-    if(data.success){
-      alert("Deleted ✅");
-      loadProducts();
-    } else {
-      alert("Delete failed ❌");
-    }
-
-  })
-  .catch(() => alert("Server error ❌"));
+    headers:{ "Authorization":"Bearer "+localStorage.getItem("adminToken") }
+  }).then(()=>loadProducts());
 }
 
-/* ================= ORDERS ================= */
-function loadOrders(){
-
-  fetch(BASE_URL+"/orders")
-  .then(res => res.json())
-  .then(data => {
-
-    let html = "";
-
-    data.forEach(o => {
-
-      let items = "";
-
-      o.products.forEach(i => {
-        items += `
-          <li>${i.name} - ₹${i.price} (Size: ${i.size || "-"})</li>
-        `;
-      });
-
-      html += `
-      <div class="card">
-        <p><b>Total:</b> ₹${o.total}</p>
-
-        <p>
-          <b>Status:</b>
-          <select onchange="updateStatus('${o._id}', this.value)">
-            <option ${o.status==="Pending"?"selected":""}>Pending</option>
-            <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
-            <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
-          </select>
-        </p>
-
-        <ul>${items}</ul>
-      </div>
-      `;
-    });
-
-    document.getElementById("orders").innerHTML = html;
-  });
-}
-
-function updateStatus(id, status){
-
-  fetch(BASE_URL+"/orders/"+id,{
-    method:"PUT",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": "Bearer " + localStorage.getItem("adminToken")
-    },
-    body: JSON.stringify({ status })
-  })
-  .then(() => {
-    alert("Updated ✅");
-    loadOrders();
-  });
-}
-
-/* ================= INIT ================= */
 loadProducts();
-loadOrders();
 
 </script>
 
