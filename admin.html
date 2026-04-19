@@ -40,6 +40,7 @@ img {
   float:right;
   background:red;
 }
+
 </style>
 
 </head>
@@ -103,13 +104,15 @@ function loadSizeOptions() {
 
   let html = "<p>Select Sizes:</p>";
 
-  sizes.forEach(s => {
-    html += `
-      <label>
-        <input type="checkbox" value="${s}"> ${s}
-      </label><br>
-    `;
-  });
+ sizes.forEach(s => {
+  html += `
+    <label>
+      <input type="checkbox" value="${s}" onchange="toggleStock(this)">
+      ${s}
+      <input type="number" placeholder="Stock" id="stock-${s}" style="display:none;width:80px;">
+    </label><br>
+  `;
+});
 
   document.getElementById("sizeBox").innerHTML = html;
 }
@@ -171,16 +174,15 @@ async function sendProduct(name,price,stock,type,sizes,image,video){
       "Content-Type":"application/json",
       "Authorization": "Bearer " + localStorage.getItem("adminToken")
     },
-    body:JSON.stringify({
-      name,
-      price,
-      stock,
-      type,
-      sizes,
-      image,
-      video   // 🔥 IMPORTANT
-    })
-  });
+   body: JSON.stringify({
+  name,
+  price,
+  stock,
+  type,
+  sizes,
+  sizeStock,
+  image
+})
 
   const data = await res.json();
 
@@ -310,7 +312,20 @@ function updateStatus(id, status){
     loadOrders();
   });
 }
-async function uploadBannerVideo(){
+function toggleStock(cb){
+  const input = document.getElementById("stock-" + cb.value);
+  input.style.display = cb.checked ? "inline-block" : "none";
+}
+ const sizeStock = [];
+
+checkboxes.forEach(cb => {
+  const stockVal = document.getElementById("stock-" + cb.value).value;
+  sizeStock.push({
+    size: cb.value,
+    stock: Number(stockVal || 0)
+  });
+});
+  async function uploadBannerVideo(){
 
   const file = document.getElementById("videoFile").files[0];
 
