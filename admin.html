@@ -40,17 +40,16 @@ img {
   float:right;
   background:red;
 }
-
 </style>
-
 </head>
+
 <body>
 
 <h2>Admin Panel 🔧 
   <button class="logout" onclick="logout()">Logout</button>
 </h2>
 
-<!-- PRODUCT FORM -->
+<!-- PRODUCT -->
 <input id="name" placeholder="Product Name">
 <input id="price" placeholder="Price">
 <input id="stock" placeholder="Stock">
@@ -60,55 +59,59 @@ img {
   <option value="pant">Pant</option>
 </select>
 
-<!-- SIZE -->
 <div id="sizeBox"></div>
 
-<!-- IMAGE -->
 <input type="file" id="imageFile">
-<input type="file" id="videoFile">
 
-  <button onclick="addProduct()">Add Product</button>
-<button onclick="saveBanner()">Save Banner</button>
-<h2>Products</h2>
-<div id="products"></div>
+<button onclick="addProduct()">Add Product</button>
 
-<h2>Orders</h2>
-<div id="orders"></div>
-<h3>Banner Type</h3>
+<hr>
+
+<!-- 🎬 BANNER -->
+<h3>Banner Upload</h3>
 
 <select id="bannerType">
   <option value="video">Video</option>
   <option value="slider">Image Slider</option>
 </select>
 
-<br><br>
+<br>
 
-<input type="text" id="videoUrl" placeholder="Video URL">
+<input type="file" id="bannerVideoFile">
+<input type="file" id="bannerImages" multiple>
 
-<br><br>
+<br>
 
-<input type="text" id="sliderImages" placeholder="Image URLs (comma separated)">
+<button onclick="uploadBanner()">Upload Banner</button>
+
+<hr>
+
+<h2>Products</h2>
+<div id="products"></div>
+
+<h2>Orders</h2>
+<div id="orders"></div>
+
 <script>
 
 const BASE_URL = "https://fark618-backend.onrender.com";
 
-/* 🔐 CHECK LOGIN */
+/* LOGIN CHECK */
 if(!localStorage.getItem("adminToken")){
   alert("Login first ❌");
   window.location.href = "admin-login.html";
 }
 
-/* 🔓 LOGOUT */
+/* LOGOUT */
 function logout(){
   localStorage.removeItem("adminToken");
   window.location.href = "admin-login.html";
 }
 
-/* ================= SIZE ================= */
+/* SIZE LOAD */
 document.getElementById("type").addEventListener("change", loadSizeOptions);
 
-function loadSizeOptions() {
-
+function loadSizeOptions(){
   const type = document.getElementById("type").value;
 
   let sizes = type === "shirt"
@@ -117,22 +120,28 @@ function loadSizeOptions() {
 
   let html = "<p>Select Sizes:</p>";
 
- sizes.forEach(s => {
-  html += `
-    <label>
-      <input type="checkbox" value="${s}" onchange="toggleStock(this)">
-      ${s}
-      <input type="number" placeholder="Stock" id="stock-${s}" style="display:none;width:80px;">
-    </label><br>
-  `;
-});
+  sizes.forEach(s => {
+    html += `
+      <label>
+        <input type="checkbox" value="${s}" onchange="toggleStock(this)">
+        ${s}
+        <input type="number" id="stock-${s}" placeholder="Stock" style="display:none;width:80px;">
+      </label><br>
+    `;
+  });
 
   document.getElementById("sizeBox").innerHTML = html;
 }
 
 loadSizeOptions();
 
-/* ================= ADD PRODUCT ================= */
+/* TOGGLE STOCK */
+function toggleStock(cb){
+  const input = document.getElementById("stock-" + cb.value);
+  input.style.display = cb.checked ? "inline-block" : "none";
+}
+
+/* ADD PRODUCT */
 async function addProduct(){
 
   const name = document.getElementById("name").value;
@@ -141,93 +150,153 @@ async function addProduct(){
   const type = document.getElementById("type").value;
 
   const checkboxes = document.querySelectorAll("#sizeBox input:checked");
-  const sizes = [];
 
-  checkboxes.forEach(cb => sizes.push(cb.value));
+  const sizes = [];
+  const sizeStock = [];
+
+  checkboxes.forEach(cb => {
+    sizes.push(cb.value);
+
+    const val = document.getElementById("stock-" + cb.value).value;
+
+    sizeStock.push({
+      size: cb.value,
+      stock: Number(val || 0)
+    });
+  });
 
   if(!name || !price || !stock){
     alert("Fill all fields ❗");
     return;
   }
 
-  if(
-  name.trim() === "" ||
-  document.getElementById("price").value === "" ||
-  document.getElementById("stock").value === ""
-){
-  alert("Fill all fields ❗");
-  return;
-}
-
-  const imageFile = document.getElementById("imageFile").files[0];
-  const videoFile = document.getElementById("videoFile").files[0];
+  const file = document.getElementById("imageFile").files[0];
 
   let image = "";
-  let video = "";
 
-  // 🔥 IMAGE (optional)
-  if(imageFile){
+  if(file){
     const reader = new FileReader();
-    reader.onload = function(e){
+
+    reader.onload = async function(e){
       image = e.target.result;
-      handleVideo();
+      send();
     };
-    reader.readAsDataURL(imageFile);
+
+    reader.readAsDataURL(file);
   } else {
-    handleVideo();
+    send();
   }
 
+  async function send(){
+    await fetch(BASE_URL + "/add-product",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + localStorage.getItem("adminToken")
+      },
+      body: JSON.stringify({
+        name,
+        price,
+        stock,
+        type,
+        sizes,
+        sizeStock,
+        image
+      })
+    });
 
-/* ================= SEND PRODUCT ================= */
-async function sendProduct(name,price,stock,type,sizes,image,video){
-
-  const res = await fetch(BASE_URL+"/add-product",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": "Bearer " + localStorage.getItem("adminToken")
-    },
-   body: JSON.stringify({
-  name,
-  price,
-  stock,
-  type,
-  sizes,
-  sizeStock,
-  image
-})
-
-  const data = await res.json();
-
-  if(!res.ok){
-    alert("Failed ❌");
-    return;
+    alert("Product Added ✅");
+    loadProducts();
   }
-
-  alert("Product Added ✅");
-  loadProducts();
 }
-/* ================= PRODUCTS ================= */
-function loadProducts(){
 
-  fetch(BASE_URL+"/products")
+/* BANNER UPLOAD */
+async function uploadBanner(){
+
+  const type = document.getElementById("bannerType").value;
+
+  // VIDEO
+  if(type === "video"){
+    const file = document.getElementById("bannerVideoFile").files[0];
+
+    if(!file){
+      alert("Select video ❗");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async function(e){
+      await fetch(BASE_URL + "/banner",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          type:"video",
+          videoUrl:e.target.result,
+          images:[]
+        })
+      });
+
+      alert("Video Updated ✅");
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  // SLIDER
+  if(type === "slider"){
+    const files = document.getElementById("bannerImages").files;
+
+    if(files.length === 0){
+      alert("Select images ❗");
+      return;
+    }
+
+    let images = [];
+
+    for(let i=0;i<files.length;i++){
+      const reader = new FileReader();
+
+      await new Promise(resolve=>{
+        reader.onload = function(e){
+          images.push(e.target.result);
+          resolve();
+        };
+        reader.readAsDataURL(files[i]);
+      });
+    }
+
+    await fetch(BASE_URL + "/banner",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        type:"slider",
+        videoUrl:"",
+        images
+      })
+    });
+
+    alert("Slider Updated ✅");
+  }
+}
+
+/* LOAD PRODUCTS */
+function loadProducts(){
+  fetch(BASE_URL + "/products")
   .then(res => res.json())
   .then(data => {
 
     let html = "";
 
     data.forEach(p => {
-
       html += `
-      <div class="card">
-        <img src="${p.image || ''}">
-        <h3>${p.name}</h3>
-        <p>₹${p.price}</p>
-        <p>Stock: ${p.stock}</p>
-        <p>Sizes: ${p.sizes?.join(", ") || "-"}</p>
-
-        <button onclick="deleteProduct('${p._id}')">Delete</button>
-      </div>
+        <div class="card">
+          <img src="${p.image || ''}">
+          <h3>${p.name}</h3>
+          <p>₹${p.price}</p>
+          <p>Stock: ${p.stock}</p>
+          <button onclick="deleteProduct('${p._id}')">Delete</button>
+        </div>
       `;
     });
 
@@ -235,36 +304,22 @@ function loadProducts(){
   });
 }
 
+/* DELETE */
 function deleteProduct(id){
-
-  if(!confirm("Delete product? ❗")) return;
+  if(!confirm("Delete?")) return;
 
   fetch(BASE_URL+"/products/"+id,{
     method:"DELETE",
     headers:{
-      "Authorization": "Bearer " + localStorage.getItem("adminToken")
+      "Authorization":"Bearer "+localStorage.getItem("adminToken")
     }
   })
-  .then(res => res.json())
-  .then(data => {
-
-    console.log("DELETE:", data);
-
-    if(data.success){
-      alert("Deleted ✅");
-      loadProducts();
-    } else {
-      alert("Delete failed ❌");
-    }
-
-  })
-  .catch(() => alert("Server error ❌"));
+  .then(()=>loadProducts());
 }
 
-/* ================= ORDERS ================= */
+/* ORDERS */
 function loadOrders(){
-
-  fetch(BASE_URL+"/orders")
+  fetch(BASE_URL + "/orders")
   .then(res => res.json())
   .then(data => {
 
@@ -274,90 +329,46 @@ function loadOrders(){
 
       let items = "";
 
-      o.products.forEach(i => {
-        items += `
-          <li>
-            ${i.name} - ₹${i.price}
-            <br>Size: <b>${i.size || "-"}</b>
-          </li>
-        `;
+      o.products.forEach(i=>{
+        items += `<li>${i.name} - ₹${i.price} (Size: ${i.size})</li>`;
       });
 
       html += `
-      <div class="card">
+        <div class="card">
+          <p><b>${o.name}</b></p>
+          <p>${o.phone}</p>
+          <p>${o.address}</p>
+          <p>Total: ₹${o.total}</p>
 
-        <p><b>Name:</b> ${o.name}</p>
-        <p><b>Phone:</b> ${o.phone}</p>
-        <p><b>Address:</b> ${o.address}</p>
-
-        <p><b>Total:</b> ₹${o.total}</p>
-
-        <p>
-          <b>Status:</b>
-          <select onchange="updateStatus('${o._id}', this.value)">
+          <select onchange="updateStatus('${o._id}',this.value)">
             <option ${o.status==="Pending"?"selected":""}>Pending</option>
             <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
             <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
           </select>
-        </p>
 
-        <ul>${items}</ul>
-
-      </div>
+          <ul>${items}</ul>
+        </div>
       `;
     });
 
     document.getElementById("orders").innerHTML = html;
   });
 }
-function updateStatus(id, status){
 
+/* UPDATE STATUS */
+function updateStatus(id,status){
   fetch(BASE_URL+"/orders/"+id,{
     method:"PUT",
     headers:{
       "Content-Type":"application/json",
-      "Authorization": "Bearer " + localStorage.getItem("adminToken")
+      "Authorization":"Bearer "+localStorage.getItem("adminToken")
     },
-    body: JSON.stringify({ status })
+    body: JSON.stringify({status})
   })
-  .then(() => {
-    alert("Updated ✅");
-    loadOrders();
-  });
+  .then(()=>loadOrders());
 }
-async function saveBanner(){
 
-  const type = document.getElementById("bannerType").value;
-  const videoUrl = document.getElementById("videoUrl").value;
-  const images = document.getElementById("sliderImages").value.split(",");
-
- await fetch(BASE_URL + "/banner", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      type,
-      videoUrl,
-      images
-    })
-  });
-
-  alert("Banner Updated ✅");
-}
-  function toggleStock(cb){
-  const input = document.getElementById("stock-" + cb.value);
-  input.style.display = cb.checked ? "inline-block" : "none";
-}
- const sizeStock = [];
-
-checkboxes.forEach(cb => {
-  const stockVal = document.getElementById("stock-" + cb.value).value;
-  sizeStock.push({
-    size: cb.value,
-    stock: Number(stockVal || 0)
-  });
-});
- 
-/* ================= INIT ================= */
+/* INIT */
 loadProducts();
 loadOrders();
 
