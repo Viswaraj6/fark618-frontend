@@ -117,6 +117,27 @@
   height: 250px;
   border-radius: 10px;
 }
+.card {
+  position: relative; /* 🔥 must */
+}
+
+.fav-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border-radius: 50%;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+.fav-icon:hover {
+  transform: scale(1.2);
+  color: red;
+}    
   </style>
 </head>
 
@@ -164,32 +185,31 @@ async function loadProducts() {
       options += `<option value="${s.trim()}">${s.trim()}</option>`;
     });
 
-    html += `
-      <div class="card">
+   html += `
+  <div class="card">
 
-        <img
-          src="${p.image || 'https://via.placeholder.com/200'}"
-          onclick="openProduct(${index})"
-        >
+    <!-- ❤️ FAVORITE ICON -->
+    <div class="fav-icon" onclick="addToFav(${index})">🤍</div>
 
-        <div class="name">${p.name}</div>
-        <div class="price">₹${p.price}</div>
-        <div class="stock">Stock: ${p.stock}</div>
+    <img
+      src="${p.image || 'https://via.placeholder.com/200'}"
+      onclick="openProduct(${index})"
+    >
 
-        <select id="size-${index}">
-          ${options}
-        </select>
+    <div class="name">${p.name}</div>
+    <div class="price">₹${p.price}</div>
+    <div class="stock">Stock: ${p.stock}</div>
 
-        <button class="cart-btn" onclick="addToCart(${index})">
-          Add to Cart
-        </button>
+    <select id="size-${index}">
+      ${options}
+    </select>
 
-        <button class="fav-btn" onclick="addToFav(${index})">
-          ❤️ Favorite
-        </button>
+    <button class="cart-btn" onclick="addToCart(${index})">
+      Add to Cart
+    </button>
 
-      </div>
-    `;
+  </div>
+`;
   });
 
   document.getElementById("products").innerHTML = html;
