@@ -331,7 +331,7 @@ async function saveBanner(){
   const videoUrl = document.getElementById("videoUrl").value;
   const images = document.getElementById("sliderImages").value.split(",");
 
-  await fetch(API + "/banner", {
+ await fetch(BASE_URL + "/banner", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({
