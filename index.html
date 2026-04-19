@@ -158,25 +158,6 @@ function toggleFav(i){
   loadProducts(); // refresh UI
 }
 
-// 🔥 TOGGLE FAVORITE
-function toggleFav(i){
-  let fav = getFav();
-  const p = productsData[i];
-
-  const exist = fav.find(x => x._id === p._id);
-
-  if(exist){
-    fav = fav.filter(x => x._id !== p._id);
-  } else {
-    fav.push(p);
-  }
-
-  localStorage.setItem("fav", JSON.stringify(fav));
-
-  loadProducts(); // refresh UI
-}
-
-
 // 🔥 LOAD PRODUCTS
 async function loadProducts(){
   try {
