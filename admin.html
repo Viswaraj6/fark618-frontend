@@ -319,7 +319,11 @@ function deleteProduct(id){
 
 /* ORDERS */
 function loadOrders(){
-  fetch(BASE_URL + "/orders")
+  fetch(BASE_URL + "/orders", {
+    headers:{
+      "Authorization":"Bearer "+localStorage.getItem("adminToken")
+    }
+  })
   .then(res => res.json())
   .then(data => {
 
@@ -329,15 +333,15 @@ function loadOrders(){
 
       let items = "";
 
-      o.products.forEach(i=>{
+      (o.products || []).forEach(i=>{
         items += `<li>${i.name} - ₹${i.price} (Size: ${i.size})</li>`;
       });
 
       html += `
         <div class="card">
-          <p><b>${o.name}</b></p>
-          <p>${o.phone}</p>
-          <p>${o.address}</p>
+          <p><b>${o.name || ""}</b></p>
+          <p>${o.phone || ""}</p>
+          <p>${o.address || ""}</p>
           <p>Total: ₹${o.total}</p>
 
           <select onchange="updateStatus('${o._id}',this.value)">
@@ -354,7 +358,6 @@ function loadOrders(){
     document.getElementById("orders").innerHTML = html;
   });
 }
-
 /* UPDATE STATUS */
 function updateStatus(id,status){
   fetch(BASE_URL+"/orders/"+id,{
