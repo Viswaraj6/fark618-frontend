@@ -113,9 +113,7 @@
 
 <!-- 🔥 VIDEO BANNER -->
 <div class="video-banner">
-  <video autoplay muted loop playsinline>
-    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-  </video>
+ <video id="bannerVideo" autoplay muted loop playsinline></video>
 </div>
 
 <div id="products" class="products"></div>
@@ -216,7 +214,21 @@ function goAccount(){ location.href="account.html"; }
 function goCart(){ location.href="cart.html"; }
 
 loadProducts();
+async function loadBannerVideo(){
 
+  const res = await fetch("https://fark618-backend.onrender.com/video");
+  const data = await res.json();
+
+  const video = document.getElementById("bannerVideo");
+
+  if(data.url){
+    video.src = data.url;
+  } else {
+    video.src = "https://www.w3schools.com/html/mov_bbb.mp4";
+  }
+}
+
+loadBannerVideo();
 </script>
 
 </body>
