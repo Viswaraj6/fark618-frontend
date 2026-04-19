@@ -133,10 +133,14 @@ async function addProduct(){
     return;
   }
 
-  if(sizes.length === 0){
-    alert("Select size ❗");
-    return;
-  }
+  if(
+  name.trim() === "" ||
+  document.getElementById("price").value === "" ||
+  document.getElementById("stock").value === ""
+){
+  alert("Fill all fields ❗");
+  return;
+}
 
   const imageFile = document.getElementById("imageFile").files[0];
   const videoFile = document.getElementById("videoFile").files[0];
