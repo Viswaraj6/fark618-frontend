@@ -169,21 +169,25 @@ async function loadProducts(){
     let html = "";
 
     data.forEach((p,i)=>{
-      html += `
-      <div class="card" onclick="openProduct(${i})">
 
-        <div class="fav ${isFav(p._id || i) ? 'active' : ''}" 
-     onclick="event.stopPropagation(); toggleFav(${i})">
-  ❤️
-</div>
-        <img src="${p.image || 'https://via.placeholder.com/200'}">
+  const id = p._id || i;
 
-        <h4>${p.name}</h4>
-        <div class="price">₹${p.price}</div>
+  html += `
+  <div class="card" onclick="openProduct(${i})">
 
-      </div>
-      `;
-    });
+    <div class="fav ${isFav(id) ? 'active' : ''}" 
+         onclick="event.stopPropagation(); toggleFav(${i})">
+      ❤️
+    </div>
+
+    <img src="${p.image || 'https://via.placeholder.com/200'}">
+
+    <h4>${p.name}</h4>
+    <div class="price">₹${p.price}</div>
+
+  </div>
+  `;
+});
 
     document.getElementById("products").innerHTML = html;
 
