@@ -67,25 +67,19 @@ img {
 
 <button onclick="addProduct()">Add Product</button>
 
-<!-- EXCEL -->
-<h3>Import Excel 📥</h3>
-<input type="file" id="excelFile">
-<button onclick="importExcel()">Upload Excel</button>
-
 <h2>Products</h2>
 <div id="products"></div>
 
 <h2>Orders</h2>
 <div id="orders"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
 <script>
 
-const BASE_URL = "https://fark618-1.onrender.com";
+const BASE_URL = "https://fark618-backend.onrender.com";
 
 /* 🔐 CHECK LOGIN */
 if(!localStorage.getItem("adminToken")){
+  alert("Login first ❌");
   window.location.href = "admin-login.html";
 }
 
@@ -125,14 +119,19 @@ loadSizeOptions();
 async function addProduct(){
 
   const name = document.getElementById("name").value;
-  const price = document.getElementById("price").value;
-  const stock = document.getElementById("stock").value;
+  const price = Number(document.getElementById("price").value);
+  const stock = Number(document.getElementById("stock").value);
   const type = document.getElementById("type").value;
 
   const checkboxes = document.querySelectorAll("#sizeBox input:checked");
   const sizes = [];
 
   checkboxes.forEach(cb => sizes.push(cb.value));
+
+  if(!name || !price || !stock){
+    alert("Fill all fields ❗");
+    return;
+  }
 
   if(sizes.length === 0){
     alert("Select size ❗");
@@ -143,29 +142,13 @@ async function addProduct(){
 
   if(file){
 
-    const img = new Image();
     const reader = new FileReader();
 
-    reader.onload = function(e){
-      img.src = e.target.result;
-    };
+    reader.onload = async function(e){
 
-    img.onload = function(){
+      const image = e.target.result;
 
-      const canvas = document.createElement("canvas");
-
-      const maxWidth = 600;
-      const scale = maxWidth / img.width;
-
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
-
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      const compressed = canvas.toDataURL("image/jpeg", 0.7);
-
-      sendProduct(name,price,stock,type,sizes,compressed);
+      sendProduct(name,price,stock,type,sizes,image);
     };
 
     reader.readAsDataURL(file);
@@ -175,77 +158,43 @@ async function addProduct(){
   }
 }
 
+/* ================= SEND PRODUCT ================= */
 async function sendProduct(name,price,stock,type,sizes,image){
 
-  const res = await fetch(BASE_URL+"/add-product",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": localStorage.getItem("adminToken")
-    },
-    body:JSON.stringify({
-      name, price, stock, type, sizes, image
-    })
-  });
+  try {
 
-  if(!res.ok){
-    alert("Unauthorized ❌");
-    return;
-  }
-
-  alert("Product Added ✅");
-  loadProducts();
-}
-
-/* ================= EXCEL ================= */
-function importExcel(){
-
-  const file = document.getElementById("excelFile").files[0];
-
-  if(!file){
-    alert("Select Excel ❗");
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = function(e){
-
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: "array" });
-
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet);
-
-    json.forEach(item => {
-
-      let sizes = item.sizes
-        ? item.sizes.split(",").map(s => s.trim())
-        : [];
-
-      fetch(BASE_URL+"/add-product",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization": localStorage.getItem("adminToken")
-        },
-        body:JSON.stringify({
-          name: item.name,
-          price: item.price,
-          stock: item.stock,
-          type: item.type,
-          sizes,
-          image: ""
-        })
-      });
-
+    const res = await fetch(BASE_URL+"/add-product",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization": "Bearer " + localStorage.getItem("adminToken")
+      },
+      body:JSON.stringify({
+        name, price, stock, type, sizes, image
+      })
     });
 
-    alert("Excel Imported ✅");
-    loadProducts();
-  };
+    const data = await res.json();
+    console.log("RESPONSE:", data);
 
-  reader.readAsArrayBuffer(file);
+    if(!res.ok){
+      alert(data.message || "Failed ❌");
+      return;
+    }
+
+    alert("Product Added ✅");
+
+    // clear form
+    document.getElementById("name").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("stock").value = "";
+
+    loadProducts();
+
+  } catch(err){
+    console.log(err);
+    alert("Server error ❌");
+  }
 }
 
 /* ================= PRODUCTS ================= */
@@ -281,7 +230,7 @@ function deleteProduct(id){
   fetch(BASE_URL+"/products/"+id,{
     method:"DELETE",
     headers:{
-      "Authorization": localStorage.getItem("adminToken")
+      "Authorization": "Bearer " + localStorage.getItem("adminToken")
     }
   })
   .then(() => loadProducts());
@@ -302,10 +251,7 @@ function loadOrders(){
 
       o.products.forEach(i => {
         items += `
-          <li>
-            ${i.name} - ₹${i.price}
-            <br>Size: <b>${i.size || "-"}</b>
-          </li>
+          <li>${i.name} - ₹${i.price} (Size: ${i.size || "-"})</li>
         `;
       });
 
@@ -337,7 +283,7 @@ function updateStatus(id, status){
     method:"PUT",
     headers:{
       "Content-Type":"application/json",
-      "Authorization": localStorage.getItem("adminToken")
+      "Authorization": "Bearer " + localStorage.getItem("adminToken")
     },
     body: JSON.stringify({ status })
   })
