@@ -161,20 +161,7 @@ async function addProduct(){
     handleVideo();
   }
 
-  // 🔥 VIDEO (optional)
-  function handleVideo(){
-    if(videoFile){
-      const reader2 = new FileReader();
-      reader2.onload = function(e){
-        video = e.target.result;
-        sendProduct(name,price,stock,type,sizes,image,video);
-      };
-      reader2.readAsDataURL(videoFile);
-    } else {
-      sendProduct(name,price,stock,type,sizes,image,"");
-    }
-  }
-}
+
 /* ================= SEND PRODUCT ================= */
 async function sendProduct(name,price,stock,type,sizes,image,video){
 
