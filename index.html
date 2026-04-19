@@ -236,12 +236,6 @@ function addToCart(index) {
   alert("Added to cart ✅");
 }
 
-function addToFav(index){
-  let fav = JSON.parse(localStorage.getItem("fav")) || [];
-  fav.push(productsData[index]);
-  localStorage.setItem("fav", JSON.stringify(fav));
-  alert("Added ❤️");
-}
 
 function goHome(){ location.href="index.html"; }
 function goAccount(){ location.href="account.html"; }
