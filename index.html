@@ -198,7 +198,7 @@ async function loadProducts() {
   <div class="card" onclick="openProduct(${index})">
 
   <div class="fav-icon" onclick="event.stopPropagation(); toggleFav(${index})">
-    ${isFav(p._id) ? "❤️" : "🤍"}
+   ${isFav(p._id || index) ? "❤️" : "🤍"}
   </div>
 
   <img src="${p.image || 'https://via.placeholder.com/200'}">
