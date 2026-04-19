@@ -34,9 +34,7 @@
       border: 1px solid #ccc;
     }
 
-    textarea {
-      height: 80px;
-    }
+    textarea { height: 80px; }
 
     .total {
       margin-top: 15px;
@@ -56,15 +54,8 @@
       cursor: pointer;
     }
 
-    .payBtn {
-      background: linear-gradient(45deg, #ff9800, #ffcc00);
-    }
-
-    .codBtn {
-      background: #4caf50;
-      color: white;
-    }
-
+    .payBtn { background: linear-gradient(45deg, #ff9800, #ffcc00); }
+    .codBtn { background: #4caf50; color: white; }
   </style>
 </head>
 
@@ -99,19 +90,26 @@ cart.forEach(i => total += i.price * (i.qty || 1));
 
 document.getElementById("totalAmount").innerText = "Total: ₹" + total;
 
+
 // EVENTS
 document.getElementById("payBtn").addEventListener("click", payNow);
 document.getElementById("codBtn").addEventListener("click", cashOnDelivery);
 
 
-// COMMON VALIDATION
+// 🔥 VALIDATION + DATA
 function getUserData() {
-  let name = document.getElementById("name").value;
-  let phone = document.getElementById("phone").value;
-  let address = document.getElementById("address").value;
+
+  let name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+  let address = document.getElementById("address").value.trim();
 
   if (!name || !phone || !address) {
     alert("Fill all fields ❗");
+    return null;
+  }
+
+  if (phone.length < 10) {
+    alert("Enter valid phone ❗");
     return null;
   }
 
@@ -139,7 +137,7 @@ function payNow() {
   .then(order => {
 
     if(!order.id){
-      alert("Order create failed ❌");
+      alert("Payment setup missing ❌");
       return;
     }
 
@@ -174,26 +172,24 @@ function payNow() {
       }
     };
 
-    const rzp = new Razorpay(options);
-    rzp.open();
+    new Razorpay(options).open();
 
   })
   .catch(() => alert("Server error ❌"));
 }
 
 
-// 🚚 CASH ON DELIVERY
+// 🚚 COD
 function cashOnDelivery() {
 
   let data = getUserData();
   if (!data) return;
 
   saveOrder(data, "Pending", "COD");
-
 }
 
 
-// 💾 SAVE ORDER FUNCTION
+// 💾 SAVE ORDER
 function saveOrder(userData, status, paymentId) {
 
   fetch(API + "/order", {
@@ -214,8 +210,8 @@ function saveOrder(userData, status, paymentId) {
     alert("Order placed ✅");
     localStorage.removeItem("cart");
     window.location.href = "account.html";
-  });
-
+  })
+  .catch(() => alert("Order save failed ❌"));
 }
 
 </script>
