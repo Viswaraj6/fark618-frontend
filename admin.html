@@ -48,12 +48,18 @@ img {
 <h2>Admin Panel 🔧 
   <button class="logout" onclick="logout()">Logout</button>
 </h2>
-
 <!-- PRODUCT -->
 <input id="name" placeholder="Product Name">
 <input id="price" placeholder="Price">
 <input id="stock" placeholder="Stock">
-
+<input id="brand" placeholder="Brand">
+<input id="fabric" placeholder="Fabric">
+<input id="typeDetail" placeholder="Type">
+<input id="fit" placeholder="Fit">
+<input id="pattern" placeholder="Pattern">
+<input id="color" placeholder="Color">
+<input id="occasion" placeholder="Occasion">
+<input id="description" placeholder="Description">
 <select id="type">
   <option value="shirt">Shirt</option>
   <option value="pant">Pant</option>
@@ -148,7 +154,14 @@ async function addProduct(){
   const price = Number(document.getElementById("price").value);
   const stock = Number(document.getElementById("stock").value);
   const type = document.getElementById("type").value;
-
+const brand = document.getElementById("brand").value;
+const fabric = document.getElementById("fabric").value;
+const typeDetail = document.getElementById("typeDetail").value;
+const fit = document.getElementById("fit").value;
+const pattern = document.getElementById("pattern").value;
+const color = document.getElementById("color").value;
+const occasion = document.getElementById("occasion").value;
+const description = document.getElementById("description").value;
   const checkboxes = document.querySelectorAll("#sizeBox input:checked");
 
   const sizes = [];
@@ -218,7 +231,15 @@ reader.readAsDataURL(file);
         type,
         sizes,
         sizeStock,
-        image
+        image,
+      brand,
+  fabric,
+  typeDetail,
+  fit,
+  pattern,
+  color,
+  occasion,
+  description  
       })
     });
 
