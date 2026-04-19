@@ -137,6 +137,15 @@
 .fav-icon:hover {
   transform: scale(1.2);
   color: red;
+}  
+.card {
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }    
   </style>
 </head>
@@ -201,15 +210,6 @@ async function loadProducts() {
     <div class="name">${p.name}</div>
     <div class="price">₹${p.price}</div>
     <div class="stock">Stock: ${p.stock}</div>
-
-    <select id="size-${index}">
-      ${options}
-    </select>
-
-    <button class="cart-btn" onclick="addToCart(${index})">
-      Add to Cart
-    </button>
-
   </div>
 `;
   });
