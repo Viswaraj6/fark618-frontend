@@ -277,13 +277,16 @@ if(data.type === "video"){
     '</video>';
 }
   // 🖼 SLIDER
-  else if(data.type === "slider"){
-    html = `
-      <div class="slider">
-        ${data.images.map(img => `<img src="${img}">`).join("")}
-      </div>
-    `;
-  }
+else if(data.type === "slider"){
+
+  html = '<div class="slider">';
+
+  data.images.forEach(img => {
+    html += '<img src="' + img + '">';
+  });
+
+  html += '</div>';
+ }
 
   document.getElementById("banner").innerHTML = html;
 }
