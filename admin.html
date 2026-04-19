@@ -227,13 +227,28 @@ function loadProducts(){
 
 function deleteProduct(id){
 
+  if(!confirm("Delete product? ❗")) return;
+
   fetch(BASE_URL+"/products/"+id,{
     method:"DELETE",
     headers:{
       "Authorization": "Bearer " + localStorage.getItem("adminToken")
     }
   })
-  .then(() => loadProducts());
+  .then(res => res.json())
+  .then(data => {
+
+    console.log("DELETE:", data);
+
+    if(data.success){
+      alert("Deleted ✅");
+      loadProducts();
+    } else {
+      alert("Delete failed ❌");
+    }
+
+  })
+  .catch(() => alert("Server error ❌"));
 }
 
 /* ================= ORDERS ================= */
