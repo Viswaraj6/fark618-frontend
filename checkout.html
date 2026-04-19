@@ -2,11 +2,7 @@
 <html>
 <head>
   <title>Checkout - FARK 618</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- 💳 Razorpay -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <style>
     body {
@@ -23,7 +19,6 @@
       padding: 25px;
       border-radius: 15px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      animation: fadeIn 0.5s ease;
     }
 
     h1 {
@@ -37,11 +32,9 @@
       margin-top: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      font-size: 14px;
     }
 
     textarea {
-      resize: none;
       height: 80px;
     }
 
@@ -62,16 +55,6 @@
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      transform: scale(1.03);
-    }
-
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(20px);}
-      to {opacity: 1; transform: translateY(0);}
     }
   </style>
 </head>
@@ -88,26 +71,42 @@
 
   <div class="total" id="totalAmount">Total: ₹0</div>
 
-  <button onclick="payNow()">Pay Now 💳</button>
+  <!-- 🔥 onclick remove -->
+  <button id="payBtn">Pay Now 💳</button>
 
 </div>
 
+<!-- 💳 Razorpay script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
+
+console.log("JS Loaded ✅");
 
 const API = "https://fark618-backend.onrender.com";
 
-// 🧮 Calculate total on load
+// 🧮 LOAD CART
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let total = 0;
 
+if(cart.length === 0){
+  alert("Cart empty ❌");
+}
+
+// 🧮 CALCULATE TOTAL
+let total = 0;
 cart.forEach(i => total += i.price * (i.qty || 1));
+
 document.getElementById("totalAmount").innerText = "Total: ₹" + total;
 
 
-// 💳 PAYMENT
+// 🔥 BUTTON CLICK (SAFE)
+document.getElementById("payBtn").addEventListener("click", payNow);
+
+
+// 💳 PAYMENT FUNCTION
 function payNow() {
-alert("Button working");
-  console.log("Pay clicked");
+
+  alert("Button working ✅");
 
   let name = document.getElementById("name").value;
   let phone = document.getElementById("phone").value;
@@ -123,6 +122,7 @@ alert("Button working");
     return;
   }
 
+  // 🟢 CREATE ORDER
   fetch(API + "/create-order", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
@@ -131,11 +131,14 @@ alert("Button working");
   .then(res => res.json())
   .then(order => {
 
+    console.log("ORDER:", order);
+
     if(!order.id){
       alert("Order create failed ❌");
       return;
     }
 
+    // 💳 RAZORPAY
     var options = {
       key: "rzp_test_SerYxhYWMF3IMm",
       amount: order.amount,
@@ -146,7 +149,7 @@ alert("Button working");
 
       handler: function (response) {
 
-        // ✅ VERIFY
+        // 🔐 VERIFY PAYMENT
         fetch(API + "/verify-payment", {
           method: "POST",
           headers: {"Content-Type":"application/json"},
@@ -157,7 +160,7 @@ alert("Button working");
 
           if (data.success) {
 
-            // ✅ SAVE ORDER
+            // 💾 SAVE ORDER
             fetch(API + "/order", {
               method: "POST",
               headers: {"Content-Type":"application/json"},
@@ -191,7 +194,7 @@ alert("Button working");
 
   })
   .catch(err => {
-    console.log(err);
+    console.log("ERROR:", err);
     alert("Server error ❌");
   });
 
