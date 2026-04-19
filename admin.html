@@ -64,7 +64,7 @@ img {
 
 <!-- IMAGE -->
 <input type="file" id="imageFile">
-
+<input type="file" id="videoFile">
 <button onclick="addProduct()">Add Product</button>
 
 <h2>Products</h2>
@@ -138,65 +138,70 @@ async function addProduct(){
     return;
   }
 
-  const file = document.getElementById("imageFile").files[0];
+  const imageFile = document.getElementById("imageFile").files[0];
+  const videoFile = document.getElementById("videoFile").files[0];
 
-  if(file){
+  let image = "";
+  let video = "";
 
+  // IMAGE
+  if(imageFile){
     const reader = new FileReader();
+    reader.onload = function(e){
+      image = e.target.result;
 
-    reader.onload = async function(e){
-
-      const image = e.target.result;
-
-      sendProduct(name,price,stock,type,sizes,image);
+      // VIDEO AFTER IMAGE
+      handleVideo();
     };
-
-    reader.readAsDataURL(file);
-
+    reader.readAsDataURL(imageFile);
   } else {
-    sendProduct(name,price,stock,type,sizes,"");
+    handleVideo();
+  }
+
+  function handleVideo(){
+    if(videoFile){
+      const reader2 = new FileReader();
+      reader2.onload = function(e){
+        video = e.target.result;
+        sendProduct(name,price,stock,type,sizes,image,video);
+      };
+      reader2.readAsDataURL(videoFile);
+    } else {
+      sendProduct(name,price,stock,type,sizes,image,"");
+    }
   }
 }
 
 /* ================= SEND PRODUCT ================= */
-async function sendProduct(name,price,stock,type,sizes,image){
+async function sendProduct(name,price,stock,type,sizes,image,video){
 
-  try {
+  const res = await fetch(BASE_URL+"/add-product",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization": "Bearer " + localStorage.getItem("adminToken")
+    },
+    body:JSON.stringify({
+      name,
+      price,
+      stock,
+      type,
+      sizes,
+      image,
+      video   // 🔥 IMPORTANT
+    })
+  });
 
-    const res = await fetch(BASE_URL+"/add-product",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization": "Bearer " + localStorage.getItem("adminToken")
-      },
-      body:JSON.stringify({
-        name, price, stock, type, sizes, image
-      })
-    });
+  const data = await res.json();
 
-    const data = await res.json();
-    console.log("RESPONSE:", data);
-
-    if(!res.ok){
-      alert(data.message || "Failed ❌");
-      return;
-    }
-
-    alert("Product Added ✅");
-
-    // clear form
-    document.getElementById("name").value = "";
-    document.getElementById("price").value = "";
-    document.getElementById("stock").value = "";
-
-    loadProducts();
-
-  } catch(err){
-    console.log(err);
-    alert("Server error ❌");
+  if(!res.ok){
+    alert("Failed ❌");
+    return;
   }
-}
 
+  alert("Product Added ✅");
+  loadProducts();
+}
 /* ================= PRODUCTS ================= */
 function loadProducts(){
 
