@@ -34,11 +34,6 @@
       border-radius: 12px;
       padding: 10px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      transition: 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
     }
 
     .card img {
@@ -46,19 +41,16 @@
       height: 150px;
       object-fit: cover;
       border-radius: 8px;
-      cursor: pointer;
     }
 
     .name {
       font-weight: 600;
       margin-top: 8px;
-      font-size: 15px;
     }
 
     .price {
       color: green;
       font-weight: bold;
-      font-size: 16px;
     }
 
     .stock {
@@ -70,8 +62,6 @@
       width: 100%;
       padding: 6px;
       margin-top: 6px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
     }
 
     button {
@@ -81,7 +71,6 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
     }
 
     .cart-btn {
@@ -90,8 +79,8 @@
     }
 
     .fav-btn {
-      background: linear-gradient(to right, orange, gold);
-      font-weight: bold;
+      background: orange;
+      color: white;
     }
 
     #bottomNav {
@@ -102,19 +91,14 @@
       display: flex;
       justify-content: space-around;
       padding: 10px;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-      font-size: 14px;
+      border-top: 1px solid #ccc;
     }
 
-    #bottomNav div {
+    #loader {
       text-align: center;
-      cursor: pointer;
+      padding: 20px;
     }
-#loader {
-  text-align: center;
-  font-size: 18px;
-  padding: 20px;
-}
+
   </style>
 </head>
 
@@ -125,6 +109,7 @@
 
 <div id="products" class="products"></div>
 <div id="loader">Loading products... ⏳</div>
+
 <div id="bottomNav">
   <div onclick="goHome()">🏠<br>Home</div>
   <div onclick="goAccount()">👤<br>Account</div>
@@ -144,9 +129,7 @@ document.getElementById("welcome").innerText =
 // 🔥 LOAD PRODUCTS
 async function loadProducts() {
 
-  // 🔥 Loading UI
   document.getElementById("products").innerHTML = `
-    <div class="card">Loading...</div>
     <div class="card">Loading...</div>
     <div class="card">Loading...</div>
   `;
@@ -154,26 +137,35 @@ async function loadProducts() {
   try {
     const res = await fetch("https://fark618-backend.onrender.com/products");
     const data = await res.json();
-localStorage.setItem("products", JSON.stringify(data));
+
     productsData = data;
 
     let html = "";
 
     data.forEach((p, index) => {
 
-      let sizes = p.sizes || [];
+      // ✅ FIX SIZE FORMAT
+      let sizes = [];
+
+      if (Array.isArray(p.sizes)) {
+        sizes = p.sizes;
+      } else if (typeof p.sizes === "string") {
+        sizes = p.sizes.split(",");
+      }
+
       let options = `<option value="">Select Size</option>`;
 
       sizes.forEach(s => {
-        options += `<option>${s}</option>`;
+        options += `<option value="${s.trim()}">${s.trim()}</option>`;
       });
 
       html += `
         <div class="card">
 
-          <img loading="lazy"
-               src="${p.image || 'https://via.placeholder.com/200'}"
-               onclick="openProduct(${index})">
+          <img
+            src="${p.image && p.image.startsWith('http') ? p.image : 'https://via.placeholder.com/200'}"
+            onclick="openProduct(${index})"
+          >
 
           <div class="name">${p.name}</div>
           <div class="price">₹${p.price}</div>
@@ -196,15 +188,16 @@ localStorage.setItem("products", JSON.stringify(data));
     });
 
     document.getElementById("products").innerHTML = html;
+    document.getElementById("loader").style.display = "none";
 
   } catch (err) {
-    alert("Server loading slow ⚠️ Try again");
+    alert("Server slow ⚠️ Try again");
   }
 }
 
+
 // 🔥 OPEN PRODUCT
 function openProduct(index){
-
   const product = productsData[index];
 
   if(!product){
@@ -213,7 +206,6 @@ function openProduct(index){
   }
 
   localStorage.setItem("selectedProduct", JSON.stringify(product));
-
   window.location.href = "product.html";
 }
 
