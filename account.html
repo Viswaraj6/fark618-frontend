@@ -19,6 +19,7 @@
 
     h2 {
       margin-top: 20px;
+      cursor: pointer;
     }
 
     .card {
@@ -35,6 +36,31 @@
       margin-top: 10px;
     }
 
+    #loginBox {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 8px;
+      margin: 5px;
+      width: 80%;
+    }
+
+    button {
+      padding: 10px;
+      width: 85%;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      margin-top: 5px;
+    }
+
+    #orders {
+      display: none;
+    }
+
     #bottomNav {
       position: fixed;
       bottom: 0;
@@ -46,10 +72,6 @@
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     }
 
-    #bottomNav div {
-      text-align: center;
-      cursor: pointer;
-    }
   </style>
 </head>
 
@@ -57,12 +79,15 @@
 
 <h1>👤 My Account</h1>
 
+<!-- 🔐 LOGIN -->
+<div id="loginBox"></div>
+
 <!-- 🛒 CART -->
 <h2>🛒 Cart Items</h2>
 <div id="cartItems"></div>
 
-<!-- 📦 ORDERS -->
-<h2>📦 My Orders</h2>
+<!-- 📦 ORDERS (CLICK TO OPEN) -->
+<h2 onclick="toggleOrders()">📦 My Orders ⬇️</h2>
 <div id="orders"></div>
 
 
@@ -77,6 +102,43 @@
 <script>
 
 const API = "https://fark618-backend.onrender.com";
+let user = localStorage.getItem("user");
+
+
+// 🔐 LOGIN UI
+function loadLogin(){
+
+  if(user){
+    document.getElementById("loginBox").innerHTML = `
+      <p>Welcome, <b>${user}</b></p>
+      <button onclick="logout()">Logout</button>
+    `;
+  } else {
+    document.getElementById("loginBox").innerHTML = `
+      <input id="username" placeholder="Enter name">
+      <button onclick="login()">Login</button>
+    `;
+  }
+
+}
+
+function login(){
+  let name = document.getElementById("username").value;
+
+  if(!name){
+    alert("Enter name ❗");
+    return;
+  }
+
+  localStorage.setItem("user", name);
+  location.reload();
+}
+
+function logout(){
+  localStorage.removeItem("user");
+  location.reload();
+}
+
 
 
 // 🛒 LOAD CART
@@ -117,14 +179,14 @@ function loadOrders(){
       let html = "";
 
       if(data.length === 0){
-        html = "<p class='empty'>No orders yet</p>";
+        html = "<p class='empty'>No orders</p>";
       } else {
 
         data.forEach(order => {
 
           html += `
             <div class="card">
-              <b>Name:</b> ${order.name}<br>
+              <b>Name:</b> ${order.name || "Guest"}<br>
               <b>Total:</b> ₹${order.total}<br>
               <b>Status:</b> ${order.status}<br>
               <b>Date:</b> ${new Date(order.date).toLocaleDateString()}
@@ -136,33 +198,43 @@ function loadOrders(){
 
       document.getElementById("orders").innerHTML = html;
 
-    })
-    .catch(err => {
-      console.log(err);
-      document.getElementById("orders").innerHTML = "Failed to load orders ❌";
     });
+}
+
+
+
+// 🔥 TOGGLE ORDERS
+let ordersLoaded = false;
+
+function toggleOrders(){
+
+  let box = document.getElementById("orders");
+
+  if(box.style.display === "none"){
+    box.style.display = "block";
+
+    if(!ordersLoaded){
+      loadOrders();
+      ordersLoaded = true;
+    }
+
+  } else {
+    box.style.display = "none";
+  }
 
 }
 
 
 
 // 🔻 NAV
-function goHome() {
-  window.location.href = "index.html";
-}
-
-function goAccount() {
-  window.location.href = "account.html";
-}
-
-function goCart() {
-  window.location.href = "cart.html";
-}
+function goHome(){ location.href = "index.html"; }
+function goAccount(){ location.href = "account.html"; }
+function goCart(){ location.href = "cart.html"; }
 
 
 // 🚀 INIT
+loadLogin();
 loadCart();
-loadOrders();
 
 </script>
 
