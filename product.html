@@ -124,7 +124,8 @@ h2 { margin: 10px 0 5px; }
   <!-- DETAILS -->
   <p><b>Brand:</b> <span id="brand"></span></p>
   <p><b>Description:</b> <span id="desc"></span></p>
-
+<h3>Specifications</h3>
+<div id="specs"></div>
   <!-- SIMILAR -->
   <div class="similar">
     <h3>Similar Products</h3>
@@ -148,7 +149,15 @@ document.getElementById("name").innerText = product.name;
 document.getElementById("price").innerText = "₹" + product.price;
 document.getElementById("brand").innerText = product.brand || "FARK";
 document.getElementById("desc").innerText = product.description || "-";
-
+document.getElementById("specs").innerHTML = `
+  <p><b>Brand:</b> ${product.brand || "-"}</p>
+  <p><b>Fabric:</b> ${product.fabric || "-"}</p>
+  <p><b>Type:</b> ${product.typeDetail || "-"}</p>
+  <p><b>Fit:</b> ${product.fit || "-"}</p>
+  <p><b>Pattern:</b> ${product.pattern || "-"}</p>
+  <p><b>Color:</b> ${product.color || "-"}</p>
+  <p><b>Occasion:</b> ${product.occasion || "-"}</p>
+`;
 // IMAGE
 let images = product.images || [product.image];
 document.getElementById("mainImage").src = images[0];
