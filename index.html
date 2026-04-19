@@ -270,14 +270,14 @@ function toggleFav(index){
   let html = "";
 
   // 🎬 VIDEO
-  if(data.type === "video"){
-    html = `
-      <video autoplay muted loop playsinline style="width:100%;height:250px;object-fit:cover;border-radius:10px;">
-        <source src="${data.videoUrl}">
-      </video>
-    `;
-  }
-
+ if(data.type === "video"){
+  html = `
+    <video autoplay muted loop playsinline 
+    style="width:100%;height:250px;object-fit:cover;border-radius:10px;">
+      <source src="${data.videoUrl}">
+    </video>
+  `;
+}
   // 🖼 SLIDER
   else if(data.type === "slider"){
     html = `
