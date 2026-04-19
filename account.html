@@ -81,7 +81,8 @@
 
 <!-- 🔐 LOGIN -->
 <div id="loginBox"></div>
-
+<h2 onclick="goWishlist()">❤️ Wishlist</h2>
+<div id="wishlistItems"></div>
 <!-- 🛒 CART -->
 <h2>🛒 Cart Items</h2>
 <div id="cartItems"></div>
@@ -139,7 +140,9 @@ function logout(){
   location.reload();
 }
 
-
+function goWishlist(){
+  location.href = "wishlist.html";
+}
 
 // 🛒 LOAD CART
 function loadCart() {
@@ -201,7 +204,29 @@ function loadOrders(){
     });
 }
 
+function loadWishlist(){
 
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+
+  let html = "";
+
+  if(fav.length === 0){
+    html = "<p class='empty'>No wishlist items</p>";
+  } else {
+
+    fav.forEach(p => {
+      html += `
+        <div class="card">
+          <h3>${p.name}</h3>
+          <p>₹${p.price}</p>
+        </div>
+      `;
+    });
+
+  }
+
+  document.getElementById("wishlistItems").innerHTML = html;
+                                      }
 
 // 🔥 TOGGLE ORDERS
 let ordersLoaded = false;
@@ -235,7 +260,7 @@ function goCart(){ location.href = "cart.html"; }
 // 🚀 INIT
 loadLogin();
 loadCart();
-
+loadWishlist(); // 👈 add this
 </script>
 
 </body>
