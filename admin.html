@@ -68,13 +68,26 @@ img {
 <input type="file" id="videoFile">
 <button onclick="uploadBannerVideo()">Upload Banner Video</button>
   <button onclick="addProduct()">Add Product</button>
-
+<button onclick="saveBanner()">Save Banner</button>
 <h2>Products</h2>
 <div id="products"></div>
 
 <h2>Orders</h2>
 <div id="orders"></div>
+<h3>Banner Type</h3>
 
+<select id="bannerType">
+  <option value="video">Video</option>
+  <option value="slider">Image Slider</option>
+</select>
+
+<br><br>
+
+<input type="text" id="videoUrl" placeholder="Video URL">
+
+<br><br>
+
+<input type="text" id="sliderImages" placeholder="Image URLs (comma separated)">
 <script>
 
 const BASE_URL = "https://fark618-backend.onrender.com";
@@ -312,7 +325,25 @@ function updateStatus(id, status){
     loadOrders();
   });
 }
-function toggleStock(cb){
+async function saveBanner(){
+
+  const type = document.getElementById("bannerType").value;
+  const videoUrl = document.getElementById("videoUrl").value;
+  const images = document.getElementById("sliderImages").value.split(",");
+
+  await fetch(API + "/banner", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      type,
+      videoUrl,
+      images
+    })
+  });
+
+  alert("Banner Updated ✅");
+}
+  function toggleStock(cb){
   const input = document.getElementById("stock-" + cb.value);
   input.style.display = cb.checked ? "inline-block" : "none";
 }
