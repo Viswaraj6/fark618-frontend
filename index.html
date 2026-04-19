@@ -1,59 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>FARK 618</title>
+<title>Account</title>
 
 <style>
 body {
   font-family: 'Segoe UI';
-  margin: 0;
-  padding: 10px;
-  background: #f1f3f6;
+  background:#f1f3f6;
+  margin:0;
+  padding:15px;
 }
 
-h1 { text-align: center; }
-#welcome { text-align:center; color:gray; }
-
-#banner {
-  width: 100%;
-  height: 220px;
-  overflow: hidden;
-  border-radius: 10px;
-  margin-bottom: 10px;
+/* 🔥 HEADER */
+.header {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  text-align:center;
+  box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
 
-.products {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-  gap: 10px;
+.header h2 {
+  margin:5px 0;
 }
 
-.card {
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-  text-align: center;
-  position: relative;
-  cursor: pointer;
+/* 🔥 MENU */
+.menu {
+  margin-top:20px;
 }
 
-.card img {
-  width: 100%;
-  height: 180px;
-  object-fit: contain;
+.item {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+  transition:0.3s;
 }
 
-.price { color: green; }
-
-.fav {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: white;
-  border-radius: 50%;
-  padding: 5px;
+.item:hover {
+  background:#eee;
 }
 
+/* 🔥 LOGOUT */
+.logout {
+  background:red;
+  color:white;
+  text-align:center;
+  padding:12px;
+  border-radius:10px;
+  margin-top:20px;
+  cursor:pointer;
+}
+
+/* 🔥 BOTTOM NAV */
 #bottomNav {
   position: fixed;
   bottom: 0;
@@ -62,17 +65,35 @@ h1 { text-align: center; }
   justify-content: space-around;
   background: white;
   padding: 10px;
+  border-top:1px solid #ccc;
 }
 </style>
 </head>
 
 <body>
 
-<h1>FARK 618 🛍️</h1>
-<h3 id="welcome"></h3>
+<div class="header">
+  <h2>👤 Account</h2>
+  <p id="username"></p>
+</div>
 
-<div id="banner"></div>
-<div id="products" class="products"></div>
+<div class="menu">
+
+  <div class="item" onclick="goWishlist()">
+    ❤️ Wishlist <span>></span>
+  </div>
+
+  <div class="item" onclick="goCart()">
+    🛒 Cart <span>></span>
+  </div>
+
+  <div class="item" onclick="goOrders()">
+    📦 Orders <span>></span>
+  </div>
+
+</div>
+
+<div class="logout" onclick="logout()">Logout</div>
 
 <div id="bottomNav">
   <div onclick="location.href='index.html'">🏠 Home</div>
@@ -82,72 +103,38 @@ h1 { text-align: center; }
 
 <script>
 
-const API = "https://fark618-backend.onrender.com";
+// 🔥 USER NAME
+let user = localStorage.getItem("user");
 
-document.getElementById("welcome").innerText =
-  localStorage.getItem("user") || "Guest";
-
-
-// 🔥 LOAD PRODUCTS
-async function loadProducts(){
-  try {
-    const res = await fetch(API + "/products");
-    const data = await res.json();
-
-    let html = "";
-
-    data.forEach((p,i)=>{
-      html += `
-      <div class="card" onclick="openProduct(${i})">
-        <div class="fav">❤️</div>
-        <img src="${p.image || 'https://via.placeholder.com/200'}">
-        <h4>${p.name}</h4>
-        <div class="price">₹${p.price}</div>
-      </div>
-      `;
-    });
-
-    document.getElementById("products").innerHTML = html;
-
-  } catch(e){
-    console.log("Product error", e);
-  }
+if(user){
+  document.getElementById("username").innerText = "Welcome, " + user;
+} else {
+  document.getElementById("username").innerText = "Guest";
 }
 
 
-// 🔥 OPEN PRODUCT
-function openProduct(i){
-  fetch(API + "/products")
-  .then(r=>r.json())
-  .then(d=>{
-    localStorage.setItem("selectedProduct", JSON.stringify(d[i]));
-    location.href="product.html";
-  });
+// 🔥 NAVIGATION
+function goWishlist(){
+  location.href = "wishlist.html";
+}
+
+function goCart(){
+  location.href = "cart.html";
+}
+
+function goOrders(){
+  location.href = "track.html"; // already iruku
 }
 
 
-// 🔥 LOAD BANNER
-async function loadBanner(){
-  try{
-    const res = await fetch(API + "/banner");
-    const data = await res.json();
+// 🔥 LOGOUT
+function logout(){
+  localStorage.removeItem("user");
+  localStorage.removeItem("cart");
 
-    if(data.type === "video"){
-      document.getElementById("banner").innerHTML =
-        '<video autoplay muted loop style="width:100%;height:100%;object-fit:cover">' +
-        '<source src="'+data.videoUrl+'">' +
-        '</video>';
-    }
-
-  }catch(e){
-    console.log("Banner error", e);
-  }
+  alert("Logged out ✅");
+  location.href = "login.html";
 }
-
-
-// INIT
-loadProducts();
-loadBanner();
 
 </script>
 
