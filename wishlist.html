@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Wishlist ❤️</title>
+
+<style>
+body {
+  font-family: Arial;
+  background:#f5f5f5;
+  padding:15px;
+}
+
+.card {
+  background:white;
+  padding:10px;
+  margin:10px 0;
+  border-radius:10px;
+  text-align:center;
+}
+
+img {
+  width:120px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>❤️ My Wishlist</h2>
+
+<div id="wishlist"></div>
+
+<script>
+
+let fav = JSON.parse(localStorage.getItem("fav")) || [];
+
+let html = "";
+
+if(fav.length === 0){
+  html = "<p>No items</p>";
+} else {
+
+  fav.forEach((p,i) => {
+    html += `
+      <div class="card">
+        <img src="${p.image}">
+        <h3>${p.name}</h3>
+        <p>₹${p.price}</p>
+
+        <button onclick="removeItem(${i})">Remove ❌</button>
+      </div>
+    `;
+  });
+
+}
+
+document.getElementById("wishlist").innerHTML = html;
+
+
+// ❌ REMOVE
+function removeItem(i){
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+  fav.splice(i,1);
+  localStorage.setItem("fav", JSON.stringify(fav));
+  location.reload();
+}
+
+</script>
+
+</body>
+</html>
