@@ -1,59 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Account</title>
+<title>FARK 618</title>
 
 <style>
 body {
   font-family: 'Segoe UI';
-  background:#f1f3f6;
-  margin:0;
-  padding:15px;
+  margin: 0;
+  padding: 10px;
+  background: #f1f3f6;
 }
 
-/* 🔥 HEADER */
-.header {
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  text-align:center;
-  box-shadow:0 2px 10px rgba(0,0,0,0.1);
+h1 { text-align: center; }
+#welcome { text-align:center; color:gray; }
+
+/* 🔥 BANNER */
+#banner {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
 
-.header h2 {
-  margin:5px 0;
+/* 🔥 GRID */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(170px,1fr));
+  gap: 12px;
 }
 
-/* 🔥 MENU */
-.menu {
-  margin-top:20px;
+/* 🔥 CARD */
+.card {
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.item {
-  background:white;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  cursor:pointer;
-  transition:0.3s;
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
-.item:hover {
-  background:#eee;
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
 }
 
-/* 🔥 LOGOUT */
-.logout {
-  background:red;
-  color:white;
-  text-align:center;
-  padding:12px;
-  border-radius:10px;
-  margin-top:20px;
-  cursor:pointer;
+.price { 
+  color: green; 
+  font-weight: bold;
+}
+
+/* 🔥 FAVORITE ICON */
+.fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border-radius: 50%;
+  padding: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  color: grey;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+.fav.active {
+  color: red;
+}
+
+.fav:hover {
+  transform: scale(1.2);
 }
 
 /* 🔥 BOTTOM NAV */
@@ -72,69 +96,134 @@ body {
 
 <body>
 
-<div class="header">
-  <h2>👤 Account</h2>
-  <p id="username"></p>
-</div>
+<h1>FARK 618 🛍️</h1>
+<h3 id="welcome"></h3>
 
-<div class="menu">
-
-  <div class="item" onclick="goWishlist()">
-    ❤️ Wishlist <span>></span>
-  </div>
-
-  <div class="item" onclick="goCart()">
-    🛒 Cart <span>></span>
-  </div>
-
-  <div class="item" onclick="goOrders()">
-    📦 Orders <span>></span>
-  </div>
-
-</div>
-
-<div class="logout" onclick="logout()">Logout</div>
+<div id="banner"></div>
+<div id="products" class="products"></div>
 
 <div id="bottomNav">
   <div onclick="location.href='index.html'">🏠 Home</div>
-  <div onclick="location.href='account.html'">👤 Account</div>
+  <div onclick="location.href='wishlist.html'">❤️ Wishlist</div>
   <div onclick="location.href='cart.html'">🛒 Cart</div>
 </div>
 
 <script>
 
-// 🔥 USER NAME
-let user = localStorage.getItem("user");
+const API = "https://fark618-backend.onrender.com";
 
-if(user){
-  document.getElementById("username").innerText = "Welcome, " + user;
-} else {
-  document.getElementById("username").innerText = "Guest";
+let productsData = [];
+
+document.getElementById("welcome").innerText =
+  localStorage.getItem("user") || "Guest";
+
+
+// 🔥 GET WISHLIST
+function getFav(){
+  return JSON.parse(localStorage.getItem("fav")) || [];
+}
+
+function isFav(id){
+  return getFav().some(p => p._id === id);
 }
 
 
-// 🔥 NAVIGATION
-function goWishlist(){
-  location.href = "wishlist.html";
+// 🔥 TOGGLE FAVORITE
+function toggleFav(i){
+  let fav = getFav();
+  const p = productsData[i];
+
+  const exist = fav.find(x => x._id === p._id);
+
+  if(exist){
+    fav = fav.filter(x => x._id !== p._id);
+  } else {
+    fav.push(p);
+  }
+
+  localStorage.setItem("fav", JSON.stringify(fav));
+
+  loadProducts(); // refresh UI
 }
 
-function goCart(){
-  location.href = "cart.html";
+
+// 🔥 LOAD PRODUCTS
+async function loadProducts(){
+  try {
+    const res = await fetch(API + "/products");
+    const data = await res.json();
+
+    productsData = data;
+
+    let html = "";
+
+    data.forEach((p,i)=>{
+      html += `
+      <div class="card" onclick="openProduct(${i})">
+
+        <div class="fav ${isFav(p._id) ? 'active' : ''}" 
+             onclick="event.stopPropagation(); toggleFav(${i})">
+          ❤️
+        </div>
+
+        <img src="${p.image || 'https://via.placeholder.com/200'}">
+
+        <h4>${p.name}</h4>
+        <div class="price">₹${p.price}</div>
+
+      </div>
+      `;
+    });
+
+    document.getElementById("products").innerHTML = html;
+
+  } catch(e){
+    console.log("Product error", e);
+  }
 }
 
-function goOrders(){
-  location.href = "track.html"; // already iruku
+
+// 🔥 OPEN PRODUCT
+function openProduct(i){
+  localStorage.setItem("selectedProduct", JSON.stringify(productsData[i]));
+  location.href="product.html";
 }
 
 
-// 🔥 LOGOUT
-function logout(){
-  localStorage.removeItem("user");
-  localStorage.removeItem("cart");
+// 🔥 LOAD BANNER
+async function loadBanner(){
+  try{
+    const res = await fetch(API + "/banner");
+    const data = await res.json();
 
-  alert("Logged out ✅");
-  location.href = "login.html";
+    let html = "";
+
+    if(data.type === "video"){
+      html =
+        '<video autoplay muted loop style="width:100%;height:100%;object-fit:cover">' +
+        '<source src="'+data.videoUrl+'">' +
+        '</video>';
+    }
+
+    else if(data.type === "slider"){
+      html = '<div style="display:flex;overflow-x:auto;gap:10px;">';
+      data.images.forEach(img=>{
+        html += `<img src="${img}" style="height:220px;border-radius:10px;">`;
+      });
+      html += '</div>';
+    }
+
+    document.getElementById("banner").innerHTML = html;
+
+  }catch(e){
+    console.log("Banner error", e);
+  }
 }
+
+
+// INIT
+loadProducts();
+loadBanner();
 
 </script>
 
