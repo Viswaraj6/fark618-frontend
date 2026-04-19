@@ -185,11 +185,13 @@ async function loadProducts() {
       options += `<option value="${s.trim()}">${s.trim()}</option>`;
     });
 
-   html += `
+  html += `
   <div class="card">
 
-    <!-- ❤️ FAVORITE ICON -->
-    <div class="fav-icon" onclick="addToFav(${index})">🤍</div>
+    <!-- ❤️ ICON -->
+    <div class="fav-icon" onclick="toggleFav(${index})">
+      ${isFav(p._id) ? "❤️" : "🤍"}
+    </div>
 
     <img
       src="${p.image || 'https://via.placeholder.com/200'}"
@@ -261,6 +263,31 @@ async function loadBannerVideo(){
 }
 
 loadBannerVideo();
+  function getFav(){
+  return JSON.parse(localStorage.getItem("fav")) || [];
+}
+
+function isFav(id){
+  return getFav().some(p => p._id === id);
+}
+
+function toggleFav(index){
+
+  let fav = getFav();
+  const p = productsData[index];
+
+  const exist = fav.find(item => item._id === p._id);
+
+  if(exist){
+    fav = fav.filter(item => item._id !== p._id);
+  } else {
+    fav.push(p);
+  }
+
+  localStorage.setItem("fav", JSON.stringify(fav));
+
+  loadProducts(); // 🔥 refresh UI
+}
   async function loadBanner(){
 
   const res = await fetch("https://fark618-backend.onrender.com/banner");
