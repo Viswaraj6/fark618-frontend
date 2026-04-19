@@ -319,18 +319,21 @@ function deleteProduct(id){
 
 /* ORDERS */
 function loadOrders(){
- fetch(BASE_URL + "/orders")
+  fetch(BASE_URL + "/orders")
   .then(res => res.json())
   .then(data => {
 
     let html = "";
 
-    data.forEach(o => {
+    (data || []).forEach(o => {
 
       let items = "";
 
       (o.products || []).forEach(i=>{
-        items += `<li>${i.name} - ₹${i.price} (Size: ${i.size})</li>`;
+        items += `<li>
+          ${i.name || "Item"} - ₹${i.price || 0}
+          ${i.size ? `(Size: ${i.size})` : ""}
+        </li>`;
       });
 
       html += `
@@ -338,7 +341,7 @@ function loadOrders(){
           <p><b>${o.name || ""}</b></p>
           <p>${o.phone || ""}</p>
           <p>${o.address || ""}</p>
-          <p>Total: ₹${o.total}</p>
+          <p>Total: ₹${o.total || 0}</p>
 
           <select onchange="updateStatus('${o._id}',this.value)">
             <option ${o.status==="Pending"?"selected":""}>Pending</option>
