@@ -97,10 +97,13 @@ h1 { text-align: center; }
 }
 
 /* ❤️ active (wishlist) */
+.fav {
+  color: #bbb;   /* grey */
+}
+
 .fav.active {
   color: red;
 }
-
 /* hover effect */
 .fav:hover {
   transform: scale(1.1);
@@ -201,10 +204,10 @@ async function loadProducts(){
       html += `
       <div class="card" onclick="openProduct(${i})">
 
-        <div class="fav ${isFav(p._id) ? 'active' : ''}" 
-             onclick="event.stopPropagation(); toggleFav(${i})">
-          ❤️
-        </div>
+       <div class="fav ${isFav(p._id) ? 'active' : ''}" 
+     onclick="event.stopPropagation(); toggleFav(${i})">
+  🤍
+</div>
 
         <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}">
 
