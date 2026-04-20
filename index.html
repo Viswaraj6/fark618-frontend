@@ -98,11 +98,11 @@ h1 { text-align: center; }
 
 /* ❤️ active (wishlist) */
 .fav {
-  color: red;   /* grey */
+  color: #888;   /* grey */
 }
 
 .fav.active {
-  color: #888;
+  color: red;
 }
 /* hover effect */
 .fav:hover {
@@ -113,23 +113,41 @@ h1 { text-align: center; }
   position: fixed;
   bottom: 0;
   width: 100%;
+  background: #fff;
   display: flex;
   justify-content: space-around;
-  background: white;
-  padding: 10px;
-  border-top:1px solid #ccc;
-}
-  .heart {
-  font-size: 18px;
-  color: #bbb;
+  border-top: 1px solid #ddd;
+  padding: 6px 0;
+  z-index: 1000;
 }
 
-.fav .heart {
+.nav-item {
+  text-align: center;
+  flex: 1;
+  color: #777;
+  font-size: 12px;
+  cursor: pointer;
   transition: 0.2s;
 }
 
-.fav.active .heart {
-  color: red;
+.nav-item .icon {
+  font-size: 20px;
+  display: block;
+  transition: 0.2s;
+}
+
+/* 🔥 ACTIVE STATE */
+.nav-item.active {
+  color: #2874f0;   /* Flipkart blue */
+}
+
+.nav-item.active .icon {
+  transform: scale(1.2);
+}
+
+/* 🔥 CLICK ANIMATION */
+.nav-item:active .icon {
+  transform: scale(0.9);
 }
 </style>
 </head>
@@ -143,9 +161,22 @@ h1 { text-align: center; }
 <div id="products" class="products"></div>
 
 <div id="bottomNav">
-  <div onclick="location.href='index.html'">🏠 Home</div>
-  <div onclick="location.href='account.html'">👤Account</div>
-  <div onclick="location.href='cart.html'">🛒 Cart</div>
+
+  <div class="nav-item active" onclick="goPage('index.html', this)">
+    <span class="icon">🏠</span>
+    <span class="label">Home</span>
+  </div>
+
+  <div class="nav-item" onclick="goPage('account.html', this)">
+    <span class="icon">👤</span>
+    <span class="label">Account</span>
+  </div>
+
+  <div class="nav-item" onclick="goPage('cart.html', this)">
+    <span class="icon">🛒</span>
+    <span class="label">Cart</span>
+  </div>
+
 </div>
 
 <script>
@@ -243,7 +274,21 @@ function openProduct(i){
   localStorage.setItem("selectedProduct", JSON.stringify(productsData[i]));
   location.href="product.html";
 }
+<script>
+function goPage(page, el){
 
+  // remove active from all
+  document.querySelectorAll(".nav-item")
+    .forEach(x => x.classList.remove("active"));
+
+  // add active to clicked
+  el.classList.add("active");
+
+  // navigate
+  setTimeout(()=>{
+    location.href = page;
+  },100);
+}
 
 // ==============================
 // 🎬 LOAD BANNER
