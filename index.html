@@ -119,6 +119,18 @@ h1 { text-align: center; }
   padding: 10px;
   border-top:1px solid #ccc;
 }
+  .heart {
+  font-size: 18px;
+  color: #bbb;
+}
+
+.fav .heart {
+  transition: 0.2s;
+}
+
+.fav.active .heart {
+  color: red;
+}
 </style>
 </head>
 
@@ -186,7 +198,6 @@ function toggleFav(i){
   loadProducts(); // refresh UI
 }
 
-
 // ==============================
 // 📦 LOAD PRODUCTS
 // ==============================
@@ -204,9 +215,8 @@ async function loadProducts(){
       html += `
       <div class="card" onclick="openProduct(${i})">
 
-       <div class="fav ${isFav(p._id) ? 'active' : ''}" 
-     onclick="event.stopPropagation(); toggleFav(${i})">
-  🤍
+      <div class="fav" onclick="event.stopPropagation(); toggleFav(${i})">
+  <span class="heart">${isFav(p._id) ? '♥' : '♡'}</span>
 </div>
 
         <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}">
