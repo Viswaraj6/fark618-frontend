@@ -51,6 +51,7 @@ img {
 <!-- PRODUCT -->
 <input id="name" placeholder="Product Name">
 <input id="price" placeholder="Price">
+  <input id="stock" placeholder="Total Stock">
 <select id="category">
   <option value="">Select Category</option>
 
@@ -169,7 +170,6 @@ async function addProduct(){
 
   const name = document.getElementById("name").value;
   const price = Number(document.getElementById("price").value);
-  const stock = Number(document.getElementById("stock").value);
   const type = document.getElementById("type").value;
   const category = document.getElementById("category").value;
 const brand = document.getElementById("brand").value;
@@ -196,10 +196,6 @@ const description = document.getElementById("description").value;
     });
   });
 
-  if(!name || !price || !stock){
-    alert("Fill all fields ❗");
-    return;
-  }
 const files = document.getElementById("imageFiles").files;
 
 let images = [];
