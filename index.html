@@ -43,6 +43,7 @@ h1 { text-align: center; }
   cursor: pointer;
   transition: 0.2s;
   border: 1px solid #eee;
+  position: relative;
 }
 
 .card:hover {
@@ -83,22 +84,26 @@ h1 { text-align: center; }
   right: 8px;
   background: white;
   border-radius: 50%;
-  padding: 6px;
-  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
   cursor: pointer;
-  color: grey;
+  color: #bbb;                 /* 🔥 default grey */
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: 0.3s;
+  transition: 0.2s;
 }
+
+/* ❤️ active (wishlist) */
 .fav.active {
   color: red;
 }
 
+/* hover effect */
 .fav:hover {
-  transform: scale(1.2);
-}
-.fav-icon:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
 }
 /* 🔥 BOTTOM NAV */
 #bottomNav {
@@ -139,39 +144,32 @@ document.getElementById("welcome").innerText =
 
 
 // 🔥 GET WISHLIST
-function getFav(){
-  return JSON.parse(localStorage.getItem("fav")) || [];
-}
-
-function isFav(id){
-  return getFav().some(p => p.id === id);
-}
-
 function toggleFav(i){
 
   let fav = getFav();
   const p = productsData[i];
 
-  const id = p._id || i;
+  const id = p._id;
 
   const exist = fav.find(item => item.id === id);
 
   if(exist){
+    // ❌ remove from wishlist
     fav = fav.filter(item => item.id !== id);
   } else {
+    // ❤️ add to wishlist
     fav.push({
       id: id,
       name: p.name,
       price: p.price,
-      image: p.image
+      image: p.images?.[0] || p.image   // 🔥 FIX HERE
     });
   }
 
   localStorage.setItem("fav", JSON.stringify(fav));
 
-  loadProducts(); // refresh UI
+  loadProducts();  // refresh UI
 }
-
 // 🔥 LOAD PRODUCTS
 async function loadProducts(){
   try {
