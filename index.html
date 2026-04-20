@@ -303,9 +303,9 @@ h1 { text-align: center; }
 
 </div>
   <div class="categories">
-  <button onclick="filterCategory('all')">All</button>
-  <button onclick="filterCategory('shirt')">Shirts</button>
-  <button onclick="filterCategory('pant')">Pants</button>
+ <button onclick="filterCategory('all', this)">All</button>
+<button onclick="filterCategory('shirt', this)">Shirts</button>
+<button onclick="filterCategory('pant', this)">Pants</button>
 </div>
 <h3 id="welcome"></h3>
 
@@ -385,23 +385,17 @@ function toggleFav(i){
 // 📦 LOAD PRODUCTS
 // ==============================
 async function loadProducts(){
-  const res = await fetch(API + "/products");
-  const data = await res.json();
+  try {
+    const res = await fetch(API + "/products");
+    const data = await res.json();
 
-  productsData = data;
-  renderProducts(data);
-}
-      `;
-    });
-
-    document.getElementById("products").innerHTML = html;
+    productsData = data;
+    renderProducts(data);
 
   } catch(e){
     console.log("Product error", e);
   }
 }
-
-
 // ==============================
 // 🔍 OPEN PRODUCT
 // ==============================
@@ -432,12 +426,12 @@ document.getElementById("searchInput").addEventListener("input", function(e){
 
   renderProducts(filtered);
 });
-  function filterCategory(type){
+function filterCategory(type, el){
 
   document.querySelectorAll(".categories button")
     .forEach(btn => btn.classList.remove("active"));
 
-  event.target.classList.add("active");
+  el.classList.add("active");
 
   if(type === "all"){
     renderProducts(productsData);
