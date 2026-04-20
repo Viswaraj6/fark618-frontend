@@ -170,6 +170,7 @@ async function addProduct(){
 
   const name = document.getElementById("name").value;
   const price = Number(document.getElementById("price").value);
+  const stock = Number(document.getElementById("stock").value);
   const type = document.getElementById("type").value;
   const category = document.getElementById("category").value;
 const brand = document.getElementById("brand").value;
@@ -265,7 +266,10 @@ else{
   description
 })
     });
-
+if(!name || !price || !stock){
+  alert("Fill all required fields ❗");
+  return;
+}
     alert("Product Added ✅");
     loadProducts();
   }
