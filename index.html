@@ -12,7 +12,30 @@ body {
 }
 h1 { text-align: center; }
 #welcome { text-align:center; color:gray; }
+.logo {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #111;
+  margin-top: 10px;
+}
 
+.logo .num {
+  display: block;
+  font-size: 24px;
+  letter-spacing: 10px;
+  margin-top: 5px;
+}
+
+.logo .line {
+  display: inline-block;
+  width: 60px;
+  height: 2px;
+  background: #111;
+  vertical-align: middle;
+  margin: 0 10px;
+}
 /* 🔥 BANNER */
 #banner {
   width: 100%;
@@ -154,7 +177,12 @@ h1 { text-align: center; }
 
 <body>
 
-<h1>FARK 618 🛍️</h1>
+<div class="logo">
+  FARK
+  <span class="line"></span>
+  <span class="num">618</span>
+  <span class="line"></span>
+</div>
 <h3 id="welcome"></h3>
 
 <div id="banner"></div>
