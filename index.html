@@ -139,38 +139,54 @@ const API = "https://fark618-backend.onrender.com";
 
 let productsData = [];
 
+// 👤 Welcome
 document.getElementById("welcome").innerText =
   localStorage.getItem("user") || "Guest";
 
 
-// 🔥 GET WISHLIST
+// ==============================
+// ❤️ WISHLIST FUNCTIONS
+// ==============================
+
+// Get wishlist
+function getFav(){
+  return JSON.parse(localStorage.getItem("fav")) || [];
+}
+
+// Check if product is in wishlist
+function isFav(id){
+  return getFav().some(p => p.id === id);
+}
+
+// Toggle wishlist
 function toggleFav(i){
 
   let fav = getFav();
   const p = productsData[i];
-
   const id = p._id;
 
   const exist = fav.find(item => item.id === id);
 
   if(exist){
-    // ❌ remove from wishlist
     fav = fav.filter(item => item.id !== id);
   } else {
-    // ❤️ add to wishlist
     fav.push({
       id: id,
       name: p.name,
       price: p.price,
-      image: p.images?.[0] || p.image   // 🔥 FIX HERE
+      image: p.images?.[0] || p.image
     });
   }
 
   localStorage.setItem("fav", JSON.stringify(fav));
 
-  loadProducts();  // refresh UI
+  loadProducts(); // refresh UI
 }
-// 🔥 LOAD PRODUCTS
+
+
+// ==============================
+// 📦 LOAD PRODUCTS
+// ==============================
 async function loadProducts(){
   try {
     const res = await fetch(API + "/products");
@@ -182,24 +198,22 @@ async function loadProducts(){
 
     data.forEach((p,i)=>{
 
-  const id = p._id || i;
+      html += `
+      <div class="card" onclick="openProduct(${i})">
 
-  html += `
-  <div class="card" onclick="openProduct(${i})">
+        <div class="fav ${isFav(p._id) ? 'active' : ''}" 
+             onclick="event.stopPropagation(); toggleFav(${i})">
+          ❤️
+        </div>
 
-    <div class="fav ${isFav(id) ? 'active' : ''}" 
-         onclick="event.stopPropagation(); toggleFav(${i})">
-      ❤️
-    </div>
+        <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}">
 
-   <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}">
+        <h4>${p.name}</h4>
+        <div class="price">₹${p.price}</div>
 
-    <h4>${p.name}</h4>
-    <div class="price">₹${p.price}</div>
-
-  </div>
-  `;
-});
+      </div>
+      `;
+    });
 
     document.getElementById("products").innerHTML = html;
 
@@ -209,14 +223,18 @@ async function loadProducts(){
 }
 
 
-// 🔥 OPEN PRODUCT
+// ==============================
+// 🔍 OPEN PRODUCT
+// ==============================
 function openProduct(i){
   localStorage.setItem("selectedProduct", JSON.stringify(productsData[i]));
   location.href="product.html";
 }
 
 
-// 🔥 LOAD BANNER
+// ==============================
+// 🎬 LOAD BANNER
+// ==============================
 async function loadBanner(){
   try{
     const res = await fetch(API + "/banner");
@@ -225,10 +243,10 @@ async function loadBanner(){
     let html = "";
 
     if(data.type === "video"){
-     html =
-  `<video autoplay muted loop playsinline preload="auto">
-    <source src="${data.videoUrl}">
-  </video>`;
+      html = `
+      <video autoplay muted loop playsinline>
+        <source src="${data.videoUrl}">
+      </video>`;
     }
 
     else if(data.type === "slider"){
@@ -247,7 +265,9 @@ async function loadBanner(){
 }
 
 
-// INIT
+// ==============================
+// 🚀 INIT
+// ==============================
 loadProducts();
 loadBanner();
 
