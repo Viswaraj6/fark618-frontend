@@ -258,6 +258,26 @@ h1 { text-align: center; }
 .nav-item:active .icon {
   transform: scale(0.9);
 }
+  .categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px;
+  background: #fff;
+}
+
+.categories button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  background: #eee;
+  cursor: pointer;
+}
+
+.categories button.active {
+  background: #2874f0;
+  color: #fff;
+}
 </style>
 </head>
 
@@ -281,6 +301,11 @@ h1 { text-align: center; }
     <input type="text" id="searchInput" placeholder="Search for products...">
   </div>
 
+</div>
+  <div class="categories">
+  <button onclick="filterCategory('all')">All</button>
+  <button onclick="filterCategory('shirt')">Shirts</button>
+  <button onclick="filterCategory('pant')">Pants</button>
 </div>
 <h3 id="welcome"></h3>
 
@@ -360,29 +385,12 @@ function toggleFav(i){
 // 📦 LOAD PRODUCTS
 // ==============================
 async function loadProducts(){
-  try {
-    const res = await fetch(API + "/products");
-    const data = await res.json();
+  const res = await fetch(API + "/products");
+  const data = await res.json();
 
-    productsData = data;
-
-    let html = "";
-
-    data.forEach((p,i)=>{
-
-      html += `
-      <div class="card" onclick="openProduct(${i})">
-
-      <div class="fav" onclick="event.stopPropagation(); toggleFav(${i})">
-  <span class="heart">${isFav(p._id) ? '♥' : '♡'}</span>
-</div>
-
-        <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}">
-
-        <h4>${p.name}</h4>
-        <div class="price">₹${p.price}</div>
-
-      </div>
+  productsData = data;
+  renderProducts(data);
+}
       `;
     });
 
@@ -424,7 +432,45 @@ document.getElementById("searchInput").addEventListener("input", function(e){
 
   renderProducts(filtered);
 });
-  
+  function filterCategory(type){
+
+  document.querySelectorAll(".categories button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  event.target.classList.add("active");
+
+  if(type === "all"){
+    renderProducts(productsData);
+  } else {
+    const filtered = productsData.filter(p =>
+      p.name.toLowerCase().includes(type)
+    );
+    renderProducts(filtered);
+  }
+}
+  function renderProducts(data){
+
+  let html = "";
+
+  data.forEach((p,i)=>{
+    html += `
+    <div class="card" onclick="openProduct(${i})">
+
+      <div class="fav" onclick="event.stopPropagation(); toggleFav(${i})">
+        <span class="heart">${isFav(p._id) ? '♥' : '♡'}</span>
+      </div>
+
+      <img src="${p.images?.[0] || p.image || 'https://via.placeholder.com/300'}">
+
+      <h4>${p.name}</h4>
+      <div class="price">₹${p.price}</div>
+
+    </div>
+    `;
+  });
+
+  document.getElementById("products").innerHTML = html;
+}
 // ==============================
 // 🎬 LOAD BANNER
 // ==============================
