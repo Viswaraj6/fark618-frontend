@@ -240,39 +240,42 @@ else{
   send();
 }
 
-  async function send(){
-    await fetch(BASE_URL + "/add-product",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + localStorage.getItem("adminToken")
-      },
-      body: JSON.stringify({
-  name,
-  price,
-  stock,
-  type,
-  category,      
-  sizes,
-  sizeStock,
-  images,   // ✅ correct
-  brand,
-  fabric,
-  typeDetail,
-  fit,
-  pattern,
-  color,
-  occasion,
-  description
-})
-    });
-if(!name || !price || !stock){
-  alert("Fill all required fields ❗");
-  return;
-}
-    alert("Product Added ✅");
-    loadProducts();
+async function send(){
+
+  // ✅ VALIDATION FIRST
+  if(!name || !price || !stock){
+    alert("Fill all required fields ❗");
+    return;
   }
+
+  await fetch(BASE_URL + "/add-product",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer " + localStorage.getItem("adminToken")
+    },
+    body: JSON.stringify({
+      name,
+      price,
+      stock,
+      type,
+      category,
+      sizes,
+      sizeStock,
+      images,
+      brand,
+      fabric,
+      typeDetail,
+      fit,
+      pattern,
+      color,
+      occasion,
+      description
+    })
+  });
+
+  alert("Product Added ✅");
+  loadProducts();
 }
 
 /* BANNER UPLOAD */
