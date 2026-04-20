@@ -60,6 +60,25 @@ img {
 <input id="color" placeholder="Color">
 <input id="occasion" placeholder="Occasion">
 <input id="description" placeholder="Description">
+  <!-- 🔥 CATEGORY -->
+<select id="category">
+  <option value="">Select Category</option>
+
+  <optgroup label="Shirts">
+    <option value="smart shirt">Smart Shirt</option>
+    <option value="casual shirt">Casual Shirt</option>
+  </optgroup>
+
+  <optgroup label="Pants">
+    <option value="linen pant">Linen Pant</option>
+    <option value="relax pant">Relax Pant</option>
+    <option value="jeans">Jeans</option>
+  </optgroup>
+
+  <optgroup label="T-Shirts">
+    <option value="tshirt">T-Shirt</option>
+  </optgroup>
+</select>
 <select id="type">
   <option value="shirt">Shirt</option>
   <option value="pant">Pant</option>
@@ -154,6 +173,7 @@ async function addProduct(){
   const price = Number(document.getElementById("price").value);
   const stock = Number(document.getElementById("stock").value);
   const type = document.getElementById("type").value;
+  const category = document.getElementById("category").value;
 const brand = document.getElementById("brand").value;
 const fabric = document.getElementById("fabric").value;
 const typeDetail = document.getElementById("typeDetail").value;
@@ -237,6 +257,7 @@ else{
   price,
   stock,
   type,
+  category,      
   sizes,
   sizeStock,
   images,   // ✅ correct
