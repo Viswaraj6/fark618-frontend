@@ -367,15 +367,17 @@ function loadProducts(){
 
 /* DELETE */
 function deleteProduct(id){
+
   if(!confirm("Delete?")) return;
 
-  fetch(BASE_URL+"/products/"+id,{
-    method:"DELETE",
-    headers:{
-      "Authorization":"Bearer "+localStorage.getItem("adminToken")
+  fetch(BASE_URL + "/products/" + id, {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + localStorage.getItem("adminToken")
     }
   })
-  .then(()=>loadProducts());
+  .then(res => res.json())
+  .then(() => loadProducts());
 }
 
 /* ORDERS */
