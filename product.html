@@ -480,7 +480,6 @@ const product = JSON.parse(localStorage.getItem("selectedProduct"));
 document.getElementById("name").innerText = product.name;
 document.getElementById("price").innerText = "₹" + product.price;
 document.getElementById("specs").innerHTML = `
-  <p><b>Description:</b> ${product.description || "-"}</p>
   <ul style="padding-left:15px;">
     <li><b>Brand:</b> ${product.brand || "-"}</li>
     <li><b>Fabric:</b> ${product.fabric || "-"}</li>
@@ -490,6 +489,10 @@ document.getElementById("specs").innerHTML = `
     <li><b>Color:</b> ${product.color || "-"}</li>
     <li><b>Occasion:</b> ${product.occasion || "-"}</li>
   </ul>
+
+  <p style="margin-top:10px;">
+    <b>Description:</b> ${product.description || "-"}
+  </p>
 `;
 // IMAGE
 let images = [];
