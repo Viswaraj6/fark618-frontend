@@ -136,7 +136,18 @@ h2 { margin: 10px 0 5px; }
   cursor: pointer;
   position: relative;
 }
+.icon i{
+  font-size: 18px;
+  color: #111;
+  transition: 0.3s;
+}
 
+.icon:hover i{
+  color: #ff3f6c;  /* 🔥 hover effect */
+}
+  .icon:hover .fa-heart{
+  font-weight: 900;
+}
 .cart span{
   position: absolute;
   top: -6px;
@@ -158,16 +169,20 @@ h2 { margin: 10px 0 5px; }
 
   <div class="menu-right">
 
-    <div class="icon">🔍</div>
+  <div class="icon"><i class="fa-solid fa-magnifying-glass"></i></div>
 
-    <div class="icon" onclick="goPage('wishlist.html')">❤️</div>
+<div class="icon" onclick="goPage('wishlist.html')">
+  <i class="fa-regular fa-heart"></i>
+</div>
 
-    <div class="icon" onclick="goPage('account.html')">👤</div>
+<div class="icon" onclick="goPage('account.html')">
+  <i class="fa-regular fa-user"></i>
+</div>
 
-    <div class="icon cart" onclick="goPage('cart.html')">
-      🛒
-      <span id="cartCount">0</span>
-    </div>
+<div class="icon cart" onclick="goPage('cart.html')">
+  <i class="fa-solid fa-bag-shopping"></i>
+  <span id="cartCount">0</span>
+</div>
 
   </div>
 
