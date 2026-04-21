@@ -479,11 +479,8 @@ const product = JSON.parse(localStorage.getItem("selectedProduct"));
 
 document.getElementById("name").innerText = product.name;
 document.getElementById("price").innerText = "₹" + product.price;
-document.getElementById("brand").innerText = product.brand || "FARK";
-document.getElementById("desc").innerText = product.description || "-";
 document.getElementById("specs").innerHTML = `
   <p><b>Description:</b> ${product.description || "-"}</p>
-
   <ul style="padding-left:15px;">
     <li><b>Brand:</b> ${product.brand || "-"}</li>
     <li><b>Fabric:</b> ${product.fabric || "-"}</li>
