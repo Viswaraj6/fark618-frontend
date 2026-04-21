@@ -159,7 +159,17 @@ document.getElementById("specs").innerHTML = `
   <p><b>Occasion:</b> ${product.occasion || "-"}</p>
 `;
 // IMAGE
-let images = product.images || [product.image];
+let images = [];
+
+if(product.images && product.images.length > 0){
+  images = product.images;
+} 
+else if(product.image){
+  images = [product.image];
+} 
+else {
+  images = ["https://via.placeholder.com/300"];
+}
 document.getElementById("mainImage").src = images[0];
 
 let thumbsHTML = "";
@@ -200,7 +210,7 @@ function addToCart(){
     name: product.name,
     price: product.price,
     size: selectedSize,
-    image: product.image
+   image: product.images?.[0] || product.image
   });
 
   localStorage.setItem("cart", JSON.stringify(cart));
@@ -236,7 +246,7 @@ async function loadSimilar(){
   .forEach(p=>{
     html += `
       <div class="similar-card" onclick="openProduct('${p._id}')">
-        <img src="${p.image}" width="100%">
+       <img src="${p.images?.[0] || p.image}" width="100%">
         <p>${p.name}</p>
         <b>₹${p.price}</b>
       </div>
