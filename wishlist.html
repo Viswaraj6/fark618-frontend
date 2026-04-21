@@ -73,11 +73,11 @@ function loadWishlist(){
     fav.forEach(p => {
       html += `
         <div class="card">
-          <img src="${p.image}">
-          <h3>${p.name}</h3>
-          <p class="price">₹${p.price}</p>
+          <img src="${p.images?.[0] || p.image}">
+          <h3>${p.name || "No Name"}</h3>
+          <p class="price">₹${p.price || 0}</p>
 
-          <button onclick="removeItem('${p.id}')">Remove ❌</button>
+          <button onclick="removeItem('${p._id}')">Remove ❌</button>
         </div>
       `;
     });
@@ -86,7 +86,6 @@ function loadWishlist(){
 
   document.getElementById("wishlist").innerHTML = html;
 }
-
 
 // ❌ REMOVE (safe remove using id)
 function removeItem(id){
