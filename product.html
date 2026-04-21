@@ -204,6 +204,35 @@ h2 { margin: 10px 0 5px; }
   padding: 2px 5px;
   border-radius: 50%;
 }
+  .main-wrapper{
+  position: relative;
+  flex: 1;
+}
+
+.arrow{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 22px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.arrow.left{
+  left: 10px;
+}
+
+.arrow.right{
+  right: 10px;
+}
+
+.arrow:hover{
+  background: black;
+}
 </style>
 
 </head>
@@ -253,10 +282,15 @@ h2 { margin: 10px 0 5px; }
 
   <div id="thumbs" class="thumbs"></div>
 
-  <img id="mainImage" class="main-img">
+  <div class="main-wrapper">
+    <button class="arrow left" onclick="prevImage()">‹</button>
+
+    <img id="mainImage" class="main-img">
+
+    <button class="arrow right" onclick="nextImage()">›</button>
+  </div>
 
 </div>
-
   <h2 id="name"></h2>
   <div class="price" id="price"></div>
 
@@ -313,8 +347,14 @@ else if(product.image){
 else {
   images = ["https://via.placeholder.com/300"];
 }
-document.getElementById("mainImage").src = images[0];
 
+// 👉 CURRENT INDEX
+let currentIndex = 0;
+
+// 👉 INITIAL IMAGE
+document.getElementById("mainImage").src = images[currentIndex];
+
+// 👉 THUMBNAILS
 let thumbsHTML = "";
 images.forEach((img, index)=>{
   thumbsHTML += `
@@ -326,13 +366,43 @@ images.forEach((img, index)=>{
   
 document.getElementById("thumbs").innerHTML = thumbsHTML;
 
+
+// 👉 CHANGE IMAGE (thumb click)
 function changeImage(src, el){
-  document.getElementById("mainImage").src = src;
+  currentIndex = images.indexOf(src);   // ⭐ IMPORTANT
+  updateImage();
+}
+
+
+// 👉 NEXT →
+function nextImage(){
+  currentIndex++;
+  if(currentIndex >= images.length){
+    currentIndex = 0;
+  }
+  updateImage();
+}
+
+
+// 👉 PREV ←
+function prevImage(){
+  currentIndex--;
+  if(currentIndex < 0){
+    currentIndex = images.length - 1;
+  }
+  updateImage();
+}
+
+
+// 👉 UPDATE IMAGE (COMMON FUNCTION)
+function updateImage(){
+  document.getElementById("mainImage").src = images[currentIndex];
 
   document.querySelectorAll(".thumbs img")
     .forEach(x => x.classList.remove("active"));
 
-  el.classList.add("active");
+  document.querySelectorAll(".thumbs img")[currentIndex]
+    .classList.add("active");
 }
 // SIZE
 let selectedSize = "";
