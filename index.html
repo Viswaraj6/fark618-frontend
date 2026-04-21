@@ -438,8 +438,8 @@ function filterCategory(type, el){
     renderProducts(productsData);
   } else {
     const filtered = productsData.filter(p =>
-      p.name.toLowerCase().includes(type)
-    );
+  p.category && p.category.toLowerCase().includes(type)
+);
     renderProducts(filtered);
   }
 }
