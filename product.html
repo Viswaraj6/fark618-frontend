@@ -14,9 +14,30 @@ body {
 .container {
   padding: 10px;
 }
+.product-layout{
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.product-details{
+  width: 50%;
+}
+/* product name */
+#name{
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+  /* price */
+.price{
+  font-size: 22px;
+  color: green;
+  margin-bottom: 10px;
+}
 .image-section{
   display: flex;
   gap: 15px;
+  width: 50%;
 }
   .main-img{
   width: 100%;
@@ -233,6 +254,13 @@ h2 { margin: 10px 0 5px; }
 .arrow:hover{
   background: black;
 }
+  .main-wrapper{
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>
 
 </head>
@@ -278,21 +306,41 @@ h2 { margin: 10px 0 5px; }
 </div>
 <div class="container">
 
-<div class="image-section">
+<div class="product-layout">
 
-  <div id="thumbs" class="thumbs"></div>
+  <!-- LEFT -->
+  <div class="image-section">
 
-  <div class="main-wrapper">
-    <button class="arrow left" onclick="prevImage()">‹</button>
+    <div id="thumbs" class="thumbs"></div>
 
-    <img id="mainImage" class="main-img">
+    <div class="main-wrapper">
+      <button class="arrow left" onclick="prevImage()">‹</button>
 
-    <button class="arrow right" onclick="nextImage()">›</button>
+      <img id="mainImage" class="main-img">
+
+      <button class="arrow right" onclick="nextImage()">›</button>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="product-details">
+
+    <h2 id="name"></h2>
+    <div class="price" id="price"></div>
+
+    <h3>Select Size</h3>
+    <div id="sizes" class="sizes"></div>
+
+    <p><b>Brand:</b> <span id="brand"></span></p>
+    <p><b>Description:</b> <span id="desc"></span></p>
+
+    <h3>Specifications</h3>
+    <div id="specs"></div>
+
   </div>
 
 </div>
-  <h2 id="name"></h2>
-  <div class="price" id="price"></div>
 
   <!-- SIZE -->
   <h3>Select Size</h3>
