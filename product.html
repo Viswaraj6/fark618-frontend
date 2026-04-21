@@ -702,9 +702,10 @@ async function loadSimilar(){
       });
 
     document.getElementById("similar").innerHTML = html;
-
-  } catch(err){
+  } 
+  catch(err){
     console.log(err);
+  }
   }
 function updateCartCount(){
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
