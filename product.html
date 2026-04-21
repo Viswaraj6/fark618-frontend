@@ -261,6 +261,84 @@ h2 { margin: 10px 0 5px; }
   justify-content: center;
   align-items: center;
 }
+  .pincode-box{
+  display:flex;
+  gap:10px;
+  margin:10px 0 20px;
+}
+
+.pincode-box input{
+  flex:1;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
+
+.pincode-box button{
+  padding:10px 15px;
+  background:black;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+  .sticky-bar{
+  position: fixed;
+  bottom: 60px;
+  left:0;
+  width:100%;
+  background:#fff;
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  padding:10px 15px;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.1);
+  z-index:999;
+}
+
+.hidden{
+  display:none;
+}
+
+.sticky-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.sticky-left img{
+  width:50px;
+  height:50px;
+  object-fit:cover;
+  border-radius:6px;
+}
+
+.sticky-right{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.sticky-right select{
+  padding:6px;
+}
+  .acc-title{
+  padding:12px;
+  background:#fff;
+  cursor:pointer;
+  border-bottom:1px solid #ddd;
+  font-weight:600;
+}
+
+.acc-content{
+  display:none;
+  padding:10px;
+  background:#fff;
+}
+
+.acc-item.active .acc-content{
+  display:block;
+}
 </style>
 
 </head>
@@ -331,13 +409,30 @@ h2 { margin: 10px 0 5px; }
 
     <h3>Select Size</h3>
     <div id="sizes" class="sizes"></div>
+<h3>Check Pincode For Accurate Delivery</h3>
 
+<p style="font-size:13px;color:gray;">
+  Estimated delivery time: 2-6 working days
+</p>
+
+<div class="pincode-box">
+  <input type="text" placeholder="Enter Pincode">
+  <button>CHECK</button>
+</div>
     <p><b>Brand:</b> <span id="brand"></span></p>
     <p><b>Description:</b> <span id="desc"></span></p>
 
-    <h3>Specifications</h3>
-    <div id="specs">
-      
+ <div class="accordion">
+
+  <div class="acc-item">
+    <div class="acc-title" onclick="toggleAcc(this)">
+      Product Details ▼
+    </div>
+
+    <div class="acc-content" id="specs"></div>
+  </div>
+
+</div>
     </div>
     
   </div>
@@ -349,7 +444,24 @@ h2 { margin: 10px 0 5px; }
   </div>
 
 </div>
+<div id="stickyBar" class="sticky-bar hidden">
 
+  <div class="sticky-left">
+    <img id="stickyImg">
+    <div>
+      <p id="stickyName"></p>
+      <b id="stickyPrice"></b>
+    </div>
+  </div>
+
+  <div class="sticky-right">
+    <select id="stickySize"></select>
+
+    <button class="cart-btn">ADD TO BAG</button>
+    <button class="buy-btn">BUY NOW</button>
+  </div>
+
+</div>
 <div class="bottom-bar">
   <button class="cart-btn" onclick="addToCart()">Add to Cart</button>
   <button class="buy-btn" onclick="buyNow()">Buy Now</button>
@@ -457,7 +569,31 @@ function selectSize(el,size){
   el.classList.add("active");
   selectedSize = size;
 }
+// sticky data set
+document.getElementById("stickyImg").src = product.images?.[0] || product.image;
+document.getElementById("stickyName").innerText = product.name;
+document.getElementById("stickyPrice").innerText = "₹" + product.price;
 
+// size dropdown
+let sizeDrop = "";
+(product.sizes || []).forEach(s=>{
+  sizeDrop += `<option>${s}</option>`;
+});
+document.getElementById("stickySize").innerHTML = sizeDrop;
+
+
+// scroll show/hide
+window.addEventListener("scroll", function(){
+
+  const trigger = document.querySelector(".product-layout").offsetHeight;
+
+  if(window.scrollY > trigger){
+    document.getElementById("stickyBar").classList.remove("hidden");
+  } else {
+    document.getElementById("stickyBar").classList.add("hidden");
+  }
+
+});
 // CART
 function addToCart(){
   if(!selectedSize){
@@ -533,7 +669,9 @@ function openProduct(id){
     location.reload();
   });
 }
-
+function toggleAcc(el){
+  el.parentElement.classList.toggle("active");
+}
 loadSimilar();
 
 </script>
