@@ -667,8 +667,9 @@ function getFav(){
 }
 
 function isFav(id){
-  return getFav().some(p => p.id === id);
+  return getFav().some(p => p._id === id);   // ✅ FIXED
 }
+
 function toggleFav(id, el){
   let fav = getFav();
 
@@ -678,8 +679,7 @@ function toggleFav(id, el){
     fav = fav.filter(item => item._id !== id);
   } else {
     const product = window.allProducts.find(p => p._id === id);
-
-    fav.push(product);   // 🔥 FULL PRODUCT SAVE
+    fav.push(product);
   }
 
   localStorage.setItem("fav", JSON.stringify(fav));
