@@ -115,7 +115,9 @@ h2 { margin: 10px 0 5px; }
 
 /* NEW DESIGN */
 .similar-card {
-  min-width: 200px;
+  min-width: 160px;
+  max-width: 180px;
+  position: relative;
   background: #fff;
   padding: 10px;
   border-radius: 10px;
@@ -657,10 +659,12 @@ async function loadSimilar(){
   .filter(p => p.category === product.category && p._id !== product._id)
   .slice(0,5)
   .forEach(p=>{
-   html += `
+  html += `
   <div class="similar-card" onclick="openProduct('${p._id}')">
 
-    <div class="fav">♡</div>
+    <div class="fav" onclick="event.stopPropagation(); toggleFav('${p._id}', this)">
+      ${isFav(p._id) ? '♥' : '♡'}
+    </div>
 
     <img src="${p.images?.[0] || p.image}">
 
