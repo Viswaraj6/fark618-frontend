@@ -212,36 +212,13 @@ h1 { text-align: center; }
   bottom: 0;
   width: 100%;
   background: #fff;
-  display: flex;
+  display: none;
   justify-content: space-around;
   border-top: 1px solid #ddd;
   padding: 6px 0;
   z-index: 1000;
 }
 
-.nav-item {
-  text-align: center;
-  flex: 1;
-  color: #777;
-  font-size: 12px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.nav-item .icon {
-  font-size: 20px;
-  display: block;
-  transition: 0.2s;
-}
-
-/* 🔥 ACTIVE STATE */
-.nav-item.active {
-  color: #2874f0;   /* Flipkart blue */
-}
-
-.nav-item.active .icon {
-  transform: scale(1.2);
-}
 .top-header {
   position: sticky;   /* 🔥 key */
   top: 0;
@@ -273,7 +250,54 @@ h1 { text-align: center; }
   background: #eee;
   cursor: pointer;
 }
+.top-nav {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
 
+.logo {
+  font-weight: bold;
+  font-size: 20px;
+  color: #111;
+}
+
+.top-nav input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.nav-icons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.icon {
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+}
+
+/* 🛒 cart badge */
+.cart span {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: red;
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 50%;
+}
 .categories button.active {
   background: #2874f0;
   color: #fff;
@@ -282,7 +306,29 @@ h1 { text-align: center; }
 </head>
 
 <body>
+<div class="top-nav">
 
+  <!-- Logo -->
+  <div class="logo">FARK 618</div>
+
+  <!-- Search -->
+  <input type="text" id="searchInput" placeholder="Search for products...">
+
+  <!-- Right Icons -->
+  <div class="nav-icons">
+
+    <div class="icon" onclick="goPage('account.html')">
+      👤
+    </div>
+
+    <div class="icon cart" onclick="goPage('cart.html')">
+      🛒
+      <span id="cartCount">0</span>
+    </div>
+
+  </div>
+
+</div>
 <div class="top-header">
 
   <div class="logo-wrap">
@@ -312,25 +358,6 @@ h1 { text-align: center; }
 <button onclick="filterCategory('pant', this)">Pants</button>
 </div>
 <div id="products" class="products"></div>
-
-<div id="bottomNav">
-
-  <div class="nav-item active" onclick="goPage('index.html', this)">
-    <span class="icon">🏠</span>
-    <span class="label">Home</span>
-  </div>
-
-  <div class="nav-item" onclick="goPage('account.html', this)">
-    <span class="icon">👤</span>
-    <span class="label">Account</span>
-  </div>
-
-  <div class="nav-item" onclick="goPage('cart.html', this)">
-    <span class="icon">🛒</span>
-    <span class="label">Cart</span>
-  </div>
-
-</div>
 
 <script>
 
@@ -497,7 +524,12 @@ async function loadBanner(){
     console.log("Banner error", e);
   }
 }
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  document.getElementById("cartCount").innerText = cart.length;
+}
 
+updateCartCount();
 
 // ==============================
 // 🚀 INIT
