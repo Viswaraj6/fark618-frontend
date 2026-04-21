@@ -40,13 +40,12 @@ body {
   width: 50%;
   align-items: center;
 }
- .main-img{
+  /* MAIN IMAGE */
+.main-img{
   width: 100%;
-  max-width: 400px;      /* optional control */
-  aspect-ratio: 4/5;     /* ⭐ same as product image */
-  object-fit: contain;   /* ⭐ full image show */
-  background: #fff;
-  border-radius: 10px;
+  height: 100%;
+  object-fit: cover;   /* ⭐ full fill like StyleUnion */
+  display: block;
 }
 .thumbs{
   display: flex;
@@ -218,12 +217,17 @@ h2 { margin: 10px 0 5px; }
   padding: 2px 5px;
   border-radius: 50%;
 }
-  .main-wrapper{
-  position: relative;
+ .main-wrapper{
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;              /* ⭐ important */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   display: flex;
-  flex: 1;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 .arrow{
   position: absolute;
