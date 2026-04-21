@@ -10,16 +10,41 @@ body {
   padding:15px;
 }
 
+h2{
+  text-align:center;
+}
+
+#wishlist{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:15px;
+}
+
 .card {
   background:white;
   padding:10px;
-  margin:10px 0;
   border-radius:10px;
   text-align:center;
 }
 
-img {
-  width:120px;
+.card img {
+  width:100%;
+  height:200px;
+  object-fit:cover;
+}
+
+.price{
+  color:green;
+  font-weight:bold;
+}
+
+button{
+  background:red;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -32,38 +57,45 @@ img {
 
 <script>
 
-let fav = JSON.parse(localStorage.getItem("fav")) || [];
-
-let html = "";
-
-if(fav.length === 0){
-  html = "<p>No items</p>";
-} else {
-
-  fav.forEach((p,i) => {
-    html += `
-      <div class="card">
-        <img src="${p.image}">
-        <h3>${p.name}</h3>
-        <p>₹${p.price}</p>
-
-        <button onclick="removeItem(${i})">Remove ❌</button>
-      </div>
-    `;
-  });
-
+function getFav(){
+  return JSON.parse(localStorage.getItem("fav")) || [];
 }
 
-document.getElementById("wishlist").innerHTML = html;
+function loadWishlist(){
+
+  let fav = getFav();
+  let html = "";
+
+  if(fav.length === 0){
+    html = "<p>No items in wishlist</p>";
+  } else {
+
+    fav.forEach(p => {
+      html += `
+        <div class="card">
+          <img src="${p.image}">
+          <h3>${p.name}</h3>
+          <p class="price">₹${p.price}</p>
+
+          <button onclick="removeItem('${p.id}')">Remove ❌</button>
+        </div>
+      `;
+    });
+
+  }
+
+  document.getElementById("wishlist").innerHTML = html;
+}
 
 
-// ❌ REMOVE
-function removeItem(i){
-  let fav = JSON.parse(localStorage.getItem("fav")) || [];
-  fav.splice(i,1);
+// ❌ REMOVE (safe remove using id)
+function removeItem(id){
+  let fav = getFav().filter(p => p.id !== id);
   localStorage.setItem("fav", JSON.stringify(fav));
-  location.reload();
+  loadWishlist(); // reload without refresh
 }
+
+loadWishlist();
 
 </script>
 
