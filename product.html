@@ -647,34 +647,66 @@ function buyNow(){
 
   location.href = "checkout.html";
 }
+// ❤️ WISHLIST FUNCTIONS
+function getFav(){
+  return JSON.parse(localStorage.getItem("fav")) || [];
+}
 
+function isFav(id){
+  return getFav().some(p => p.id === id);
+}
+
+function toggleFav(id, el){
+  let fav = getFav();
+
+  const exist = fav.find(item => item.id === id);
+
+  if(exist){
+    fav = fav.filter(item => item.id !== id);
+  } else {
+    fav.push({ id });
+  }
+
+  localStorage.setItem("fav", JSON.stringify(fav));
+
+  el.innerText = isFav(id) ? "♥" : "♡";
+}
 // SIMILAR PRODUCTS
 async function loadSimilar(){
-  const res = await fetch(API + "/products");
-  const data = await res.json();
+  try{
+    const res = await fetch(API + "/products");
+    const data = await res.json();
 
-  window.allProducts = data; // ⭐ IMPORTANT
+    window.allProducts = data;
 
-  let html = "";
+    let html = "";
 
-  data
-  .filter(p => p.category === product.category && p._id !== product._id)
-  .slice(0,5)
-  .forEach(p=>{
-    html += `
-      <div class="similar-card" onclick="openProduct('${p._id}')">
+    data
+      .filter(p => p.category === product.category && p._id !== product._id)
+      .slice(0,5)
+      .forEach(p=>{
+        html += `
+          <div class="similar-card" onclick="openProduct('${p._id}')">
 
-        <div class="fav" onclick="event.stopPropagation(); toggleFav('${p._id}', this)">
-          ${isFav(p._id) ? '♥' : '♡'}
-        </div>
+            <div class="fav" onclick="event.stopPropagation(); toggleFav('${p._id}', this)">
+              ${isFav(p._id) ? '♥' : '♡'}
+            </div>
 
-        <img src="${p.images?.[0] || p.image}">
+            <img src="${p.images?.[0] || p.image}">
 
-        <p>${p.name}</p>
-        <b>₹${p.price}</b>
+            <p>${p.name}</p>
+            <b>₹${p.price}</b>
 
-      </div>
-    `;
+          </div>
+        `;
+      });
+
+    document.getElementById("similar").innerHTML = html;
+
+  } catch(err){
+    console.log(err);
+  }
+}
   });
 
   document.getElementById("similar").innerHTML = html;
