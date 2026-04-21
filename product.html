@@ -706,15 +706,6 @@ async function loadSimilar(){
   } catch(err){
     console.log(err);
   }
-}
-  });
-
-  document.getElementById("similar").innerHTML = html;
-}
-  });
-
-  document.getElementById("similar").innerHTML = html;
-}
 function updateCartCount(){
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
   document.getElementById("cartCount").innerText = cart.length;
