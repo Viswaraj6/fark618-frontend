@@ -14,27 +14,33 @@ body {
 .container {
   padding: 10px;
 }
-
-.main-img {
+.image-section{
+  display: flex;
+  gap: 15px;
+}
+  .main-img{
   width: 100%;
-  height: 280px;
+  max-height: 400px;
   object-fit: contain;
   background: white;
   border-radius: 10px;
 }
-
-.thumbs {
+.thumbs{
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
 }
-
-.thumbs img {
-  width: 70px;
+.thumbs img{
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
   border-radius: 6px;
   cursor: pointer;
+  border: 2px solid transparent;
 }
-
+.thumbs img.active{
+  border: 2px solid black;
+}
 h2 { margin: 10px 0 5px; }
 
 .price {
@@ -243,9 +249,13 @@ h2 { margin: 10px 0 5px; }
 </div>
 <div class="container">
 
-  <img id="mainImage" class="main-img">
+<div class="image-section">
 
   <div id="thumbs" class="thumbs"></div>
+
+  <img id="mainImage" class="main-img">
+
+</div>
 
   <h2 id="name"></h2>
   <div class="price" id="price"></div>
@@ -306,15 +316,24 @@ else {
 document.getElementById("mainImage").src = images[0];
 
 let thumbsHTML = "";
-images.forEach(img=>{
-  thumbsHTML += `<img src="${img}" onclick="changeImage('${img}')">`;
+images.forEach((img, index)=>{
+  thumbsHTML += `
+    <img src="${img}" 
+         onclick="changeImage('${img}', this)"
+         class="${index === 0 ? 'active' : ''}">
+  `;
 });
+  
 document.getElementById("thumbs").innerHTML = thumbsHTML;
 
-function changeImage(src){
+function changeImage(src, el){
   document.getElementById("mainImage").src = src;
-}
 
+  document.querySelectorAll(".thumbs img")
+    .forEach(x => x.classList.remove("active"));
+
+  el.classList.add("active");
+}
 // SIZE
 let selectedSize = "";
 
