@@ -39,11 +39,12 @@ body {
   gap: 15px;
   width: 50%;
 }
-  .main-img{
+ .main-img{
   width: 100%;
-  aspect-ratio: 4/5;
-  object-fit: cover;   /* fills box */
-  background: white;
+  max-width: 400px;      /* optional control */
+  aspect-ratio: 4/5;     /* ⭐ same as product image */
+  object-fit: contain;   /* ⭐ full image show */
+  background: #fff;
   border-radius: 10px;
 }
 .thumbs{
