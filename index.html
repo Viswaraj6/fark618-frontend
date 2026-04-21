@@ -268,37 +268,30 @@ h1 { text-align: center; }
   color: #111;
 }
 
-.top-nav input {
-  flex: 1;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.nav-icons {
+.top-icons{
   display: flex;
+  justify-content: flex-end;
   gap: 15px;
-  align-items: center;
+  padding: 10px;
 }
 
-.icon {
-  font-size: 20px;
+.icon{
+  font-size: 22px;
   cursor: pointer;
   position: relative;
 }
 
-/* 🛒 cart badge */
-.cart span {
+/* cart badge */
+.cart span{
   position: absolute;
   top: -6px;
   right: -8px;
   background: red;
-  color: #fff;
+  color: white;
   font-size: 10px;
   padding: 2px 5px;
   border-radius: 50%;
-}
-.categories button.active {
+}.categories button.active {
   background: #2874f0;
   color: #fff;
 }
@@ -306,6 +299,19 @@ h1 { text-align: center; }
 </head>
 
 <body>
+<div class="top-header">
+
+  <div class="logo-wrap">
+    <div class="logo-text">
+      F A <span class="flip-r">R</span> K
+    </div>
+
+    <div class="logo-bottom">
+      <span class="line"></span>
+      <span class="num">618</span>
+      <span class="line"></span>
+    </div>
+  </div>
 <div class="top-nav">
   <!-- Right Icons -->
   <div class="nav-icons">
@@ -322,20 +328,6 @@ h1 { text-align: center; }
   </div>
 
 </div>
-<div class="top-header">
-
-  <div class="logo-wrap">
-    <div class="logo-text">
-      F A <span class="flip-r">R</span> K
-    </div>
-
-    <div class="logo-bottom">
-      <span class="line"></span>
-      <span class="num">618</span>
-      <span class="line"></span>
-    </div>
-  </div>
-
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="Search for products...">
   </div>
@@ -521,9 +513,7 @@ function updateCartCount(){
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
   document.getElementById("cartCount").innerText = cart.length;
 }
-
 updateCartCount();
-
 // ==============================
 // 🚀 INIT
 // ==============================
