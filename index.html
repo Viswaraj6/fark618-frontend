@@ -26,6 +26,7 @@ h1 { text-align: center; }
 .logo-wrap {
   text-align: center;
   margin: 20px 0 10px;
+  position: relative; 
 }
 
 /* FARK text */
@@ -269,12 +270,12 @@ h1 { text-align: center; }
 }
 
 .top-icons{
+  position: absolute;
+  right: 10px;
+  bottom: 0;
   display: flex;
-  justify-content: flex-end;
   gap: 15px;
-  padding: 10px;
 }
-
 .icon{
   font-size: 22px;
   cursor: pointer;
@@ -314,7 +315,7 @@ h1 { text-align: center; }
   </div>
 <div class="top-nav">
   <!-- Right Icons -->
-  <div class="nav-icons">
+  <div class="top-icons">
 
     <div class="icon" onclick="goPage('account.html')">
       👤
