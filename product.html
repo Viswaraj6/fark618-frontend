@@ -122,6 +122,19 @@ h2 { margin: 10px 0 5px; }
   text-align: left;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+  .similar-card .fav{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:#fff;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
   .header{
   display: flex;
   justify-content: space-between;
@@ -644,13 +657,18 @@ async function loadSimilar(){
   .filter(p => p.category === product.category && p._id !== product._id)
   .slice(0,5)
   .forEach(p=>{
-    html += `
-      <div class="similar-card" onclick="openProduct('${p._id}')">
-      <img src="${p.images?.[0] || p.image}">
-        <p>${p.name}</p>
-        <b>₹${p.price}</b>
-      </div>
-    `;
+   html += `
+  <div class="similar-card" onclick="openProduct('${p._id}')">
+
+    <div class="fav">♡</div>
+
+    <img src="${p.images?.[0] || p.image}">
+
+    <p>${p.name}</p>
+    <b>₹${p.price}</b>
+
+  </div>
+`;
   });
 
   document.getElementById("similar").innerHTML = html;
