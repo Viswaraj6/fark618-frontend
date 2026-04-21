@@ -313,7 +313,6 @@ h1 { text-align: center; }
       <span class="line"></span>
     </div>
   </div>
-<div class="top-nav">
   <!-- Right Icons -->
   <div class="top-icons">
 
@@ -417,19 +416,8 @@ function openProduct(i){
   localStorage.setItem("selectedProduct", JSON.stringify(productsData[i]));
   location.href="product.html";
 }
-function goPage(page, el){
-
-  // remove active from all
-  document.querySelectorAll(".nav-item")
-    .forEach(x => x.classList.remove("active"));
-
-  // add active to clicked
-  el.classList.add("active");
-
-  // navigate
-  setTimeout(()=>{
-    location.href = page;
-  },100);
+function goPage(page){
+  window.location.href = page;
 }
 document.getElementById("searchInput").addEventListener("input", function(e){
   const value = e.target.value.toLowerCase();
