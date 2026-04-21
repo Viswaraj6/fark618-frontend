@@ -646,7 +646,7 @@ async function loadSimilar(){
   .forEach(p=>{
     html += `
       <div class="similar-card" onclick="openProduct('${p._id}')">
-       <img src="${p.images?.[0] || p.image}" width="100%">
+      <img src="${p.images?.[0] || p.image}">
         <p>${p.name}</p>
         <b>₹${p.price}</b>
       </div>
