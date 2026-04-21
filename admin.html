@@ -243,11 +243,10 @@ else{
 async function send(){
 
   // ✅ VALIDATION FIRST
-  if(!name || !price || !stock){
-    alert("Fill all required fields ❗");
-    return;
-  }
-
+ if(!name || !price || !stock || images.length === 0){
+  alert("Fill all fields + upload image ❗");
+  return;
+}
   await fetch(BASE_URL + "/add-product",{
     method:"POST",
     headers:{
