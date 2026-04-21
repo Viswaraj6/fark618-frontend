@@ -41,8 +41,8 @@ body {
 }
   .main-img{
   width: 100%;
-  max-height: 400px;
-  object-fit: contain;
+  aspect-ratio: 4/5;
+  object-fit: cover;   /* fills box */
   background: white;
   border-radius: 10px;
 }
@@ -218,9 +218,16 @@ h2 { margin: 10px 0 5px; }
 }
   .main-wrapper{
   position: relative;
+  display: flex;
   flex: 1;
+  justify-content: center;
+  align-items: center;
 }
-
+.main-wrapper{
+  
+  justify-content: center;
+  align-items: center;
+}
 .arrow{
   position: absolute;
   top: 50%;
