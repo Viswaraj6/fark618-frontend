@@ -102,12 +102,76 @@ h2 { margin: 10px 0 5px; }
   border-radius: 10px;
   text-align: center;
 }
+  .header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #ddd;
+}
+
+.menu-left{
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+}
+
+.logo-center{
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.menu-right{
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.icon{
+  font-size: 18px;
+  cursor: pointer;
+  position: relative;
+}
+
+.cart span{
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 50%;
+}
 </style>
 
 </head>
 
 <body>
+ <div class="logo-center">
+    FARK 618
+  </div>
 
+  <div class="menu-right">
+
+    <div class="icon">🔍</div>
+
+    <div class="icon" onclick="goPage('wishlist.html')">❤️</div>
+
+    <div class="icon" onclick="goPage('account.html')">👤</div>
+
+    <div class="icon cart" onclick="goPage('cart.html')">
+      🛒
+      <span id="cartCount">0</span>
+    </div>
+
+  </div>
+
+</div>
 <div class="container">
 
   <img id="mainImage" class="main-img">
@@ -255,7 +319,14 @@ async function loadSimilar(){
 
   document.getElementById("similar").innerHTML = html;
 }
-
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  document.getElementById("cartCount").innerText = cart.length;
+}
+updateCartCount();
+  function goPage(page){
+  window.location.href = page;
+}
 function openProduct(id){
   fetch(API + "/products")
   .then(r=>r.json())
