@@ -242,12 +242,15 @@ else{
 
 async function send(){
 
-  // ✅ VALIDATION FIRST
- if(!name || !price || !stock || images.length === 0){
-  alert("Fill all fields + upload image ❗");
-  return;
-}
-  await fetch(BASE_URL + "/add-product",{
+  if(!name || !price || !stock || images.length === 0){
+    alert("Fill all fields ❗");
+    return;
+  }
+
+  // 👉 ADD THIS LINE HERE
+  console.log("Token:", localStorage.getItem("adminToken"));
+
+  const res = await fetch(BASE_URL + "/add-product",{
     method:"POST",
     headers:{
       "Content-Type":"application/json",
@@ -273,9 +276,14 @@ async function send(){
     })
   });
 
-  alert("Product Added ✅");
-  loadProducts();
-}
+  const data = await res.json();
+
+  if(res.ok){
+    alert("Product Added ✅");
+    loadProducts();
+  }else{
+    alert("Error: " + (data.message || "Unauthorized ❌"));
+  }
 }
 /* BANNER UPLOAD */
 async function uploadBanner(){
