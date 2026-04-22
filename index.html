@@ -110,7 +110,22 @@ h1 { text-align: center; }
   border-radius: 0px;   /* optional */
   margin-bottom: 10px;
   background: #d8f3f0;
-  padding: 0;           /* 🔥 fix */
+  padding: 0; 
+  position: relative;
+}
+  /* slider container */
+.slider {
+  display: flex;
+  width: 100%;
+  transition: transform 0.5s ease;
+}
+
+/* each image */
+.slider img {
+  width: 100%;
+height: 320px;
+  object-fit: contain; /* full image show */
+  flex-shrink: 0;
 }
   #banner video {
   width: 100%;
@@ -518,7 +533,7 @@ async function loadBanner(){
     }
 
     else if(data.type === "slider"){
-      html = '<div style="display:flex;overflow-x:auto;">';
+   html = `<div class="slider" id="slider">`;
       data.images.forEach(img=>{
     html += `<img src="${img}" style="width:100%; height:auto;">`;
       });
@@ -527,10 +542,25 @@ async function loadBanner(){
     }
 
     document.getElementById("banner").innerHTML = html;
-
+startSlider(data.images.length); 
   }catch(e){
     console.log("Banner error", e);
   }
+}
+  let currentSlide = 0;
+
+function startSlider(total){
+  const slider = document.getElementById("slider");
+
+  setInterval(()=>{
+    currentSlide++;
+
+    if(currentSlide >= total){
+      currentSlide = 0;
+    }
+
+    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+  }, 3000);
 }
 function updateCartCount(){
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
