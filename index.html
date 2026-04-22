@@ -533,7 +533,7 @@ async function loadBanner(){
     else if(data.type === "slider"){
    html = `<div class="slider" id="slider">`;
       data.images.forEach(img=>{
-   html += `<img src="${img}">`;
+ html += `<img src="${img}" style="width:100%; height:auto;">`;
       });
     
       html += '</div>';
