@@ -520,7 +520,6 @@ async function loadBanner(){
     else if(data.type === "slider"){
       html = '<div style="display:flex;overflow-x:auto;">';
       data.images.forEach(img=>{
-     html += `
     html += `<img src="${img}" style="width:100%; height:auto;">`;
       });
     
