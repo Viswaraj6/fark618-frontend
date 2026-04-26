@@ -561,7 +561,7 @@ h2 { margin: 10px 0 5px; }
     <div class="acc-content" id="specs"></div>
     <!-- 👇 ADD THIS -->
 <div class="action-buttons">
-  <button class="cart-btn" onclick="addToCart()">Add to Cart</button>
+ <button id="addBtn" class="cart-btn" onclick="addToCart()">Add to Cart</button>
   <button class="buy-btn" onclick="buyNow()">Buy Now</button>
 </div>
   </div>
@@ -731,6 +731,7 @@ const trigger = 300;
 });
 // CART
 function addToCart(){
+
   if(!selectedSize){
     alert("Select size ❗");
     return;
@@ -738,18 +739,48 @@ function addToCart(){
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  cart.push({
-    name: product.name,
-    price: product.price,
-    size: selectedSize,
-   image: product.images?.[0] || product.image
-  });
+  // 🔥 duplicate check
+  const exists = cart.find(p => 
+    p.name === product.name && p.size === selectedSize
+  );
 
-  localStorage.setItem("cart", JSON.stringify(cart));
+  if(!exists){
+    cart.push({
+      name: product.name,
+      price: product.price,
+      size: selectedSize,
+      image: product.images?.[0] || product.image
+    });
 
-  alert("Added to cart ✅");
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }
+
+  // 🔥 BUTTON CHANGE
+  const btn = document.getElementById("addBtn");
+  btn.innerText = "Go to Cart";
+
+  btn.onclick = () => {
+    window.location.href = "cart.html";
+  };
+
+  updateCartCount();
+}
+  function checkCartStatus(){
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  const exists = cart.find(p => p.name === product.name);
+
+  if(exists){
+    const btn = document.getElementById("addBtn");
+    btn.innerText = "Go to Cart";
+    btn.onclick = () => {
+      window.location.href = "cart.html";
+    };
+  }
 }
 
+checkCartStatus();
 // BUY
 function buyNow(){
   if(!selectedSize){
