@@ -453,6 +453,28 @@ h2 { margin: 10px 0 5px; }
   #main-content {
   flex: 1;
 }
+  .action-buttons{
+  display:flex;
+  gap:10px;
+  margin:15px 0 20px;
+}
+  /* 🔥 MOBILE FIX */
+@media(max-width:600px){
+
+  .action-buttons{
+    flex-direction: row;
+    gap:8px;
+  }
+
+  .action-buttons .cart-btn,
+  .action-buttons .buy-btn{
+    flex:1;
+    width:100%;      /* 🔥 equal size */
+    height:42px;
+    font-size:13px;
+  }
+
+}
  @media(max-width:600px){
 
   .sticky-bar{
