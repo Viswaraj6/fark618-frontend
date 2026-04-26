@@ -669,7 +669,7 @@ document.getElementById("stickySize").innerHTML = sizeDrop;
 // scroll show/hide
 window.addEventListener("scroll", function(){
 
-  const trigger = document.querySelector(".product-layout").offsetHeight;
+ const trigger = 300;
 
   if(window.scrollY > trigger){
     document.getElementById("stickyBar").classList.remove("hidden");
