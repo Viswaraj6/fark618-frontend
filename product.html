@@ -742,13 +742,11 @@ function addToCart(){
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  // 🔍 check same product + size
   const exists = cart.find(p => 
     p.name === product.name && p.size === selectedSize
   );
 
   if(exists){
-    // 🔥 qty increase
     exists.qty = (exists.qty || 1) + 1;
   } else {
     cart.push({
@@ -756,12 +754,17 @@ function addToCart(){
       price: product.price,
       size: selectedSize,
       image: product.images?.[0] || product.image,
-      qty: 1   // 🔥 important
+      qty: 1
     });
   }
 
   localStorage.setItem("cart", JSON.stringify(cart));
 
+  // 🔥 முக்கிய line
+  checkCartStatus();   // ⭐ button sync (main + sticky)
+
+  updateCartCount();
+}
   // 🔄 button change
   const btn = document.getElementById("addBtn");
   btn.innerText = "Go to Cart";
@@ -923,6 +926,7 @@ function toggleAcc(el){
   el.parentElement.classList.toggle("active");
 }
 loadSimilar();
+checkCartStatus(); 
 fetch("footer.html")
   .then(res => res.text())
   .then(data => {
