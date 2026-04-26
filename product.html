@@ -446,15 +446,26 @@ h2 { margin: 10px 0 5px; }
     flex: 1;
   }
 }
-  @media(max-width:768px){
+@media(max-width:768px){
 
   .product-layout{
-    flex-direction: column;
+    display: block;   /* 🔥 CHANGE (not flex) */
   }
 
   .image-section{
     width: 100%;
-    flex-direction: column;
+    display: block;   /* 🔥 FORCE STACK */
+  }
+
+  .main-wrapper{
+    max-width: 100%;
+  }
+
+  .thumbs{
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    margin-bottom: 10px;
   }
 
   .product-details{
