@@ -84,9 +84,11 @@ img {
 </select>
 
 <div id="sizeBox"></div>
-
+<label style="display:block; margin-top:10px; font-size:14px;">
+  <b>Upload Product Images (Multiple)</b>
+</label>
 <input type="file" id="imageFiles" multiple>
-
+<div id="previewBox" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;"></div>
 <button onclick="addProduct()">Add Product</button>
 
 <hr>
@@ -243,7 +245,35 @@ async function addProduct(){
   else{
     send();
   }
+document.getElementById("imageFiles").addEventListener("change", function(e){
 
+  const files = e.target.files;
+  const preview = document.getElementById("previewBox");
+
+  preview.innerHTML = "";
+
+  for(let i=0; i<files.length; i++){
+
+    const reader = new FileReader();
+
+    reader.onload = function(ev){
+
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+
+      img.style.width = "80px";
+      img.style.height = "100px";
+      img.style.objectFit = "cover";
+      img.style.borderRadius = "6px";
+      img.style.border = "1px solid #ccc";
+
+      preview.appendChild(img);
+    };
+
+    reader.readAsDataURL(files[i]);
+  }
+
+});
   // 🔥 SEND DATA
   async function send(){
 
