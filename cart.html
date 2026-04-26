@@ -97,7 +97,7 @@
   <div onclick="goAccount()">👤<br>Account</div>
   <div onclick="goCart()">🛒<br>Cart</div>
 </div>
-
+<div id="footer"></div>
 <script>
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -171,7 +171,11 @@ function checkout() {
   // next step page
   window.location.href = "checkout.html";
 }
-
+fetch("footer.html")
+  .then(res => res.text())
+  .then(data => {
+    document.getElementById("footer").innerHTML = data;
+  });
 
 // NAVIGATION
 function goHome() {
