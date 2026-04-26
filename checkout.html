@@ -60,7 +60,7 @@
 </head>
 
 <body>
-
+<div id="productBox" style="margin-bottom:15px;"></div>
 <div class="container">
 
   <h1>🛍 Checkout</h1>
@@ -84,9 +84,19 @@ const API = "https://fark618-backend.onrender.com";
 
 // 🧮 CART
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let checkoutItem = JSON.parse(localStorage.getItem("checkout"));
 
-let total = 0;
-cart.forEach(i => total += i.price * (i.qty || 1));
+let products = [];
+let total = 0;// 🔥 IF BUY NOW
+if(checkoutItem){
+  products = [checkoutItem];
+  total = checkoutItem.price;
+} 
+// 🔥 ELSE CART
+else if(cart.length > 0){
+  products = cart;
+  cart.forEach(i => total += i.price * (i.qty || 1));
+}
 
 document.getElementById("totalAmount").innerText = "Total: ₹" + total;
 
@@ -213,7 +223,25 @@ function saveOrder(userData, status, paymentId) {
   })
   .catch(() => alert("Order save failed ❌"));
 }
+// 🖼 SHOW PRODUCT
+if(products.length > 0){
+  let html = "";
 
+  products.forEach(p => {
+    html += `
+      <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+        <img src="${p.images?.[0] || p.image}" width="60">
+        <div>
+          <p style="margin:0">${p.name}</p>
+          <b>₹${p.price}</b><br>
+          <small>Size: ${p.size || "-"}</small>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("productBox").innerHTML = html;
+}
 </script>
 
 </body>
