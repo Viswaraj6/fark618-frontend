@@ -590,8 +590,8 @@ h2 { margin: 10px 0 5px; }
 
   <div class="sticky-right">
     <select id="stickySize"></select>
-<button class="cart-btn" onclick="stickyAddToCart()">ADD TO CART</button>
-<button class="buy-btn" onclick="stickyBuyNow()">BUY NOW</button>
+<button class="cart-btn" onclick="stickyAddToCart()">Add to Cart</button>
+<button class="buy-btn" onclick="stickyBuyNow()">Buy Now</button>
   </div>
 
 </div>
@@ -785,7 +785,7 @@ function addToCart(){
     btn.onclick = () => window.location.href = "cart.html";
 
     if(stickyBtn){
-      stickyBtn.innerText = "GO TO CART";
+      stickyBtn.innerText = "Go to Cart";
       stickyBtn.onclick = () => window.location.href = "cart.html";
     }
 
@@ -794,7 +794,7 @@ function addToCart(){
     btn.onclick = addToCart;
 
     if(stickyBtn){
-      stickyBtn.innerText = "ADD TO CART";
+      stickyBtn.innerText = "Add to Cart";
       stickyBtn.onclick = stickyAddToCart;
     }
   }
