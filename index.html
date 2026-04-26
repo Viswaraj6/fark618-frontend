@@ -514,6 +514,11 @@ function filterCategory(type, el){
 
   document.getElementById("products").innerHTML = html;
 }
+  fetch("footer.html")
+  .then(res => res.text())
+  .then(data => {
+    document.getElementById("footer").innerHTML = data;
+  });
 // ==============================
 // 🎬 LOAD BANNER
 // ==============================
