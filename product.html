@@ -354,8 +354,10 @@ h2 { margin: 10px 0 5px; }
 }
 .sticky-right{
   display:flex;
-  gap:12px;
+  gap:10px;
   align-items:center;
+  justify-content:flex-end;
+  min-width: 320px;   /* 🔥 alignment stable */
 }
 
 .sticky-right select{
