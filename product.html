@@ -590,9 +590,8 @@ h2 { margin: 10px 0 5px; }
 
   <div class="sticky-right">
     <select id="stickySize"></select>
-
-    <button class="cart-btn">ADD TO BAG</button>
-    <button class="buy-btn">BUY NOW</button>
+<button class="cart-btn" onclick="stickyAddToCart()">ADD TO BAG</button>
+<button class="buy-btn" onclick="stickyBuyNow()">BUY NOW</button>
   </div>
 
 </div>
@@ -716,7 +715,10 @@ let sizeDrop = "";
   sizeDrop += `<option>${s}</option>`;
 });
 document.getElementById("stickySize").innerHTML = sizeDrop;
-
+document.getElementById("stickySize").addEventListener("change", function(){
+  selectedSize = this.value;
+  checkCartStatus();
+});
 
 // scroll show/hide
 window.addEventListener("scroll", function(){
@@ -776,16 +778,53 @@ function addToCart(){
   );
 
   const btn = document.getElementById("addBtn");
+  const stickyBtn = document.querySelector(".sticky-bar .cart-btn");
 
   if(exists){
     btn.innerText = "Go to Cart";
-    btn.onclick = () => {
-      window.location.href = "cart.html";
-    };
+    btn.onclick = () => window.location.href = "cart.html";
+
+    if(stickyBtn){
+      stickyBtn.innerText = "GO TO CART";
+      stickyBtn.onclick = () => window.location.href = "cart.html";
+    }
+
   } else {
-    btn.innerText = "Add to Cart";   // 🔥 IMPORTANT
-    btn.onclick = addToCart;         // 🔥 RESET BACK
+    btn.innerText = "Add to Cart";
+    btn.onclick = addToCart;
+
+    if(stickyBtn){
+      stickyBtn.innerText = "ADD TO BAG";
+      stickyBtn.onclick = stickyAddToCart;
+    }
   }
+}
+  function stickyAddToCart(){
+
+  const size = document.getElementById("stickySize").value;
+
+  if(!size){
+    alert("Select size ❗");
+    return;
+  }
+
+  selectedSize = size;   // ⭐ sync with main
+
+  addToCart();           // reuse existing function
+}
+
+function stickyBuyNow(){
+
+  const size = document.getElementById("stickySize").value;
+
+  if(!size){
+    alert("Select size ❗");
+    return;
+  }
+
+  selectedSize = size;   // ⭐ sync
+
+  buyNow();              // reuse existing function
 }
   
 // BUY
