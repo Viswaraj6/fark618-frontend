@@ -766,24 +766,26 @@ function addToCart(){
 
   updateCartCount();
 }
-  function checkCartStatus(){
+ function checkCartStatus(){
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
- const exists = cart.find(p => 
-  p.name === product.name && p.size === selectedSize
-);
+  const exists = cart.find(p => 
+    p.name === product.name && p.size === selectedSize
+  );
+
+  const btn = document.getElementById("addBtn");
 
   if(exists){
-    const btn = document.getElementById("addBtn");
     btn.innerText = "Go to Cart";
     btn.onclick = () => {
       window.location.href = "cart.html";
     };
+  } else {
+    btn.innerText = "Add to Cart";   // 🔥 IMPORTANT
+    btn.onclick = addToCart;         // 🔥 RESET BACK
   }
 }
-
-checkCartStatus();
   
 // BUY
 function buyNow(){
