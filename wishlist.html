@@ -54,7 +54,7 @@ button{
 <h2>❤️ My Wishlist</h2>
 
 <div id="wishlist"></div>
-
+<div id="footer"></div>
 <script>
 
 function getFav(){
@@ -95,7 +95,11 @@ function removeItem(id){
 }
 
 loadWishlist();
-
+fetch("footer.html")
+  .then(res => res.text())
+  .then(data => {
+    document.getElementById("footer").innerHTML = data;
+  });
 </script>
 
 </body>
