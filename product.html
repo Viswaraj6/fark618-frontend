@@ -87,38 +87,11 @@ h2 { margin: 10px 0 5px; }
 .size.active {
   border: 2px solid black;
 }
-.cart-btn {
-  flex: 1;
-  padding: 14px 22px;        /* 🔥 konjam bigger */
-  background: black;
-  color: white;
-  border: none;
-  font-size: 15px;           /* 🔥 improve readability */
-  font-weight: 500;
-  border-radius: 6px;        /* 🔥 modern look */
-  cursor: pointer;
-  transition: 0.2s;
+.cart-btn,
+.buy-btn{
+  flex: none;               /* 🔥 IMPORTANT */
+  white-space: nowrap;      /* 🔥 text break aagathu */
 }
-
-  .cart-btn:hover{
-  background:#222;           /* 🔥 hover effect */
-}
-.buy-btn {
-  flex: 1;
-  padding: 14px 26px;        /* 🔥 konjam wide */
-  background: #ff9f00;       /* 🔥 Flipkart orange feel */
-  border: none;
-  font-weight: bold;
-  font-size: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.buy-btn:hover{
-  background:#fb8c00;
-}
-
 .similar {
   margin-top: 20px;
 }
@@ -370,7 +343,7 @@ h2 { margin: 10px 0 5px; }
   gap:10px;
   align-items:center;
   justify-content:flex-end;
-  min-width: 320px;   /* 🔥 alignment stable */
+  flex-wrap: nowrap;        /* 🔥 IMPORTANT */
 }
 
 .sticky-right select{
