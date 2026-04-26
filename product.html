@@ -89,8 +89,9 @@ h2 { margin: 10px 0 5px; }
 }
 .cart-btn,
 .buy-btn{
-  flex: none;               /* 🔥 IMPORTANT */
+  flex: 1;               /* 🔥 IMPORTANT */
   white-space: nowrap;      /* 🔥 text break aagathu */
+   width: auto; 
 }
   .sticky-right select{
   width: 60px;
@@ -453,7 +454,22 @@ h2 { margin: 10px 0 5px; }
   #main-content {
   flex: 1;
 }
+  .action-buttons{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+@media(max-width:600px){
 
+  .cart-btn,
+  .buy-btn{
+    width: 100%;          /* 🔥 full fit */
+    height: 38px;         /* 🔥 smaller */
+    font-size: 12px;      /* 🔥 compact */
+    padding: 0;
+  }
+
+}
 </style>
 
 </head>
@@ -544,7 +560,7 @@ h2 { margin: 10px 0 5px; }
 
     <div class="acc-content" id="specs"></div>
     <!-- 👇 ADD THIS -->
-<div style="display:flex; gap:10px; margin-top:10px;">
+<div class="action-buttons">
   <button class="cart-btn" onclick="addToCart()">Add to Cart</button>
   <button class="buy-btn" onclick="buyNow()">Buy Now</button>
 </div>
