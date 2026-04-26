@@ -495,6 +495,8 @@ h2 { margin: 10px 0 5px; }
   </div>
 
 </div>
+  <div id="footer"></div>
+
 <script>
 
 const API = "https://fark618-backend.onrender.com";
@@ -743,7 +745,11 @@ function toggleAcc(el){
   el.parentElement.classList.toggle("active");
 }
 loadSimilar();
-
+fetch("footer.html")
+  .then(res => res.text())
+  .then(data => {
+    document.getElementById("footer").innerHTML = data;
+  });
 </script>
 
 </body>
