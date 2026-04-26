@@ -861,7 +861,6 @@ function updateCartCount(){
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
   document.getElementById("cartCount").innerText = cart.length;
 }
-updateCartCount();
   function goPage(page){
   window.location.href = page;
 }
