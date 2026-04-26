@@ -703,6 +703,7 @@ function selectSize(el,size){
   document.querySelectorAll(".size").forEach(x=>x.classList.remove("active"));
   el.classList.add("active");
   selectedSize = size;
+  checkCartStatus();
 }
 // sticky data set
 document.getElementById("stickyImg").src = product.images?.[0] || product.image;
@@ -769,7 +770,9 @@ function addToCart(){
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  const exists = cart.find(p => p.name === product.name);
+ const exists = cart.find(p => 
+  p.name === product.name && p.size === selectedSize
+);
 
   if(exists){
     const btn = document.getElementById("addBtn");
@@ -781,6 +784,7 @@ function addToCart(){
 }
 
 checkCartStatus();
+  
 // BUY
 function buyNow(){
   if(!selectedSize){
