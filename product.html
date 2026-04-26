@@ -470,7 +470,7 @@ h2 { margin: 10px 0 5px; }
 
 <body>
   <div id="main-content">
-<div class="header">
+<div id="header"></div>
 
   <div class="menu-left"></div>
 
@@ -919,6 +919,12 @@ fetch("footer.html")
   .then(res => res.text())
   .then(data => {
     document.getElementById("footer").innerHTML = data;
+  });
+  fetch("header.html")
+  .then(res => res.text())
+  .then(data => {
+    document.getElementById("header").innerHTML = data;
+    updateCartCount();
   });
 </script>
 
