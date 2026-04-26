@@ -449,13 +449,17 @@ function loadOrders(){
 
       let items = "";
 
-      (o.products || []).forEach(i=>{
-        items += `<li>
-          ${i.name || "Item"} - ₹${i.price || 0}
-          ${i.size ? `(Size: ${i.size})` : ""}
-        </li>`;
-      });
+     (o.products || []).forEach(i=>{
 
+  const qty = i.qty || 1;
+
+  items += `<li>
+    ${i.name} - ₹${i.price} 
+    ${i.size ? `(Size: ${i.size})` : ""}
+    | Qty: ${qty}
+    | Total: ₹${i.price * qty}
+  </li>`;
+});
       html += `
         <div class="card">
           <p><b>${o.name || ""}</b></p>
