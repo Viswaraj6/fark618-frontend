@@ -765,11 +765,7 @@ function addToCart(){
 
   updateCartCount();
 }
-  // 🔄 button change
-  const btn = document.getElementById("addBtn");
-  btn.innerText = "Go to Cart";
-  btn.onclick = () => window.location.href = "cart.html";
-}
+ 
  function checkCartStatus(){
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
