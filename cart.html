@@ -304,9 +304,45 @@ body{
 </head>
 
 <body>
- <div id="header" class="header"></div>
+<div class="header">
+
+  <div class="menu-left"></div>
+
+  <!-- LOGO CENTER -->
+  <div class="logo-center" onclick="goHome()" style="cursor:pointer;">
+    <div class="logo-text">
+      FA<span class="flip-r">R</span>K
+    </div>
+
+    <div class="logo-bottom">
+      <div class="line"></div>
+      <span class="num">618</span>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT ICONS -->
+  <div class="menu-right">
+
+    <div class="icon" onclick="goPage('wishlist.html')">
+      <i class="fa-regular fa-heart"></i>
+    </div>
+
+    <div class="icon" onclick="goPage('account.html')">
+      <i class="fa-regular fa-user"></i>
+    </div>
+
+    <div class="icon cart" onclick="goPage('cart.html')">
+      <i class="fa-solid fa-bag-shopping"></i>
+      <span id="cartCount">0</span>
+    </div>
+
+  </div>
+
+</div>
 <div id="main-content">
 <h1>🛒 Your Cart</h1>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <div class="address-box">
   <b>Deliver to:</b> Viswa Raj, 641008 
   <button class="change-btn">Change</button>
@@ -435,7 +471,17 @@ function goCart() {
 
 // INIT
 loadCart();
+function goPage(page){
+  window.location.href = page;
+}
 
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const el = document.getElementById("cartCount");
+  if(el){
+    el.innerText = cart.length;
+  }
+}
 </script>
 
 </body>
