@@ -10,11 +10,36 @@
       padding: 20px;
       padding-bottom: 100px;
     }
+.header{
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #fff;
+  z-index: 999;
+  border-bottom: 1px solid #ddd;
+}
 
+body{
+  padding-top: 80px; /* header space */
+}
     h1 {
       text-align: center;
     }
+.address-box{
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
 
+.change-btn{
+  float: right;
+  background: #eee;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
     .card {
       background: white;
       padding: 15px;
@@ -65,18 +90,6 @@
       padding: 10px 20px;
       margin-top: 10px;
     }
-
-    /* Bottom Nav */
-    #bottomNav {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px;
-      border-top: 1px solid #ccc;
-    }
     .footer {
   background: #111;
   color: #fff;
@@ -111,7 +124,56 @@
   font-size: 13px;
   color: #bbb;
 }
+.cart-item{
+  display: flex;
+  gap: 15px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
 
+.cart-img{
+  width: 80px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.cart-details{
+  flex: 1;
+}
+
+.price{
+  font-weight: bold;
+}
+.price-box{
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+.qty-box{
+  margin-top: 5px;
+}
+    .bottom-bar{
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  border-top: 1px solid #ccc;
+}
+
+.bottom-bar button{
+  background: #ffcc00;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
 .footer-bottom {
   text-align: center;
   margin-top: 20px;
@@ -131,21 +193,30 @@
 </head>
 
 <body>
+  <div id="header"></div>
 <div id="main-content">
 <h1>🛒 Your Cart</h1>
-
+<div class="address-box">
+  <b>Deliver to:</b> Viswa Raj, 641008 
+  <button class="change-btn">Change</button>
+  <p>Fark 618, Kuniyamuthur, Coimbatore</p>
+</div>
 <div id="cartList"></div>
 
-<div class="total-box">
-  <h2>Total: ₹<span id="total">0</span></h2>
-  <button class="checkout" onclick="checkout()">Checkout</button>
-</div>
+<div class="price-box">
+  <h3>Price Details</h3>
 
-<!-- Bottom Nav -->
-<div id="bottomNav">
-  <div onclick="goHome()">🏠<br>Home</div>
-  <div onclick="goAccount()">👤<br>Account</div>
-  <div onclick="goCart()">🛒<br>Cart</div>
+  <p>Price: ₹<span id="total"></span></p>
+  <p>Discount: -₹100</p>
+  <p>Delivery: ₹0</p>
+
+  <hr>
+
+  <h2>Total Amount: ₹<span id="totalFinal"></span></h2>
+</div>
+  <div class="bottom-bar">
+  <div class="price">₹<span id="totalBottom"></span></div>
+  <button onclick="checkout()">Place Order</button>
 </div>
 <div id="footer"></div>
 <script>
@@ -169,28 +240,33 @@ function loadCart() {
       total += itemTotal;
 
       html += `
-        <div class="card">
-          <div class="info">
-            <h3>${item.name}</h3>
-            <p>₹${item.price}</p>
-            <p>Size: ${item.size}</p>
-          </div>
+<div class="cart-item">
+  <img src="${item.image}" class="cart-img">
 
-          <div class="actions">
-            <input type="number" min="1" value="${qty}" 
-              onchange="updateQty(${index}, this.value)" class="qty">
+  <div class="cart-details">
+    <h3>${item.name}</h3>
+    <p>Size: ${item.size}</p>
+    <p class="price">₹${item.price}</p>
 
-            <br>
+    <div class="qty-box">
+      Qty:
+      <input type="number" min="1" value="${qty}" 
+        onchange="updateQty(${index}, this.value)">
+    </div>
 
-            <button class="remove" onclick="removeItem(${index})">Remove</button>
-          </div>
-        </div>
-      `;
+    <div class="actions">
+      <button onclick="removeItem(${index})">Remove</button>
+    </div>
+  </div>
+</div>
+`;
     });
   }
 
   document.getElementById("cartList").innerHTML = html;
   document.getElementById("total").innerText = total;
+   document.getElementById("totalFinal").innerText = total;
+  document.getElementById("totalBottom").innerText = total;
 }
 
 
@@ -226,7 +302,12 @@ fetch("footer.html")
   .then(data => {
     document.getElementById("footer").innerHTML = data;
   });
-
+fetch("header.html")
+  .then(res => res.text())
+  .then(data => {
+    document.getElementById("header").innerHTML = data;
+    updateCartCount();
+  });
 // NAVIGATION
 function goHome() {
   window.location.href = "/";
