@@ -315,7 +315,10 @@ h2 { margin: 10px 0 5px; }
   gap:10px;
   margin:10px 0 20px;
 }
-
+#checkBtn:disabled{
+  background: gray;
+  cursor: not-allowed;
+}
 .pincode-box input{
   flex:1;
   padding:10px;
@@ -509,7 +512,7 @@ h2 { margin: 10px 0 5px; }
 <!-- ✅ NEW CODE HERE -->
 <div class="pincode-box">
   <input type="text" id="pincodeInput" placeholder="Enter Pincode">
-  <button onclick="checkPincode()">CHECK</button>
+<button id="checkBtn" onclick="checkPincode()">CHECK</button>
 </div>
 
 <p id="deliveryText"></p>
@@ -893,10 +896,11 @@ fetch("footer.html")
     document.getElementById("header").innerHTML = data;
     updateCartCount();
   });
-  function checkPincode(){
+ function checkPincode(){
 
   const pin = document.getElementById("pincodeInput").value;
   const el = document.getElementById("deliveryText");
+  const btn = document.getElementById("checkBtn");
 
   if(pin.length !== 6){
     el.innerText = "Enter valid pincode ❗";
@@ -904,31 +908,27 @@ fetch("footer.html")
     return;
   }
 
-  el.innerText = "Checking...";
-  el.style.color = "black";
+  // 🔥 BUTTON CHANGE
+  btn.innerText = "Checking...";
+  btn.disabled = true;
+
+  el.innerText = "";   // clear old text
 
   setTimeout(() => {
 
-    let days = 4; // default
+    let days = 4;
 
-    // 🔥 Coimbatore nearby (fast)
-    if(fastDelivery.some(p => pin.startsWith(p))){
-      days = 1 + Math.floor(Math.random()*2); // 1–2 days
+    if(pin.startsWith("641")){
+      days = 1 + Math.floor(Math.random()*2);
     }
-
-    // 🔥 Medium cities
-    else if(mediumDelivery.some(p => pin.startsWith(p))){
-      days = 2 + Math.floor(Math.random()*2); // 2–3 days
+    else if(pin.startsWith("600")){
+      days = 2 + Math.floor(Math.random()*2);
     }
-
-    // 🔥 Other Tamil Nadu
     else if(pin.startsWith("6")){
-      days = 3 + Math.floor(Math.random()*3); // 3–5 days
+      days = 3 + Math.floor(Math.random()*3);
     }
-
-    // 🔥 Outside TN
     else{
-      days = 5 + Math.floor(Math.random()*3); // 5–7 days
+      days = 5 + Math.floor(Math.random()*3);
     }
 
     const today = new Date();
@@ -937,8 +937,13 @@ fetch("footer.html")
     const options = { weekday: 'long', month: 'short', day: 'numeric' };
     const deliveryDate = today.toLocaleDateString('en-IN', options);
 
+    // 🔥 RESULT BELOW
     el.innerText = "Estimated Delivery by " + deliveryDate;
     el.style.color = "green";
+
+    // 🔥 BUTTON RESET
+    btn.innerText = "CHECK";
+    btn.disabled = false;
 
   }, 1000);
 }
