@@ -108,7 +108,26 @@ h2 { margin: 10px 0 5px; }
   background:#d5d5d5;
   
 }
+.cart-toast{
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  display: none;
+  z-index: 9999;
+}
 
+.cart-toast span{
+  color: #ffcc00;
+  margin-left: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
 .buy-btn{
   background:#ffd54f;   /* light yellow */
   color:#000;
@@ -561,7 +580,10 @@ h2 { margin: 10px 0 5px; }
 
 </div>
   <div id="footer"></div>
-
+<div id="cartToast" class="cart-toast">
+  Item added to cart 
+  <span onclick="goToCart()">GO TO CART</span>
+</div>
 <script>
 
 const API = "https://fark618-backend.onrender.com";
@@ -729,6 +751,7 @@ function addToCart(){
   checkCartStatus();   // ⭐ button sync (main + sticky)
 
   updateCartCount();
+  showCartToast();
 }
  
  function checkCartStatus(){
@@ -774,7 +797,19 @@ function addToCart(){
 
   addToCart();           // reuse existing function
 }
+function showCartToast(){
+  const toast = document.getElementById("cartToast");
 
+  toast.style.display = "block";
+
+  setTimeout(()=>{
+    toast.style.display = "none";
+  }, 2000);
+}
+
+function goToCart(){
+  window.location.href = "cart.html";
+}
 function stickyBuyNow(){
 
   const size = document.getElementById("stickySize").value;
