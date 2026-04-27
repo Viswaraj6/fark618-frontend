@@ -506,10 +506,13 @@ h2 { margin: 10px 0 5px; }
   Estimated delivery time: 2-6 working days
 </p>
 
+<!-- ✅ NEW CODE HERE -->
 <div class="pincode-box">
-  <input type="text" placeholder="Enter Pincode">
-  <button>CHECK</button>
+  <input type="text" id="pincodeInput" placeholder="Enter Pincode">
+  <button onclick="checkPincode()">CHECK</button>
 </div>
+
+<p id="deliveryText"></p>
  <div class="accordion">
 
   <div class="acc-item">
@@ -890,6 +893,55 @@ fetch("footer.html")
     document.getElementById("header").innerHTML = data;
     updateCartCount();
   });
+  function checkPincode(){
+
+  const pin = document.getElementById("pincodeInput").value;
+  const el = document.getElementById("deliveryText");
+
+  if(pin.length !== 6){
+    el.innerText = "Enter valid pincode ❗";
+    el.style.color = "red";
+    return;
+  }
+
+  el.innerText = "Checking...";
+  el.style.color = "black";
+
+  setTimeout(() => {
+
+    let days = 4; // default
+
+    // 🔥 Coimbatore nearby (fast)
+    if(fastDelivery.some(p => pin.startsWith(p))){
+      days = 1 + Math.floor(Math.random()*2); // 1–2 days
+    }
+
+    // 🔥 Medium cities
+    else if(mediumDelivery.some(p => pin.startsWith(p))){
+      days = 2 + Math.floor(Math.random()*2); // 2–3 days
+    }
+
+    // 🔥 Other Tamil Nadu
+    else if(pin.startsWith("6")){
+      days = 3 + Math.floor(Math.random()*3); // 3–5 days
+    }
+
+    // 🔥 Outside TN
+    else{
+      days = 5 + Math.floor(Math.random()*3); // 5–7 days
+    }
+
+    const today = new Date();
+    today.setDate(today.getDate() + days);
+
+    const options = { weekday: 'long', month: 'short', day: 'numeric' };
+    const deliveryDate = today.toLocaleDateString('en-IN', options);
+
+    el.innerText = "Estimated Delivery by " + deliveryDate;
+    el.style.color = "green";
+
+  }, 1000);
+}
 </script>
 
 </body>
