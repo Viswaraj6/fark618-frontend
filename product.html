@@ -991,9 +991,9 @@ setTimeout(() => {
 
   const options = { weekday: 'long', month: 'short', day: 'numeric' };
   const deliveryDate = today.toLocaleDateString('en-IN', options);
-  window.selectedDeliveryDate = deliveryDate;
 
   el.innerText = "Estimated Delivery by " + deliveryDate;
+  window.selectedDeliveryDate = deliveryDate;
   el.style.color = "green";
 
   btn.innerText = "CHECK";
