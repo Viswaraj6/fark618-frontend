@@ -295,18 +295,27 @@ if(products.length > 0){
   let html = "";
 
   products.forEach(p => {
-    html += `
-      <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
-        <img src="${p.images?.[0] || p.image}" width="60">
-        <div>
-          <p style="margin:0">${p.name}</p>
-          <b>₹${p.price}</b><br>
-          <small>Size: ${p.size || "-"}</small>
-        </div>
-      </div>
-    `;
-  });
 
+  const delivery = p.deliveryDate || "Calculating...";
+
+  html += `
+    <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+      <img src="${p.images?.[0] || p.image}" width="60">
+
+      <div>
+        <p style="margin:0">${p.name}</p>
+        <b>₹${p.price}</b><br>
+        <small>Size: ${p.size || "-"}</small>
+
+        <!-- 🔥 ADD THIS -->
+        <p style="color:green; font-size:12px;">
+          Delivery by ${delivery}
+        </p>
+
+      </div>
+    </div>
+  `;
+});
   document.getElementById("productBox").innerHTML = html;
 }
 </script>
