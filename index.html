@@ -500,9 +500,10 @@ async function loadProducts(){
 // ==============================
 // 🔍 OPEN PRODUCT
 // ==============================
-function openProduct(i){
-  localStorage.setItem("selectedProduct", JSON.stringify(productsData[i]));
-  location.href="product.html";
+function openProduct(id){
+  const product = productsData.find(p => p._id === id);
+  localStorage.setItem("selectedProduct", JSON.stringify(product));
+  location.href = "product.html";
 }
 function goPage(page){
   window.location.href = page;
@@ -538,8 +539,7 @@ function filterCategory(type, el){
 
   data.forEach((p,i)=>{
     html += `
-    <div class="card" onclick="openProduct(${i})">
-
+    <div class="card" onclick="openProduct('${p._id}')">
       <div class="fav" onclick="event.stopPropagation(); toggleFav(${i})">
         <span class="heart">${isFav(p._id) ? '♥' : '♡'}</span>
       </div>
