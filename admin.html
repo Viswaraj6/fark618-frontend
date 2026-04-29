@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Admin Panel</title>
-
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 body {
   font-family: Arial;
@@ -50,6 +50,7 @@ img {
 </h2>
 <!-- PRODUCT -->
 <input id="name" placeholder="Product Name">
+  <input id="styleNo" placeholder="Style No">
 <input id="price" placeholder="Price">
   <input id="stock" placeholder="Total Stock">
 <select id="category">
@@ -93,7 +94,8 @@ img {
 <button onclick="exportExcel()">Export Excel</button>
   <input type="file" id="excelFile">
 <button onclick="importExcel()">Import Excel</button>
-  
+  <input type="file" id="zipFile">
+<button onclick="importZip()">Import ZIP</button>
 <hr>
 
 <!-- 🎬 BANNER -->
@@ -344,6 +346,84 @@ async function addProduct(){
   };
 
   reader.readAsText(file);
+}
+  async function importZip(){
+
+  const file = document.getElementById("zipFile").files[0];
+
+  if(!file){
+    alert("Select ZIP ❗");
+    return;
+  }
+
+  const zip = await JSZip.loadAsync(file);
+
+  let csvFile = null;
+
+  // 🔍 Find CSV
+  for(const filename in zip.files){
+    if(filename.endsWith(".csv")){
+      csvFile = zip.files[filename];
+    }
+  }
+
+  if(!csvFile){
+    alert("CSV not found ❌");
+    return;
+  }
+
+  const csvText = await csvFile.async("text");
+  const rows = csvText.split("\n");
+
+  for(let i=1; i<rows.length; i++){
+
+    const cols = rows[i].split(",");
+
+    if(cols.length < 6) continue;
+
+    const styleNo = cols[0]; // 🔥 MAIN KEY
+
+    let images = [];
+
+    // 🔥 AUTO MATCH IMAGES
+    for(const filename in zip.files){
+
+      if(filename.startsWith(styleNo)){
+
+        const file = zip.files[filename];
+
+        if(!file.dir){
+
+          const base64 = await file.async("base64");
+
+          images.push("data:image/jpeg;base64," + base64);
+        }
+      }
+    }
+
+    // 🚀 SEND TO BACKEND
+    await fetch(BASE_URL + "/add-product", {
+      method: "POST",
+      headers: {
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + localStorage.getItem("adminToken")
+      },
+      body: JSON.stringify({
+        styleNo,
+        name: cols[1],
+        price: Number(cols[2]),
+        stock: Number(cols[3]),
+        category: cols[4] || "",
+        type: cols[5] || "",
+        color: cols[6] || "",
+        images
+      })
+    });
+
+  }
+
+  alert("ZIP Import Success ✅🔥");
+  loadProducts();
 }
   // 🔥 SEND DATA
   async function send(){
