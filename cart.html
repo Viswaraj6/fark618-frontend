@@ -392,7 +392,9 @@ function loadCart() {
     <h3>${item.name}</h3>
     <p>Size: ${item.size}</p>
     <p class="price">₹${item.price}</p>
-
+    <p style="color:green; font-size:13px;">
+    Delivery by ${item.deliveryDate || "Calculating..."}
+    </p>
     <div class="qty-box">
       Qty:
       <input type="number" min="1" value="${qty}" 
