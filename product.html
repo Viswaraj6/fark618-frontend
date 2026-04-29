@@ -959,44 +959,33 @@ fetch("footer.html")
   }
 
   // 🔥 BUTTON CHANGE
-  btn.innerText = "Checking...";
-  btn.disabled = true;
+ btn.innerText = "Checking...";
+btn.disabled = true;
 
-  el.innerText = "";   // clear old text
+el.innerText = "";
 
-  setTimeout(() => {
+setTimeout(() => {
 
-    let days = 4;
+  let days = 4;
 
-    if(pin.startsWith("641")){
-      days = 1 + Math.floor(Math.random()*2);
-    }
-    else if(pin.startsWith("600")){
-      days = 2 + Math.floor(Math.random()*2);
-    }
-    else if(pin.startsWith("6")){
-      days = 3 + Math.floor(Math.random()*3);
-    }
-    else{
-      days = 5 + Math.floor(Math.random()*3);
-    }
+  if(pin.startsWith("641")) days = 2;
+  else if(pin.startsWith("600")) days = 3;
+  else if(pin.startsWith("6")) days = 4;
+  else days = 6;
 
-    const today = new Date();
-    today.setDate(today.getDate() + days);
+  const today = new Date();
+  today.setDate(today.getDate() + days);
 
-    const options = { weekday: 'long', month: 'short', day: 'numeric' };
-    const deliveryDate = today.toLocaleDateString('en-IN', options);
+  const options = { weekday: 'long', month: 'short', day: 'numeric' };
+  const deliveryDate = today.toLocaleDateString('en-IN', options);
 
-    // 🔥 RESULT BELOW
-    el.innerText = "Estimated Delivery by " + deliveryDate;
-    el.style.color = "green";
+  el.innerText = "Estimated Delivery by " + deliveryDate;
+  el.style.color = "green";
 
-    // 🔥 BUTTON RESET
-    btn.innerText = "CHECK";
-    btn.disabled = false;
+  btn.innerText = "CHECK";
+  btn.disabled = false;
 
-  }, 1000);
-}
+}, 500);
 </script>
 
 </body>
