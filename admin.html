@@ -37,7 +37,9 @@ body {
   border-radius:6px;
   cursor:pointer;
 }
-
+.sidebar button.active {
+  background:#2563eb;
+}
 .sidebar button:hover {
   background:#374151;
 }
@@ -660,7 +662,31 @@ async function uploadBanner(){
     alert("Slider Updated ✅");
   }
 }
+function showSection(section){
+document.querySelectorAll(".sidebar button")
+    .forEach(btn => btn.classList.remove("active"));
 
+  event.target.classList.add("active");
+  // hide all
+  document.getElementById("productSection").style.display = "none";
+  document.getElementById("productsSection").style.display = "none";
+  document.getElementById("ordersSection").style.display = "none";
+  document.getElementById("bannerSection").style.display = "none";
+
+  // show based on click
+  if(section === "product"){
+    document.getElementById("productSection").style.display = "block";
+    document.getElementById("productsSection").style.display = "block";
+  }
+
+  if(section === "orders"){
+    document.getElementById("ordersSection").style.display = "block";
+  }
+
+  if(section === "banner"){
+    document.getElementById("bannerSection").style.display = "block";
+  }
+}
 /* LOAD PRODUCTS */
 function loadProducts(){
   fetch(BASE_URL + "/products")
@@ -786,7 +812,7 @@ function updateStatus(id,status){
 /* INIT */
 loadProducts();
 loadOrders();
-
+showSection("product");
 </script>
 
 </body>
