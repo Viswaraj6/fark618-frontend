@@ -280,7 +280,8 @@ function saveOrder(userData, status, paymentId) {
       products: cart,
       total,
       paymentId,
-      status
+      status,orderDate: new Date(),
+deliveryDate: cart[0]?.deliveryDate || ""
     })
   })
   .then(() => {
