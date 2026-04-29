@@ -394,21 +394,22 @@ if(res.ok){
 
   if(window.editId){
     alert("Product Updated ✅");
-    window.editId = null;   // reset edit mode
+    window.editId = null;
   } else {
     alert("Product Added ✅");
   }
 
   loadProducts();
- document.querySelectorAll("input:not([type='file'])")
-  .forEach(i => i.value = "");
 
-document.getElementById("imageFiles").value = "";
-document.getElementById("previewBox").innerHTML = "";
+  document.querySelectorAll("input:not([type='file'])")
+    .forEach(i => i.value = "");
+
+  document.getElementById("imageFiles").value = "";
+  document.getElementById("previewBox").innerHTML = "";
+
+}else{
+  alert("Error: " + (data.message || "Unauthorized ❌"));
 }
-      }else{
-        alert("Error: " + (data.message || "Unauthorized ❌"));
-      }
 
     }catch(err){
       console.log(err);
