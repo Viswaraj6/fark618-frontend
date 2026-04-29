@@ -757,11 +757,24 @@ function addToCart(){
       size: selectedSize,
       image: product.images?.[0] || product.image,
       qty: 1
-    });
-  }
+   function addToCart(){
+
+  const product = {
+    name: productData.name,
+    price: productData.price,
+    image: productData.images[0],
+    size: selectedSize,
+    qty: 1,
+    deliveryDate: window.selectedDeliveryDate || ""
+  };
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  cart.push(product);
 
   localStorage.setItem("cart", JSON.stringify(cart));
 
+  alert("Added to cart ✅");
+}
   // 🔥 முக்கிய line
   checkCartStatus();   // ⭐ button sync (main + sticky)
 
@@ -978,6 +991,7 @@ setTimeout(() => {
 
   const options = { weekday: 'long', month: 'short', day: 'numeric' };
   const deliveryDate = today.toLocaleDateString('en-IN', options);
+  window.selectedDeliveryDate = deliveryDate;
 
   el.innerText = "Estimated Delivery by " + deliveryDate;
   el.style.color = "green";
