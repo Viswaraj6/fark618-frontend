@@ -780,33 +780,61 @@ function loadOrders(){
 
     (data || []).forEach(o => {
 
+      // 🗓️ Order Date & Delivery Date
+      const orderDate = o.createdAt ? new Date(o.createdAt) : new Date();
+
+      let days = 3; // default delivery
+      if(o.status === "Shipped") days = 2;
+      if(o.status === "Delivered") days = 0;
+
+      const estimateDate = new Date(orderDate);
+      estimateDate.setDate(orderDate.getDate() + days);
+
+      const format = d => d.toLocaleDateString("en-IN");
+
+      // 🛒 Items
       let items = "";
 
-     (o.products || []).forEach(i=>{
+      (o.products || []).forEach(i => {
+        const qty = i.qty || 1;
 
-  const qty = i.qty || 1;
+        items += `<li>
+          ${i.name} - ₹${i.price} 
+          ${i.size ? `(Size: ${i.size})` : ""}
+          | Qty: ${qty}
+          | Total: ₹${i.price * qty}
+        </li>`;
+      });
 
-  items += `<li>
-    ${i.name} - ₹${i.price} 
-    ${i.size ? `(Size: ${i.size})` : ""}
-    | Qty: ${qty}
-    | Total: ₹${i.price * qty}
-  </li>`;
-});
+      // 🎨 Status Color (optional nice UI)
+      let statusColor = "#999";
+      if(o.status === "Pending") statusColor = "orange";
+      if(o.status === "Shipped") statusColor = "blue";
+      if(o.status === "Delivered") statusColor = "green";
+
       html += `
         <div class="card">
+
           <p><b>${o.name || ""}</b></p>
           <p>${o.phone || ""}</p>
           <p>${o.address || ""}</p>
-          <p>Total: ₹${o.total || 0}</p>
 
-          <select onchange="updateStatus('${o._id}',this.value)">
+          <p><b>Order Date:</b> ${format(orderDate)}</p>
+          <p><b>Delivery Date:</b> ${format(estimateDate)}</p>
+
+          <p><b>Total:</b> ₹${o.total || 0}</p>
+
+          <select style="border:2px solid ${statusColor}; padding:6px; border-radius:6px;"
+            onchange="updateStatus('${o._id}',this.value)">
+
             <option ${o.status==="Pending"?"selected":""}>Pending</option>
             <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
             <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+
           </select>
 
           <ul>${items}</ul>
+
         </div>
       `;
     });
