@@ -169,7 +169,35 @@ function toggleStock(cb){
   const input = document.getElementById("stock-" + cb.value);
   input.style.display = cb.checked ? "inline-block" : "none";
 }
+document.getElementById("imageFiles").addEventListener("change", function(e){
 
+  const files = e.target.files;
+  const preview = document.getElementById("previewBox");
+
+  preview.innerHTML = "";
+
+  for(let i=0; i<files.length; i++){
+
+    const reader = new FileReader();
+
+    reader.onload = function(ev){
+
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+
+      img.style.width = "80px";
+      img.style.height = "100px";
+      img.style.objectFit = "cover";
+      img.style.borderRadius = "6px";
+      img.style.border = "1px solid #ccc";
+
+      preview.appendChild(img);
+    };
+
+    reader.readAsDataURL(files[i]);
+  }
+
+});
 /* ADD PRODUCT */
 async function addProduct(){
 
@@ -249,35 +277,7 @@ async function addProduct(){
     send();
   }
 }
-document.getElementById("imageFiles").addEventListener("change", function(e){
 
-  const files = e.target.files;
-  const preview = document.getElementById("previewBox");
-
-  preview.innerHTML = "";
-
-  for(let i=0; i<files.length; i++){
-
-    const reader = new FileReader();
-
-    reader.onload = function(ev){
-
-      const img = document.createElement("img");
-      img.src = ev.target.result;
-
-      img.style.width = "80px";
-      img.style.height = "100px";
-      img.style.objectFit = "cover";
-      img.style.borderRadius = "6px";
-      img.style.border = "1px solid #ccc";
-
-      preview.appendChild(img);
-    };
-
-    reader.readAsDataURL(files[i]);
-  }
-
-});
   function exportExcel(){
   fetch(BASE_URL + "/products")
     .then(res => res.json())
