@@ -305,7 +305,7 @@ body{
 </head>
 
 <body>
-<div class="header">
+<div id="header" class="header">
 
   <div class="menu-left"></div>
 
@@ -445,12 +445,6 @@ fetch("footer.html")
   .then(res => res.text())
   .then(data => {
     document.getElementById("footer").innerHTML = data;
-  });
-fetch("header.html")
-  .then(res => res.text())
-  .then(data => {
-    document.getElementById("header").innerHTML = data;
-    updateCartCount();
   });
 // NAVIGATION
 function goHome() {
