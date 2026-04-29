@@ -962,7 +962,7 @@ fetch("footer.html")
   }
 
   // 🔥 BUTTON CHANGE
- btn.innerText = "Checking...";
+btn.innerText = "Checking...";
 btn.disabled = true;
 
 el.innerText = "";
@@ -982,8 +982,13 @@ setTimeout(() => {
   const options = { weekday: 'long', month: 'short', day: 'numeric' };
   const deliveryDate = today.toLocaleDateString('en-IN', options);
 
-  el.innerText = "Estimated Delivery by " + deliveryDate;
+  // 🔥 IMPORTANT (global save)
   window.selectedDeliveryDate = deliveryDate;
+
+  // 🔥 ALSO SAVE IN LOCAL (backup)
+  localStorage.setItem("deliveryDate", deliveryDate);
+
+  el.innerText = "Estimated Delivery by " + deliveryDate;
   el.style.color = "green";
 
   btn.innerText = "CHECK";
