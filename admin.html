@@ -87,7 +87,12 @@ button {
   border-radius:6px;
   cursor:pointer;
 }
-
+.export-btn {
+  background:#2563eb;
+}
+.export-btn:hover {
+  background:#1d4ed8;
+}
 /* IMAGE */
 img {
   width:100px;
@@ -180,8 +185,7 @@ img {
       <!-- ACTIONS -->
       <div class="card">
         <button onclick="addProduct()">Add Product</button>
-        <button onclick="exportExcel()">Export Excel</button>
-
+       
         <input type="file" id="excelFile">
         <button onclick="importExcel()">Import Excel</button>
 
@@ -209,10 +213,19 @@ img {
     </div>
 
     <!-- PRODUCTS -->
-    <div id="productsSection">
-      <h2>Products</h2>
-      <div id="products"></div>
-    </div>
+   <div id="productsSection">
+
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2>Products</h2>
+
+    <!-- 🔥 INGA paste pannum -->
+    <button class="export-btn" onclick="exportExcel()">Export Excel</button>
+
+  </div>
+
+  <div id="products"></div>
+
+</div>
 
     <!-- ORDERS -->
     <div id="ordersSection" style="display:none;">
