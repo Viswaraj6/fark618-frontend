@@ -750,38 +750,28 @@ function addToCart(){
 
   if(exists){
     exists.qty = (exists.qty || 1) + 1;
-  } else {
+  } 
+  else {
     cart.push({
       name: product.name,
       price: product.price,
       size: selectedSize,
       image: product.images?.[0] || product.image,
-      qty: 1
-   function addToCart(){
+      qty: 1,
 
-  const product = {
-    name: productData.name,
-    price: productData.price,
-    image: productData.images[0],
-    size: selectedSize,
-    qty: 1,
-    deliveryDate: window.selectedDeliveryDate || ""
-  };
+      // 🔥 IMPORTANT (delivery fix)
+      deliveryDate: window.selectedDeliveryDate || ""
+    });
+  }
 
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  cart.push(product);
-
+  // save
   localStorage.setItem("cart", JSON.stringify(cart));
 
-  alert("Added to cart ✅");
-}
-  // 🔥 முக்கிய line
-  checkCartStatus();   // ⭐ button sync (main + sticky)
-
+  // UI updates
+  checkCartStatus();
   updateCartCount();
   showCartToast();
 }
- 
  function checkCartStatus(){
 
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
