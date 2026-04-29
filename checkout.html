@@ -144,7 +144,7 @@ if(checkoutItem){
 } 
 // 🔥 ELSE CART
 else if(cart.length > 0){
- products: cart,
+  products = cart;
   cart.forEach(i => total += i.price * (i.qty || 1));
 }
 document.getElementById("totalAmount").innerText = total;
