@@ -297,7 +297,9 @@ if(products.length > 0){
 
   products.forEach(p => {
 
-  const delivery = p.deliveryDate || "Calculating...";
+  const delivery = p.deliveryDate && p.deliveryDate !== ""
+  ? p.deliveryDate
+  : "Check pincode in product page";
 
   html += `
     <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
