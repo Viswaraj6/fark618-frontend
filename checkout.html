@@ -84,41 +84,46 @@
 </head>
 
 <body>
-<div id="productBox" style="margin-bottom:15px;"></div>
+<!-- TOP PRODUCT (optional preview) -->
+<div id="productBoxTop" style="margin-bottom:15px;"></div>
+
 <div class="container">
- <div class="steps">
-  <div class="step active">1. Address</div>
-  <div class="step">2. Order Summary</div>
-  <div class="step">3. Payment</div>
-</div>
 
-<!-- STEP 1 -->
-<div id="step1" class="step-box">
-  <h3>Delivery Address</h3>
+  <div class="steps">
+    <div class="step active">1. Address</div>
+    <div class="step">2. Order Summary</div>
+    <div class="step">3. Payment</div>
+  </div>
 
-  <input id="name" placeholder="Full Name">
-  <input id="phone" placeholder="Phone Number">
-  <textarea id="address" placeholder="Address"></textarea>
+  <!-- STEP 1 -->
+  <div id="step1" class="step-box">
+    <h3>Delivery Address</h3>
 
-  <button onclick="goStep2()">Continue</button>
-</div>
+    <input id="name" placeholder="Full Name">
+    <input id="phone" placeholder="Phone Number">
+    <textarea id="address" placeholder="Address"></textarea>
 
-<!-- STEP 2 -->
-<div id="step2" class="step-box" style="display:none;">
-  <h3>Order Summary</h3>
+    <button onclick="goStep2()">Continue</button>
+  </div>
 
-  <div id="productBox"></div>
-  <h3>Total: ₹<span id="totalAmount"></span></h3>
+  <!-- STEP 2 -->
+  <div id="step2" class="step-box" style="display:none;">
+    <h3>Order Summary</h3>
 
-  <button onclick="goStep3()">Continue</button>
-</div>
+    <!-- 🔥 MAIN PRODUCT BOX -->
+    <div id="productBox"></div>
+
+    <h3>Total: ₹<span id="totalAmount"></span></h3>
+
+    <button onclick="goStep3()">Continue</button>
+  </div>
 
 <!-- STEP 3 -->
 <div id="step3" class="step-box" style="display:none;">
   <h3>Payment</h3>
 
-  <button onclick="payNow()">Pay Now 💳</button>
-  <button onclick="cashOnDelivery()">Cash on Delivery 🚚</button>
+ <button id="payBtn" onclick="payNow()">Pay Now 💳</button>
+<button id="codBtn" onclick="cashOnDelivery()">Cash on Delivery 🚚</button>
 </div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -168,11 +173,6 @@ function validateStep1(){
   }
   return true;
 }
-// EVENTS
-document.getElementById("payBtn").addEventListener("click", payNow);
-document.getElementById("codBtn").addEventListener("click", cashOnDelivery);
-
-
 // 🔥 VALIDATION + DATA
 function getUserData() {
 
