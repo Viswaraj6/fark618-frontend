@@ -52,6 +52,7 @@ body {
 .main {
   flex:1;
   padding:20px;
+  margin-left: 220px;  /* same as sidebar width */
 }
 
 /* CARD */
@@ -678,7 +679,6 @@ function showSection(section, btn){
   document.getElementById("ordersSection").style.display = "none";
   document.getElementById("bannerSection").style.display = "none";
 
-  // show
   if(section === "product"){
     document.getElementById("productSection").style.display = "block";
     document.getElementById("productsSection").style.display = "block";
