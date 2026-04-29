@@ -105,10 +105,9 @@ img {
   <div class="sidebar">
     <h2>FARK 618</h2>
 
-    <button onclick="showSection('product')">📦 Products</button>
-    <button onclick="showSection('orders')">🧾 Orders</button>
-    <button onclick="showSection('banner')">🎬 Banner</button>
-
+   <button onclick="showSection('product', this)">📦 Products</button>
+<button onclick="showSection('orders', this)">🧾 Orders</button>
+<button onclick="showSection('banner', this)">🎬 Banner</button>
     <button class="logout" onclick="logout()">Logout</button>
   </div>
 
@@ -666,18 +665,20 @@ async function uploadBanner(){
     alert("Slider Updated ✅");
   }
 }
-function showSection(section){
-document.querySelectorAll(".sidebar button")
-    .forEach(btn => btn.classList.remove("active"));
+function showSection(section, btn){
 
-  event.target.classList.add("active");
+  document.querySelectorAll(".sidebar button")
+    .forEach(b => b.classList.remove("active"));
+
+  if(btn) btn.classList.add("active");
+
   // hide all
   document.getElementById("productSection").style.display = "none";
   document.getElementById("productsSection").style.display = "none";
   document.getElementById("ordersSection").style.display = "none";
   document.getElementById("bannerSection").style.display = "none";
 
-  // show based on click
+  // show
   if(section === "product"){
     document.getElementById("productSection").style.display = "block";
     document.getElementById("productsSection").style.display = "block";
