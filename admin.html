@@ -90,7 +90,10 @@ img {
 <input type="file" id="imageFiles" multiple>
 <div id="previewBox" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;"></div>
 <button onclick="addProduct()">Add Product</button>
-
+<button onclick="exportExcel()">Export Excel</button>
+  <input type="file" id="excelFile">
+<button onclick="importExcel()">Import Excel</button>
+  
 <hr>
 
 <!-- 🎬 BANNER -->
@@ -274,6 +277,73 @@ document.getElementById("imageFiles").addEventListener("change", function(e){
   }
 
 });
+  function exportExcel(){
+  fetch(BASE_URL + "/products")
+    .then(res => res.json())
+    .then(data => {
+
+      let csv = "Name,Price,Stock,Category,Type,Color\n";
+
+      data.forEach(p => {
+        csv += `${p.name},${p.price},${p.stock},${p.category},${p.type},${p.color}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "products.csv";
+      a.click();
+    });
+}
+  function importExcel(){
+
+  const file = document.getElementById("excelFile").files[0];
+
+  if(!file){
+    alert("Select file ❗");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function(e){
+
+    const text = e.target.result;
+    const rows = text.split("\n");
+
+    for(let i=1; i<rows.length; i++){
+
+      const cols = rows[i].split(",");
+
+      if(cols.length < 3) continue;
+
+      await fetch(BASE_URL + "/add-product", {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + localStorage.getItem("adminToken")
+        },
+        body: JSON.stringify({
+          name: cols[0],
+          price: Number(cols[1]),
+          stock: Number(cols[2]),
+          category: cols[3] || "",
+          type: cols[4] || "",
+          color: cols[5] || "",
+          images: []   // ⚠️ images must be added later
+        })
+      });
+
+    }
+
+    alert("Import Done ✅");
+    loadProducts();
+  };
+
+  reader.readAsText(file);
+}
   // 🔥 SEND DATA
   async function send(){
 
@@ -286,8 +356,14 @@ document.getElementById("imageFiles").addEventListener("change", function(e){
 
     try{
 
-      const res = await fetch(BASE_URL + "/add-product",{
-        method:"POST",
+     const url = window.editId 
+  ? BASE_URL + "/products/" + window.editId
+  : BASE_URL + "/add-product";
+
+const method = window.editId ? "PUT" : "POST";
+
+const res = await fetch(url,{
+  method: method,
         headers:{
           "Content-Type":"application/json",
           "Authorization":"Bearer " + localStorage.getItem("adminToken")
@@ -300,7 +376,7 @@ document.getElementById("imageFiles").addEventListener("change", function(e){
           category,
           sizes,
           sizeStock,
-          images,
+          images: images.length > 0 ? images : undefined,
           brand,
           fabric,
           typeDetail,
@@ -312,11 +388,24 @@ document.getElementById("imageFiles").addEventListener("change", function(e){
         })
       });
 
-      const data = await res.json();
+     const data = await res.json();
 
-      if(res.ok){
-        alert("Product Added ✅");
-        loadProducts();
+if(res.ok){
+
+  if(window.editId){
+    alert("Product Updated ✅");
+    window.editId = null;   // reset edit mode
+  } else {
+    alert("Product Added ✅");
+  }
+
+  loadProducts();
+ document.querySelectorAll("input:not([type='file'])")
+  .forEach(i => i.value = "");
+
+document.getElementById("imageFiles").value = "";
+document.getElementById("previewBox").innerHTML = "";
+}
       }else{
         alert("Error: " + (data.message || "Unauthorized ❌"));
       }
@@ -413,7 +502,8 @@ function loadProducts(){
           <h3>${p.name}</h3>
           <p>₹${p.price}</p>
           <p>Stock: ${p.stock}</p>
-          <button onclick="deleteProduct('${p._id}')">Delete</button>
+         <button onclick="editProduct('${p._id}')">Edit</button>
+<button onclick="deleteProduct('${p._id}')">Delete</button>
         </div>
       `;
     });
@@ -436,7 +526,32 @@ function deleteProduct(id){
   .then(res => res.json())
   .then(() => loadProducts());
 }
+function editProduct(id){
 
+  fetch(BASE_URL + "/products")
+    .then(res => res.json())
+    .then(data => {
+
+      const p = data.find(x => x._id === id);
+
+      document.getElementById("name").value = p.name;
+      document.getElementById("price").value = p.price;
+      document.getElementById("stock").value = p.stock;
+      document.getElementById("category").value = p.category;
+      document.getElementById("type").value = p.type;
+
+      document.getElementById("brand").value = p.brand;
+      document.getElementById("fabric").value = p.fabric;
+      document.getElementById("typeDetail").value = p.typeDetail;
+      document.getElementById("fit").value = p.fit;
+      document.getElementById("pattern").value = p.pattern;
+      document.getElementById("color").value = p.color;
+      document.getElementById("occasion").value = p.occasion;
+      document.getElementById("description").value = p.description;
+
+      window.editId = id; // ⭐ important
+    });
+}
 /* ORDERS */
 function loadOrders(){
   fetch(BASE_URL + "/orders")
